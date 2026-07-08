@@ -3,7 +3,7 @@ const path = require("path");
 const express = require("express");
 const sql = require("mssql");
 
-require("dotenv").config();
+require("dotenv").config({path: path.resolve(__dirname, ".env")});
 
 // TODO: Import Controllers
 const accountController = require("./controller/accountController");
