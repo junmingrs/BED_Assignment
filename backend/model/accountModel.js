@@ -1,7 +1,7 @@
 const { poolPromise } = require("../db");
 
 async function getAccountByEmail(email) {
-    const query = `SELECT account_id FROM Account WHERE account_email= @email`;
+    const query = `SELECT account_id, account_name, account_email, password_hash, role FROM Account WHERE account_email= @email`;
     const pool = await poolPromise;
     const result = await pool.request().input("email", email).query(query);
 
@@ -10,7 +10,7 @@ async function getAccountByEmail(email) {
 }
 
 async function getAccountById(id) {
-    const query = `SELECT account_id, account_name, account_email, password_hash FROM Account WHERE account_id= @id`;
+    const query = `SELECT account_id, account_name, account_email, password_hash, role FROM Account WHERE account_id= @id`;
     const pool = await poolPromise;
     const result = await pool.request().input("id", id).query(query);
 

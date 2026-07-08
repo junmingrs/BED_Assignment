@@ -7,6 +7,7 @@ require("dotenv").config();
 
 // TODO: Import Controllers
 const accountController = require("./controller/accountController");
+const { verifyJWT } = require("./middleware/auth");
 
 // TODO: Import Validations
 
@@ -20,6 +21,11 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bo
 
 // TODO: ROUTES
 app.post("/register", accountController.registerUser);
+app.post("/login", accountController.loginUser);
+
+// to use auth:
+// app.post("/orders", verifyJWT, );
+// app.get("/orders", verifyJWT, );
 
 // Start server
 app.listen(port, () => {

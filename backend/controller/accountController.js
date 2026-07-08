@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-// const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const accountModel = require("../model/accountModel");
 
 async function registerUser(req, res) {
@@ -29,4 +29,32 @@ async function registerUser(req, res) {
         return res.status(500).json({ message: "Internal server error" });
     }
 }
-module.exports = { registerUser };
+
+async function loginUser(req, res) {
+    // login via email & password
+    const { email, password } = req.body;
+    try {
+        const user = await accountModel.getAccountByEmail(email);
+        if (!user) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+        if (!isMatch)
+            return res.status(401).json({ message: "Invalid credentials" });
+
+        const payload = {
+            id: user.account_id,
+            role: user.role,
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+            expiresIn: "3600s",
+        });
+        return res.status(200).json({ token });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+module.exports = { registerUser, loginUser };
