@@ -10,6 +10,12 @@ function verifyJWT(req, res, next) {
         const authorisedRoles = {
             "POST /orders": ["Customer"],
             "GET /orders": ["Vendor"],
+            "POST /menuitem": ["Vendor"],
+            "PUT /menuitem": ["Vendor"],
+            "DELETE /menuitem": ["Vendor"],
+            "GET /menuitem": ["Vendor"], // specific menu item by stallId and itemCode
+            "GET /menuitems": ["Vendor"], // all menu items
+            "GET /menuitemsbystore": ["Vendor"],
         };
         const reqEndpoint = `${req.method} ${req.url}`;
         const userRole = decodedUser.role;
