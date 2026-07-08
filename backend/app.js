@@ -2,12 +2,11 @@
 const path = require("path");
 const express = require("express");
 const sql = require("mssql");
-const dotenv = require("dotenv");
 
-// Load environment variables
-dotenv.config();
+require("dotenv").config();
 
 // TODO: Import Controllers
+const accountController = require("./controller/accountController");
 
 // TODO: Import Validations
 
@@ -20,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 
 // TODO: ROUTES
+app.post("/register", accountController.registerUser);
 
 // Start server
 app.listen(port, () => {
