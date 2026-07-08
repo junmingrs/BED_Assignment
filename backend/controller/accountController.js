@@ -41,7 +41,9 @@ async function loginUser(req, res) {
 
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch)
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res
+                .status(401)
+                .json({ message: "The username or password is incorrect." });
 
         const payload = {
             id: user.account_id,

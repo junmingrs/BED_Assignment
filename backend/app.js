@@ -8,6 +8,7 @@ require("dotenv").config();
 // TODO: Import Controllers
 const accountController = require("./controller/accountController");
 const { verifyJWT } = require("./middleware/auth");
+const { validateRegister, valdiateLogin } = require("./middleware/validate");
 
 // TODO: Import Validations
 
@@ -20,8 +21,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 
 // TODO: ROUTES
-app.post("/register", accountController.registerUser);
-app.post("/login", accountController.loginUser);
+app.post("/register", validateRegister, accountController.registerUser);
+app.post("/login", valdiateLogin, accountController.loginUser);
 
 // to use auth:
 // app.post("/orders", verifyJWT, );
