@@ -20,6 +20,7 @@ const port = process.env.PORT || 3000;
 // TODO: Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
+app.use(express.static(path.join("public")));
 
 // TODO: ROUTES
 app.post("/register", validateRegister, accountController.registerUser);
