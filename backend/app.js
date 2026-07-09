@@ -48,3 +48,19 @@ process.on("SIGINT", async () => {
   console.log("Database connections closed");
   process.exit(0);
 });
+
+
+// ============ STALL ROUTES ============
+const stallController = require("./controller/stallController");
+
+// GET /stalls/:stallId - get stall info (orders, ratings, complaints)
+app.get("/stalls/:stallId", verifyJWT, stallController.getStallInfo);
+
+// POST /stalls/:stallId/menu - add menu item
+app.post("/stalls/:stallId/menu", verifyJWT, stallController.addMenuItem);
+
+// PUT /stalls/:stallId/menu/:itemId - update menu item
+app.put("/stalls/:stallId/menu/:itemId", verifyJWT, stallController.updateMenuItem);
+
+// DELETE /stalls/:stallId/menu/:itemId - delete menu item
+app.delete("/stalls/:stallId/menu/:itemId", verifyJWT, stallController.deleteMenuItem);
