@@ -63,5 +63,63 @@ CREATE TABLE MenuItemCuisine (
     item_code VARCHAR(5) NOT NULL,
     CONSTRAINT PK_MenuItemCuisine PRIMARY KEY (cuisine_id, stall_id, item_code),
     CONSTRAINT FK_MenuItemCuisine_MenuItem FOREIGN KEY (stall_id, item_code) REFERENCES MenuItem(stall_id, item_code)
-)
+);
+
+INSERT INTO Account (account_id, account_name, account_email, password_hash, role)
+VALUES
+('11111111-1111-1111-1111-111111111111', 'Alice Tan', 'alice@email.com', 'hashed_pw1', 'Customer'),
+('22222222-2222-2222-2222-222222222222', 'Ben Lee', 'ben@email.com', 'hashed_pw2', 'Customer'),
+('33333333-3333-3333-3333-333333333333', 'Kim Kitchen', 'kim@email.com', 'hashed_pw3', 'Vendor'),
+('44444444-4444-4444-4444-444444444444', 'Sakura Sushi', 'sakura@email.com', 'hashed_pw4', 'Vendor'),
+('55555555-5555-5555-5555-555555555555', 'Operator One', 'operator@email.com', 'hashed_pw5', 'Operator');
+
+INSERT INTO Customer (customer_id, account_id, customer_name)
+VALUES
+('AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '11111111-1111-1111-1111-111111111111', 'Alice Tan'),
+('AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '22222222-2222-2222-2222-222222222222', 'Ben Lee');
+
+INSERT INTO Vendor (vendor_id, account_id, vendor_name)
+VALUES
+('BBBBBBB1-BBBB-BBBB-BBBB-BBBBBBBBBBBB', '33333333-3333-3333-3333-333333333333', 'Kim Kitchen'),
+('BBBBBBB2-BBBB-BBBB-BBBB-BBBBBBBBBBBB', '44444444-4444-4444-4444-444444444444', 'Sakura Sushi');
+
+INSERT INTO Operator (operator_id, account_id, operator_name)
+VALUES
+('CCCCCCC1-CCCC-CCCC-CCCC-CCCCCCCCCCCC', '55555555-5555-5555-5555-555555555555', 'Operator One');
+
+INSERT INTO Stall (stall_id, vendor_id, stall_name, stall_unit_no)
+VALUES
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'BBBBBBB1-BBBB-BBBB-BBBB-BBBBBBBBBBBB', 'Kim Kitchen', '#01-01'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'BBBBBBB2-BBBB-BBBB-BBBB-BBBBBBBBBBBB', 'Sakura Sushi', '#01-02');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category)
+VALUES
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'M001', 'Kimchi Fried Rice', 7.50, 'Main'),
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'M002', 'Bibimbap', 8.50, 'Main'),
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'D001', 'Korean Iced Tea', 2.00, 'Drinks'),
+
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'M001', 'Salmon Sushi Set', 12.50, 'Main'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'M002', 'Chicken Katsu', 9.00, 'Main'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'D001', 'Matcha Latte', 3.50, 'Drinks'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'S001', 'Mochi', 4.00, 'Dessert');
+
+INSERT INTO Cuisine (cuisine_id, cuisine_desc)
+VALUES
+('C001', 'Korean'),
+('C002', 'Japanese'),
+('C003', 'Chinese'),
+('C004', 'Western'),
+('C005', 'Thai'),
+('C006', 'Others');
+
+INSERT INTO MenuItemCuisine (stall_id, cuisine_id, item_code)
+VALUES
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C001', 'M001'),
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C001', 'M002'),
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C001', 'D001'),
+
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C002', 'M001'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C002', 'M002'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C002', 'D001'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C002', 'S001');
 
