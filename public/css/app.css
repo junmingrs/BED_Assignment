@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+body {
+    padding: 3em 10em;
+}
+
+section {
+    margin: 2em 0;
+}
