@@ -1,57 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Create Account</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account</title>
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
+    <div class="screen">
+        <div class="stage">
+            <div class="ticket">
+                <!-- Left: dark ticket stub -->
+                <div class="ticket-stub">
+                    <div class="mark">
+                        <div class="mark-glyph">H</div>
+                        <div class="mark-word">Hawker Ups</div>
+                    </div>
 
-  <div class="scene">
-    <div class="signage">New Customer</div>
-    <div class="ticket">
-      <div class="stub">NO. 02</div>
-      <div class="perf"></div>
-      <h1>Create your account</h1>
-      <p class="subtitle">SIGN UP TO START ORDERING</p>
+                    <div class="stub-mid">
+                        <h2 class="stub-headline">
+                            Join the queue,<br />start ordering.
+                        </h2>
+                        <p class="stub-copy">
+                            Create a member account to place orders, track your history, and
+                            skip the line next time.
+                        </p>
+                    </div>
 
-      <div class="form-note" id="formNote"></div>
+                    <div class="stub-foot">
+                        <div class="stub-row"><span>Ticket</span><b>No. 02</b></div>
+                        <div class="stub-row"><span>Lane</span><b>Member</b></div>
+                    </div>
+                </div>
 
-      <form id="registerForm" novalidate>
-        <div class="field" id="nameField">
-          <label for="name">Name</label>
-          <input type="text" id="name" name="name" placeholder="Full name" autocomplete="name">
-          <span class="field-error" id="nameError"></span>
+                <!-- Right: form -->
+                <div class="ticket-form">
+                    <div class="form-head">
+                        <span class="eyebrow">Sign up to start ordering</span>
+                        <h1 class="form-title">Create your account</h1>
+                        <p class="form-sub" id="formNote"></p>
+                    </div>
+
+                    <form id="registerForm">
+                        <div class="field" id="nameField">
+                            <label for="name">Name</label>
+                            <div class="field-input">
+                                <input type="text" id="name" name="name" placeholder="Full name" autocomplete="name" />
+                            </div>
+                            <span class="field-error" id="nameError"></span>
+                        </div>
+
+                        <div class="field" id="emailField">
+                            <label for="email">Email</label>
+                            <div class="field-input">
+                                <input type="email" id="email" name="email" placeholder="you@example.com"
+                                    autocomplete="email" />
+                            </div>
+                            <span class="field-error" id="emailError"></span>
+                        </div>
+
+                        <div class="field" id="passwordField">
+                            <label for="password">Password</label>
+                            <div class="field-input">
+                                <input type="password" id="password" name="password"
+                                    placeholder="At least 8 characters, 1 number and 1 special character"
+                                    autocomplete="new-password" />
+                            </div>
+                            <span class="field-error" id="passwordError"></span>
+                        </div>
+
+                        <div class="field" id="confirmField">
+                            <label for="confirm">Confirm password</label>
+                            <div class="field-input">
+                                <input type="password" id="confirm" name="confirm" placeholder="Retype password"
+                                    autocomplete="new-password" />
+                            </div>
+                            <span class="field-error" id="confirmError"></span>
+                        </div>
+
+                        <button type="submit" class="btn" id="submitBtn">
+                            Create account
+                        </button>
+                    </form>
+
+                    <div class="divider">or</div>
+                    <a href="customers/index.html" class="btn-ghost">Continue as guest</a>
+
+                    <p class="switch-line">
+                        Already have an account? <a href="index.html">Sign in</a>
+                    </p>
+                </div>
+            </div>
         </div>
 
-        <div class="field" id="emailField">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
-          <span class="field-error" id="emailError"></span>
+        <div class="foot-link">
+            <a href="operator.html">Staff login</a>
         </div>
-
-        <div class="field" id="passwordField">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="At least 8 characters" autocomplete="new-password">
-          <span class="field-error" id="passwordError"></span>
-        </div>
-
-        <div class="field" id="confirmField">
-          <label for="confirm">Confirm password</label>
-          <input type="password" id="confirm" name="confirm" placeholder="Retype password" autocomplete="new-password">
-          <span class="field-error" id="confirmError"></span>
-        </div>
-
-        <button type="submit" class="submit" id="submitBtn">Create account</button>
-      </form>
-
-      <p class="switch-link">Already have an account? <a href="index.html">Sign in</a></p>
     </div>
-  </div>
 
-  <a href="operator.html" class="desk-link">Staff login</a>
-
-  <script src="js/register.js"></script>
+    <script src="js/register.js"></script>
 </body>
+
 </html>
