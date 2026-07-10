@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stall</title>
+
+    <link rel="stylesheet" href="../css/output.css" />
+</head>
+
+<body>
+    <nav class="flex justify-between">
+        <div class="flex gap-5">
+            <a href="/customer" class="text-xl">Home</a>
+            <a href="/customer/hawkers.html" class="text-xl">Browse</a>
+        </div>
+        <div class="flex gap-5">
+            <a href="/customer/cart.html" class="text-xl">Cart</a>
+            <a href="/customer/profile.html" class="text-xl">Profile</a>
+        </div>
+    </nav>
+
+    <section>
+        <h1 class="text-3xl">Stall 1</h1>
+        <p>details</p>
+    </section>
+
+    <!-- PLACEHOLDER, TO REMOVE -->
+    <section class="grid grid-cols-3 gap-5">
+        <div class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center">
+            Pizza
+            <button popovertarget="menu" class="font-bold">Add to Cart</button>
+        </div>
+        <div class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center">
+            Matcha
+            <button popovertarget="menu" class="font-bold">Add to Cart</button>
+        </div>
+        <div class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center">
+            Sushi
+            <button popovertarget="menu" class="font-bold">Add to Cart</button>
+        </div>
+    </section>
+
+    <div id="menu" popover class="rounded border bg-white p-4 shadow-lg w-[90vw] m-auto h-[90vh]">
+        <div class="flex justify-between">
+            <h2>Pizza</h2>
+            <button popovertarget="menu" popovertargetaction="hide">Close</button>
+        </div>
+    </div>
+</body>
+
+</html>
