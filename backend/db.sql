@@ -16,7 +16,7 @@ CREATE TABLE Account
     account_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
     account_email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('Customer', 'Vendor', 'Operator')),
+    role VARCHAR(20) NOT NULL CHECK (role IN ('Customer', 'Vendor', 'Operator', 'NEA')),
 );
 
 CREATE TABLE Customer
@@ -110,14 +110,14 @@ INSERT INTO Stall
     (stall_id, vendor_id, stall_name, stall_unit_no)
 VALUES
     ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD',
-     '33333333-3333-3333-3333-333333333333',
-     'Kim Kitchen',
-     '#01-01'),
+        '33333333-3333-3333-3333-333333333333',
+        'Kim Kitchen',
+        '#01-01'),
 
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD',
-     '44444444-4444-4444-4444-444444444444',
-     'Sakura Sushi',
-     '#01-02');
+        '44444444-4444-4444-4444-444444444444',
+        'Sakura Sushi',
+        '#01-02');
 
 
 INSERT INTO MenuItem
