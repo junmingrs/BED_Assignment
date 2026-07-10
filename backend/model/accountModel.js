@@ -19,8 +19,6 @@ async function getAccountById(id) {
 }
 
 async function createAccount(account) {
-    // TODO: VALIDATION USING JOI
-
     const query = `INSERT INTO Account (account_name, account_email, password_hash, role) VALUES (@account_name, @account_email, @password_hash, @role); SELECT SCOPE_IDENTITY() AS user_id;`;
     const pool = await poolPromise;
     const result = await pool
