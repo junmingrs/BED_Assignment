@@ -8,8 +8,10 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 // TODO: Import Controllers
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
+const promotionController = require("./controller/promotionController");
 const { verifyJWT } = require("./middleware/auth");
 const { validateRegister, valdiateLogin } = require("./middleware/validate");
+
 
 // TODO: Import Validations
 
@@ -35,6 +37,11 @@ app.delete("/menuitem", verifyJWT, menuItemController.deleteMenuItem);
 app.get("/menuitem", verifyJWT, menuItemController.getMenuItemsByStallIdAndItemCode);
 app.get("/menuitems", verifyJWT, menuItemController.getAllMenuItems);
 app.get("/menuitemsbystore", verifyJWT, menuItemController.getMenuItemsByStallId);
+
+app.post("/promotion", verifyJWT, promotionController.createPromotion);
+app.get("/promotion", verifyJWT, promotionController.getPromotionsByStallId);
+app.put("/promotion", verifyJWT, promotionController.updatePromotion);
+app.delete("/promotion", verifyJWT, promotionController.deletePromotion);
 
 // Start server
 app.listen(port, () => {
