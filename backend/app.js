@@ -9,7 +9,7 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const { verifyJWT } = require("./middleware/auth");
-const { validateRegister, valdiateLogin } = require("./middleware/validate");
+const { validateRegister, validateLogin } = require("./middleware/validate");
 
 // TODO: Import Validations
 
@@ -24,7 +24,7 @@ app.use(express.static(path.join("public")));
 
 // TODO: ROUTES
 app.post("/register", validateRegister, accountController.registerUser);
-app.post("/login", valdiateLogin, accountController.loginUser);
+app.post("/login", validateLogin, accountController.loginUser);
 
 // to use auth:
 // app.post("/orders", verifyJWT, );
@@ -55,12 +55,3 @@ const stallController = require("./controller/stallController");
 
 // GET /stalls/:stallId - get stall info (orders, ratings, complaints)
 app.get("/stalls/:stallId", verifyJWT, stallController.getStallInfo);
-
-// POST /stalls/:stallId/menu - add menu item
-app.post("/stalls/:stallId/menu", verifyJWT, stallController.addMenuItem);
-
-// PUT /stalls/:stallId/menu/:itemId - update menu item
-app.put("/stalls/:stallId/menu/:itemId", verifyJWT, stallController.updateMenuItem);
-
-// DELETE /stalls/:stallId/menu/:itemId - delete menu item
-app.delete("/stalls/:stallId/menu/:itemId", verifyJWT, stallController.deleteMenuItem);
