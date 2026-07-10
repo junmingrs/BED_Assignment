@@ -9,6 +9,9 @@ DROP TABLE IF EXISTS Cuisine;
 DROP TABLE IF EXISTS Stall
 DROP TABLE IF EXISTS Vendor;
 DROP TABLE IF EXISTS Account;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Rating;
+DROP TABLE IF EXISTS Complaint;
 
 CREATE TABLE Account (
   account_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
@@ -63,6 +66,35 @@ CREATE TABLE MenuItemCuisine (
     item_code VARCHAR(5) NOT NULL,
     CONSTRAINT PK_MenuItemCuisine PRIMARY KEY (cuisine_id, stall_id, item_code),
     CONSTRAINT FK_MenuItemCuisine_MenuItem FOREIGN KEY (stall_id, item_code) REFERENCES MenuItem(stall_id, item_code)
+);
+
+CREATE TABLE Orders (
+    order_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
+    customer_id UNIQUEIDENTIFIER NOT NULL REFERENCES Customer(customer_id),
+    order_date DATETIME DEFAULT GETDATE(),
+    total_amount SMALLMONEY NOT NULL,
+    status VARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled')),
+    queue_number INT NOT NULL
+);
+
+CREATE TABLE Rating (
+    rating_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
+    customer_id UNIQUEIDENTIFIER NOT NULL REFERENCES Customer(customer_id),
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE Complaint (
+    complaint_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
+    customer_id UNIQUEIDENTIFIER NOT NULL REFERENCES Customer(customer_id),
+    subject VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    status VARCHAR(20) DEFAULT 'Open' CHECK (status IN ('Open', 'Investigating', 'Resolved', 'Closed')),
+    created_at DATETIME DEFAULT GETDATE()
 );
 
 INSERT INTO Account (account_id, account_name, account_email, password_hash, role)
@@ -123,3 +155,28 @@ VALUES
 ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C002', 'D001'),
 ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'C002', 'S001');
 
+INSERT INTO Orders (order_id, stall_id, customer_id, order_date, total_amount, status, queue_number)
+VALUES
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '2026-07-01 12:30:00', 15.50, 'Completed', 1),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '2026-07-02 18:15:00', 8.50, 'Completed', 2),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '2026-07-03 12:00:00', 9.50, 'Preparing', 3),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '2026-07-05 11:00:00', 7.50, 'Cancelled', 4),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '2026-07-01 19:00:00', 12.50, 'Completed', 1),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '2026-07-02 13:45:00', 16.00, 'Completed', 2),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', '2026-07-04 20:00:00', 3.50, 'Pending', 3);
+
+INSERT INTO Rating (rating_id, stall_id, customer_id, rating, comment, created_at)
+VALUES
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 5, 'Really good kimchi fried rice! Will order again.', '2026-07-01 12:45:00'),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 4, 'Bibimbap was solid but a bit too spicy for me.', '2026-07-02 18:30:00'),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 3, 'Portion size could be bigger, but taste is okay.', '2026-07-03 12:20:00'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 5, 'Salmon sushi was super fresh! Loved it.', '2026-07-01 19:15:00'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 4, 'Chicken katsu was crispy, will come back.', '2026-07-02 14:00:00'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 2, 'Matcha latte was too sweet, not what I expected.', '2026-07-04 20:15:00');
+
+INSERT INTO Complaint (complaint_id, stall_id, customer_id, subject, description, status, created_at)
+VALUES
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'Hair found in food', 'I found a piece of hair in my Bibimbap. Please investigate.', 'Investigating', '2026-07-02 18:35:00'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA2-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'Overcharged for order', 'I was charged $16.00 but my order total was only $12.50. Need a refund.', 'Open', '2026-07-02 14:10:00'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'Order came late', 'Delivery took 45 minutes longer than expected. Food was cold.', 'Resolved', '2026-07-01 20:00:00'),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'AAAAAAA1-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'Staff was rude', 'The vendor was really rude when I asked for extra kimchi. Very disappointed.', 'Closed', '2026-07-03 12:25:00');

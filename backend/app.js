@@ -9,7 +9,7 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const { verifyJWT } = require("./middleware/auth");
-const { validateRegister, valdiateLogin } = require("./middleware/validate");
+const { validateRegister, validateLogin } = require("./middleware/validate");
 
 // TODO: Import Validations
 
@@ -24,7 +24,7 @@ app.use(express.static(path.join("public")));
 
 // TODO: ROUTES
 app.post("/register", validateRegister, accountController.registerUser);
-app.post("/login", valdiateLogin, accountController.loginUser);
+app.post("/login", validateLogin, accountController.loginUser);
 
 // to use auth:
 // app.post("/orders", verifyJWT, );
@@ -48,3 +48,10 @@ process.on("SIGINT", async () => {
   console.log("Database connections closed");
   process.exit(0);
 });
+
+
+// ============ STALL ROUTES ============
+const stallController = require("./controller/stallController");
+
+// GET /stalls/:stallId - get stall info (orders, ratings, complaints)
+app.get("/stalls/:stallId", verifyJWT, stallController.getStallInfo);
