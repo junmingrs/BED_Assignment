@@ -17,7 +17,9 @@ function verifyJWT(req, res, next) {
             "GET /menuitems": ["Vendor"], // all menu items
             "GET /menuitemsbystore": ["Vendor"],
             "GET /stalls/:stallId": ["Vendor", "Operator"],
-            
+            "POST /stalls/:stallId/menu": ["Vendor", "Operator"],
+            "PUT /stalls/:stallId/menu/:itemId": ["Vendor", "Operator"],
+            "DELETE /stalls/:stallId/menu/:itemId": ["Vendor", "Operator"],
         };
         const reqEndpoint = `${req.method} ${req.route.path}`;
         const userRole = decodedUser.role;
