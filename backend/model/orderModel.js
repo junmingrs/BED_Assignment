@@ -1,15 +1,46 @@
 const { poolPromise } = require("../db");
+const menuItemModel = require("./menuItemModel");
 
-async function getTotalAmount(order_id) {
-    // TODO: use sql magic and do SUM on the menu items with all the item_code then x quantity
-    return 0;
+async function getTotalAmount(stallId, items) {
+    const pricePromises = items.map(async (item) => {
+        const menuItem = await menuItemModel.getMenuItemsByStallIdAndItemCode(
+            stallId,
+            item.item_code,
+        );
+        return menuItem.item_price * item.quantity;
+    });
+
+    const itemPrices = await Promise.all(pricePromises);
+    return itemPrices.reduce((s, c) => s + c, 0);
 }
 
-async function getNextQueueNum(stall_id) {
-    // TODO: use sql magic or js to find out the current number now. or maybe create a queue table idk
-    // get the max queue number from all orders from this stall (sql magic) and + 1
-    // vendor will get from min queue number from ^
-    return 0;
+async function getOrderById(orderId) {
+    const query = `SELECT order_id, stall_id, customer_id, order_date, total_amount, status, queue_number, is_eco_friendly_packaging FROM Orders WHERE order_id= @id`;
+    const pool = await poolPromise;
+    const result = await pool.request().input("id", orderId).query(query);
+
+    if (result.recordset.length === 0) return null;
+    return result.recordset[0];
+}
+
+async function getOrderByStallId(stallId) {
+    const query = `SELECT order_id, stall_id, customer_id, order_date, total_amount, status, queue_number, is_eco_friendly_packaging FROM Orders WHERE stall_id= @id`;
+    const pool = await poolPromise;
+    const result = await pool.request().input("id", stallId).query(query);
+
+    if (result.recordset.length === 0) return null;
+    return result.recordset;
+}
+
+async function getNextQueueNum(stallId) {
+    const query = `
+        SELECT MAX(queue_number) AS max_queue FROM Orders WHERE stall_id = @stall_id
+    `;
+    const pool = await poolPromise;
+    const result = await pool.request().input("stall_id", stallId).query(query);
+
+    if (result.recordset.length === 0) return 1;
+    return parseInt(result.recordset[0].max_queue) + 1;
 }
 
 async function createOrderItem(orderId, item) {
@@ -53,4 +84,10 @@ async function createOrder(orderId, stallId, customerId, totalAmount, is_eco) {
     return orderId;
 }
 
-module.exports = { createOrder, createOrderItem, getTotalAmount };
+module.exports = {
+    createOrder,
+    createOrderItem,
+    getTotalAmount,
+    getOrderById,
+    getOrderByStallId,
+};

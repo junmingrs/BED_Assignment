@@ -12,6 +12,28 @@ const orderModel = require("../model/orderModel");
 //     ],
 // };
 
+async function getOrderById(req, res) {
+    const { orderId } = req.params;
+    try {
+        const order = await orderModel.getOrderById(orderId);
+        return res.status(200).json(order);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+async function getOrderByStallId(req, res) {
+    const { stallId } = req.params;
+    try {
+        const orders = await orderModel.getOrderByStallId(stallId);
+        return res.status(200).json(orders);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 async function checkoutCart(req, res) {
     const { cart, customerId } = req.body;
     const cartParsed = typeof cart == "string" ? JSON.parse(cart) : cart; // array
@@ -28,7 +50,7 @@ async function checkoutCart(req, res) {
         const orderPromises = Object.keys(cartMap).map(async (stallId) => {
             const orderId = crypto.randomUUID();
             const items = cartMap[stallId]; // []
-            const total = await orderModel.getTotalAmount(items);
+            const total = await orderModel.getTotalAmount(stallId, items);
             const isEco = items[0]?.is_eco || false;
 
             await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
@@ -36,17 +58,23 @@ async function checkoutCart(req, res) {
             const itemPromises = items.map(async (item) => {
                 await orderModel.createOrderItem(orderId, item);
             });
+
             // to avoid timing issues from async
             await Promise.all(itemPromises);
 
-            return orderId;
+            return { stallId, orderId };
         });
 
-        const createdOrderIds = await Promise.all(orderPromises);
+        const createdOrders = await Promise.all(orderPromises);
+        // {stallId: orderId}
+        const ordersMap = createdOrders.reduce((map, current) => {
+            map[current.stallId] = current.orderId;
+            return map;
+        }, {});
 
         return res.status(200).json({
             message: "Orders placed successfully. Food is now being prepared",
-            orderIds: createdOrderIds,
+            orderIds: ordersMap,
         });
     } catch (err) {
         console.error(err);
@@ -54,4 +82,4 @@ async function checkoutCart(req, res) {
     }
 }
 
-module.exports = { checkoutCart };
+module.exports = { checkoutCart, getOrderById, getOrderByStallId };

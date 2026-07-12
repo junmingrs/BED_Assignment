@@ -28,8 +28,8 @@ app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 
 // to use auth:
-// app.post("/orders", verifyJWT, );
-// app.get("/orders", verifyJWT, );
+
+// TODO: refactor the verifyJWT so that you can pass in the authorised roles for this endpoint
 app.post("/menuitem", verifyJWT, menuItemController.createMenuItem);
 app.put("/menuitem", verifyJWT, menuItemController.updateMenuItem);
 app.delete("/menuitem", verifyJWT, menuItemController.deleteMenuItem);
@@ -46,6 +46,12 @@ app.get(
 );
 
 app.post("/checkout", verifyJWT, orderController.checkoutCart);
+app.get("/order/:orderId", verifyJWT, orderController.getOrderById);
+app.get(
+    "/stalls/:stallId/orders",
+    verifyJWT,
+    orderController.getOrderByStallId,
+);
 
 // Start server
 app.listen(port, () => {

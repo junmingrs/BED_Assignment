@@ -21,8 +21,12 @@ function verifyJWT(req, res, next) {
             "PUT /stalls/:stallId/menu/:itemId": ["Vendor", "Operator"],
             "DELETE /stalls/:stallId/menu/:itemId": ["Vendor", "Operator"],
             "POST /checkout": ["Customer"],
+            "GET /order/:orderId": ["Customer"],
+            "GET /stalls/:stallId/orders": ["Customer", "Vendor"],
         };
-        const reqEndpoint = `${req.method} ${req.route.path}`;
+        const fullPath = `${req.baseUrl}${req.route.path}`;
+        const reqEndpoint = `${req.method} ${fullPath}`;
+
         const userRole = decodedUser.role;
         const authorisedRole = Object.entries(authorisedRoles).find(
             ([endpoint, roles]) => {
