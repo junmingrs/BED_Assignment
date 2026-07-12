@@ -20,6 +20,7 @@ function verifyJWT(req, res, next) {
             "POST /stalls/:stallId/menu": ["Vendor", "Operator"],
             "PUT /stalls/:stallId/menu/:itemId": ["Vendor", "Operator"],
             "DELETE /stalls/:stallId/menu/:itemId": ["Vendor", "Operator"],
+            "POST /checkout": ["Customer"],
         };
         const reqEndpoint = `${req.method} ${req.route.path}`;
         const userRole = decodedUser.role;

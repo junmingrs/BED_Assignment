@@ -8,6 +8,7 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 // TODO: Import Controllers
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
+const orderController = require("./controller/orderController");
 const { verifyJWT } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
@@ -32,23 +33,32 @@ app.post("/login", validateLogin, accountController.loginUser);
 app.post("/menuitem", verifyJWT, menuItemController.createMenuItem);
 app.put("/menuitem", verifyJWT, menuItemController.updateMenuItem);
 app.delete("/menuitem", verifyJWT, menuItemController.deleteMenuItem);
-app.get("/menuitem", verifyJWT, menuItemController.getMenuItemsByStallIdAndItemCode);
+app.get(
+    "/menuitem",
+    verifyJWT,
+    menuItemController.getMenuItemsByStallIdAndItemCode,
+);
 app.get("/menuitems", verifyJWT, menuItemController.getAllMenuItems);
-app.get("/menuitemsbystore", verifyJWT, menuItemController.getMenuItemsByStallId);
+app.get(
+    "/menuitemsbystore",
+    verifyJWT,
+    menuItemController.getMenuItemsByStallId,
+);
+
+app.post("/checkout", verifyJWT, orderController.checkoutCart);
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
-  console.log("Server is gracefully shutting down");
-  await sql.close();
-  console.log("Database connections closed");
-  process.exit(0);
+    console.log("Server is gracefully shutting down");
+    await sql.close();
+    console.log("Database connections closed");
+    process.exit(0);
 });
-
 
 // ============ STALL ROUTES ============
 const stallController = require("./controller/stallController");
