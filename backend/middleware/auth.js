@@ -13,7 +13,7 @@ function verifyJWT(req, res, next) {
             "POST /menuitem": ["Vendor"],
             "PUT /menuitem": ["Vendor"],
             "DELETE /menuitem": ["Vendor"],
-            "GET /menuitem": ["Vendor"], // specific menu item by stallId and itemCode
+            "GET /menuitem": ["Vendor", "Customer"], // specific menu item by stallId and itemCode
             "GET /menuitems": ["Vendor"], // all menu items
             "GET /menuitemsbystore": ["Vendor"],
             "GET /stalls/:stallId": ["Vendor", "Operator"],
