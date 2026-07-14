@@ -1,3 +1,5 @@
+import { LS_KEYS } from "./const.js";
+
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const form = document.getElementById("loginForm");
@@ -24,12 +26,11 @@ async function loginUser(e) {
             console.log("ERROR WHILE LOGIN: " + data.error);
             return;
         } else {
-            localStorage.setItem("token", data.token);
+            localStorage.setItem(LS_KEYS.authToken, data.token);
             window.location.href = "/customer/";
         }
     } catch (err) {
         console.error(err);
-        alert(err);
     }
 }
 
