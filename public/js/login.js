@@ -6,6 +6,7 @@ const form = document.getElementById("loginForm");
 
 async function loginUser(e) {
     e.preventDefault();
+console.log(emailInput.value, passwordInput.value);
     try {
         const response = await fetch("/login", {
             method: "POST",
@@ -18,9 +19,9 @@ async function loginUser(e) {
                 password: passwordInput.value,
             }),
         });
-
+        
         const data = await response.json();
-
+        
         alert(data.message);
         if (!response.ok) {
             console.log("ERROR WHILE LOGIN: " + data.error);
@@ -28,6 +29,7 @@ async function loginUser(e) {
         } else {
             localStorage.setItem(LS_KEYS.authToken, data.token);
             window.location.href = "/customer/";
+            console.log(data.token);
         }
     } catch (err) {
         console.error(err);

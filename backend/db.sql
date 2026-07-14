@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS Vendor;
 DROP TABLE IF EXISTS Operator;
 DROP TABLE IF EXISTS NEA;
 DROP TABLE IF EXISTS Account;
+DROP TABLE IF EXISTS Promotion;
 GO
 
 CREATE TABLE Account
@@ -121,6 +122,16 @@ CREATE TABLE Complaint
     status VARCHAR(20) DEFAULT 'Open' CHECK (status IN ('Open', 'Investigating', 'Resolved', 'Closed')),
     created_at DATETIME DEFAULT GETDATE()
 );
+
+CREATE TABLE Promotion
+(
+    promotion_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL
+);
 GO
 
 INSERT INTO Account (account_id, account_email, password_hash, role) VALUES
@@ -205,3 +216,7 @@ INSERT INTO Complaint (complaint_id, stall_id, customer_id, subject, description
 (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '22222222-2222-2222-2222-222222222222', 'Overcharged for order', 'I was charged $16.00 but my order total was only $12.50. Need a refund.', 'Open', '2026-07-02 14:10:00'),
 (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'Order came late', 'Delivery took 45 minutes longer than expected. Food was cold.', 'Resolved', '2026-07-01 20:00:00'),
 (NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'Staff was rude', 'The vendor was really rude when I asked for extra kimchi. Very disappointed.', 'Closed', '2026-07-03 12:25:00');
+
+INSERT INTO Promotion (stall_id, title, description, start_date, end_date) VALUES
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '10% off Kimchi Fried Rice', 'Weekday lunch special', '2026-07-14', '2026-07-31'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Free Matcha Latte upgrade', 'Order any sushi set and get a free drink upgrade', '2026-07-10', '2026-08-01');
