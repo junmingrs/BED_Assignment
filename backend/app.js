@@ -10,8 +10,10 @@ const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
 const stallController = require("./controller/stallController");
+const promotionController = require("./controller/promotionController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
+
 
 // TODO: Import Validations
 
@@ -59,6 +61,11 @@ app.get(
     authorise("Vendor", "Operator"),
     stallController.getStallInfo,
 );
+
+app.post("/promotion", authorise("Vendor"), promotionController.createPromotion);
+app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsByStallId);
+app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
+app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
 
 // Start server
 app.listen(port, () => {
