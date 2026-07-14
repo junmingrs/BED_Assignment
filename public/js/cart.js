@@ -46,7 +46,7 @@ async function renderPaymentUI() {
 
             <div class="mt-6 space-y-3">
                 <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-[:checked]:border-black has-[:checked]:bg-gray-50">
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
                     <input type="radio" name="payment" value="card" class="h-4 w-4 accent-black" checked />
 
                     <div class="flex-1">
@@ -58,7 +58,7 @@ async function renderPaymentUI() {
                 </label>
 
                 <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-[:checked]:border-black has-[:checked]:bg-gray-50">
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
                     <input type="radio" name="payment" value="paynow" class="h-4 w-4 accent-black" />
 
                     <div class="flex-1">
@@ -70,7 +70,7 @@ async function renderPaymentUI() {
                 </label>
 
                 <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-[:checked]:border-black has-[:checked]:bg-gray-50">
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
                     <input type="radio" name="payment" value="cash" class="h-4 w-4 accent-black" />
 
                     <div class="flex-1">

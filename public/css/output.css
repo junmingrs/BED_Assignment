@@ -654,6 +654,16 @@
       opacity: 50%;
     }
   }
+  .has-checked\:border-black {
+    &:has(*:checked) {
+      border-color: var(--color-black);
+    }
+  }
+  .has-checked\:bg-gray-50 {
+    &:has(*:checked) {
+      background-color: var(--color-gray-50);
+    }
+  }
   .has-\[\:checked\]\:border-black {
     &:has(*:is(:checked)) {
       border-color: var(--color-black);
