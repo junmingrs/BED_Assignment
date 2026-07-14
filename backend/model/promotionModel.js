@@ -1,5 +1,5 @@
 const sql = require("mssql");
-const { poolPromise } = require("../config/db"); // adjust path to match your db config
+const { poolPromise } = require("../dbConfig.js"); // adjust path to match your db config
 
 async function createPromotion({ stallId, title, description, startDate, endDate }) {
   const pool = await poolPromise;

@@ -5,8 +5,6 @@ const accountModel = require("../model/accountModel");
 async function registerUser(req, res) {
     const { name, email, password, role } = req.body;
     try {
-        // TODO: validation
-
         // account is tied to email
         const existingUser = await accountModel.getAccountByEmail(email);
         if (existingUser) {
@@ -17,12 +15,27 @@ async function registerUser(req, res) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        await accountModel.createAccount({
+        const accountId = await accountModel.createAccount({
             name,
             email,
             passwordHash: hashedPassword,
             role,
         });
+        switch (role) {
+            case "Customer":
+                await accountModel.createCustomer(accountId, name);
+                break;
+            case "Vendor":
+                await accountModel.createVendor(accountId);
+                break;
+            case "Operator":
+                await accountModel.createOperator(accountId);
+                break;
+            case "NEA":
+                await accountModel.createNEA(accountId);
+                break;
+        }
+
         return res.status(201).json({ message: "Account created successfully" });
     } catch (err) {
         console.error(err);
@@ -52,7 +65,7 @@ async function loginUser(req, res) {
         const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
             expiresIn: "3600s",
         });
-        return res.status(200).json({ token });
+        return res.status(200).json({ token, message: "Logged in successfully" });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Internal server error" });

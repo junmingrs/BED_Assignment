@@ -87,7 +87,8 @@ CREATE TABLE Orders
     order_date DATETIME DEFAULT GETDATE(),
     total_amount SMALLMONEY NOT NULL,
     status VARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled')),
-    queue_number INT NOT NULL
+    queue_number INT NOT NULL,
+    is_eco_friendly_packaging BIT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE OrderItem
