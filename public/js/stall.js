@@ -12,9 +12,9 @@ async function addToCart() {
         quantity: 2,
     };
 
-    let cart = JSON.parse(localStorage.getItem(LS_KEYS.cart));
-    if (cart) cart.push(item);
-    else cart = [item];
+    let cart = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
+    if (cart[item.stallId]) cart[item.stallId].push(item);
+    else cart[item.stallId] = [item];
     localStorage.setItem(LS_KEYS.cart, JSON.stringify(cart));
 
     alert("Added to cart!");

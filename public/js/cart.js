@@ -3,16 +3,17 @@ const cartContainer = document.getElementById("container");
 const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
+const main = document.getElementsByTagName("main");
 
 const token = localStorage.getItem(LS_KEYS.authToken);
-const cart = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "[]");
+let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
 
-const cartMap = cart.reduce((map, item) => {
-    const stallId = item.stallId;
-    if (!map[stallId]) map[stallId] = [];
-    map[stallId].push(item);
-    return map;
-}, {});
+// const cartMap = cart.reduce((map, item) => {
+//     const stallId = item.stallId;
+//     if (!map[stallId]) map[stallId] = [];
+//     map[stallId].push(item);
+//     return map;
+// }, {});
 
 async function getItemById(stallId, itemCode) {
     try {
@@ -34,10 +35,61 @@ async function getItemById(stallId, itemCode) {
     }
 }
 
-async function loadUI() {
+async function renderPaymentUI() {
+    main.innerHTML += `
+        <!-- payment method -->
+        <section class="rounded-xl border bg-white p-6 shadow-sm mt-20!">
+            <h2 class="text-xl font-semibold">Payment Method</h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Select your preferred payment method.
+            </p>
+
+            <div class="mt-6 space-y-3">
+                <label
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-[:checked]:border-black has-[:checked]:bg-gray-50">
+                    <input type="radio" name="payment" value="card" class="h-4 w-4 accent-black" checked />
+
+                    <div class="flex-1">
+                        <p class="font-medium">Credit / Debit Card</p>
+                        <p class="text-sm text-gray-500">
+                            Visa, Mastercard, American Express
+                        </p>
+                    </div>
+                </label>
+
+                <label
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-[:checked]:border-black has-[:checked]:bg-gray-50">
+                    <input type="radio" name="payment" value="paynow" class="h-4 w-4 accent-black" />
+
+                    <div class="flex-1">
+                        <p class="font-medium">PayNow</p>
+                        <p class="text-sm text-gray-500">
+                            Pay instantly using your banking app.
+                        </p>
+                    </div>
+                </label>
+
+                <label
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-[:checked]:border-black has-[:checked]:bg-gray-50">
+                    <input type="radio" name="payment" value="cash" class="h-4 w-4 accent-black" />
+
+                    <div class="flex-1">
+                        <p class="font-medium">Cash</p>
+                        <p class="text-sm text-gray-500">
+                            Pay at the stall upon collection.
+                        </p>
+                    </div>
+                </label>
+            </div>
+        </section>
+    `;
+}
+
+async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
 
+    cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "[]");
     let totalAmount = 0;
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
@@ -69,12 +121,12 @@ async function loadUI() {
                   </div>
 
                   <div class="flex items-center gap-4">
-                    <button class="minus rounded-md border px-3 py-2">−</button>
+                    <button class="minus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">−</button>
                     <span>${item.quantity}</span>
-                    <button class="plus rounded-md border px-3 py-2">+</button>
+                    <button class="plus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">+</button>
                   </div>
 
-                  <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50">
+                  <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}" >
                     Delete
                   </button>
                 </div>
@@ -93,6 +145,13 @@ async function loadUI() {
     );
 
     cartContainer.innerHTML = cards.join("");
+    if (cartContainer.innerHTML == "") {
+        cartContainer.innerHTML =
+            '<p class="text-sm text-gray-500 text-center py-8">No items added in cart</p>';
+    } else {
+        renderPaymentUI();
+    }
+
     cartTotal.textContent = "$" + totalAmount.toFixed(2);
 }
 
@@ -126,7 +185,7 @@ async function checkout() {
                 JSON.stringify(data.orderIds),
             );
             window.location.href = "/customer/order-status.html?success=true";
-            localStorage.setItem(LS_KEYS.cart, "[]");
+            localStorage.setItem(LS_KEYS.cart, "{}");
         } else {
             console.error(data);
         }
@@ -135,8 +194,35 @@ async function checkout() {
     }
 }
 
-window.addEventListener("load", loadUI);
+function changeQuality(stallId, itemCode, amount) {
+    const item = cartMap[stallId].find((item) => item.itemCode == itemCode);
+    // min is 1, because if it's 0 then they should delete it
+    item.quantity = Math.max(item.quantity + amount, 1);
+}
+
+function deleteItem(stallId, itemCode) {
+    cartMap = cartMap[stallId].filter((item) => item.itemCode != itemCode);
+}
+
 checkoutBtn.addEventListener("click", checkout);
 checkoutFailBtn.addEventListener("click", () => {
     window.location.href = "/customer/order-status.html?success=false";
+});
+
+await renderCartItems();
+cartContainer.addEventListener("click", async (e) => {
+    const button = e.target.closest("button");
+    if (!button) return;
+
+    const { stallId, itemCode } = button.dataset;
+
+    if (button.classList.contains("plus")) {
+        changeQuality(stallId, itemCode, 1);
+    } else if (button.classList.contains("minus")) {
+        changeQuality(stallId, itemCode, -1);
+    } else if (button.classList.contains("delete")) {
+        deleteItem(stallId, itemCode);
+    }
+    localStorage.setItem(LS_KEYS.cart, JSON.stringify(cartMap));
+    await renderCartItems();
 });
