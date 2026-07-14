@@ -60,7 +60,7 @@ function validateRegister(req, res, next) {
     next();
 }
 
-function valdiateLogin(req, res, next) {
+function validateLogin(req, res, next) {
     const { error } = loginSchema.validate(req.body, { abortEarly: false });
 
     if (error) {
@@ -72,4 +72,4 @@ function valdiateLogin(req, res, next) {
     next();
 }
 
-module.exports = { validateRegister, valdiateLogin };
+module.exports = { validateRegister, validateLogin };

@@ -360,3 +360,50 @@ input:focus{ border-color:var(--accent); }
   outline-offset:2px;
 }
 .screen--staff :focus-visible{ outline-color:var(--staff); }
+
+/* ---------- Guest divider + ghost button ---------- */
+
+.divider{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:22px 0 4px;
+  color:var(--muted);
+  font-family:'IBM Plex Mono', monospace;
+  font-size:10px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.divider::before,
+.divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:var(--line);
+}
+
+.btn-ghost{
+  display:block;
+  text-align:center;
+  text-decoration:none;
+  margin-top:4px;
+  border:1.5px solid var(--line);
+  background:transparent;
+  color:var(--text);
+  font-family:'Inter', sans-serif;
+  font-weight:600;
+  font-size:14px;
+  letter-spacing:.02em;
+  padding:13px 20px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:border-color .18s ease, color .18s ease;
+}
+.btn-ghost:hover{
+  border-color:var(--accent);
+  color:var(--accent-dark);
+}
+.screen--staff .btn-ghost:hover{
+  border-color:var(--staff);
+  color:var(--staff-dark);
+}
