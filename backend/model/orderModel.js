@@ -76,12 +76,28 @@ async function createOrder(orderId, stallId, customerId, totalAmount, is_eco) {
         .input("stall_id", stallId)
         .input("customer_id", customerId)
         .input("total_amount", totalAmount)
-        .input("status", "Pending") // NOTE: when will the status update like from pending -> preparing...
+        .input("status", "Pending")
         .input("queue_number", queueNumber)
         .input("is_eco", is_eco)
         .query(query);
 
     return orderId;
+}
+
+async function updateOrderStatus(orderId, status) {
+    const query = `
+        UPDATE Orders
+        SET status = @status
+        WHERE order_id = @orderId;
+    `;
+    const pool = await poolPromise;
+    const result = await pool
+        .request()
+        .input("status", status)
+        .input("orderId", orderId)
+        .query(query);
+
+    return result.rowsAffected[0] > 0;
 }
 
 module.exports = {
@@ -90,4 +106,5 @@ module.exports = {
     getTotalAmount,
     getOrderById,
     getOrderByStallId,
+    updateOrderStatus,
 };

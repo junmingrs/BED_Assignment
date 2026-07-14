@@ -34,6 +34,22 @@ async function getOrderByStallId(req, res) {
     }
 }
 
+async function updateOrderStatus(req, res) {
+    const { orderId, status } = req.params;
+    try {
+        const updated = await orderModel.updateOrderStatus(orderId, status);
+        if (!updated) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        return res
+            .status(200)
+            .json({ message: "Order status updated successfully." });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 async function checkoutCart(req, res) {
     const { cart, customerId } = req.body;
     const cartMap = typeof cart == "string" ? JSON.parse(cart) : cart;
@@ -74,4 +90,9 @@ async function checkoutCart(req, res) {
     }
 }
 
-module.exports = { checkoutCart, getOrderById, getOrderByStallId };
+module.exports = {
+    checkoutCart,
+    getOrderById,
+    getOrderByStallId,
+    updateOrderStatus,
+};

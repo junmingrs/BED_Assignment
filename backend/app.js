@@ -44,6 +44,11 @@ app.get(
 
 app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
 app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
+app.patch(
+    "/orders/:orderId/:status",
+    authorise("Vendor"),
+    orderController.updateOrderStatus,
+);
 app.get(
     "/stalls/:stallId/orders",
     authorise("Customer", "Vendor"),
