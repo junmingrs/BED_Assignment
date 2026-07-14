@@ -2,4 +2,5 @@
 export const LS_KEYS = {
     cart: "HAWKER_CENTRE_CART",
     authToken: "token",
+    createdOrderIds: "created_orderIds",
 };

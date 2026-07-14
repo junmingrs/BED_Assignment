@@ -121,6 +121,10 @@ async function checkout() {
         const data = await response.json();
         alert(data.message);
         if (response.ok) {
+            sessionStorage.setItem(
+                LS_KEYS.createdOrderIds,
+                JSON.stringify(data.orderIds),
+            );
             window.location.href = "/customer/order-status.html?success=true";
             localStorage.setItem(LS_KEYS.cart, "[]");
         } else {
