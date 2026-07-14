@@ -5,7 +5,7 @@ async function getTotalAmount(stallId, items) {
     const pricePromises = items.map(async (item) => {
         const menuItem = await menuItemModel.getMenuItemsByStallIdAndItemCode(
             stallId,
-            item.item_code,
+            item.itemCode,
         );
         return menuItem.item_price * item.quantity;
     });
@@ -52,8 +52,8 @@ async function createOrderItem(orderId, item) {
     await pool
         .request()
         .input("order_id", orderId)
-        .input("stall_id", item.stall_id)
-        .input("item_code", item.item_code)
+        .input("stall_id", item.stallId)
+        .input("item_code", item.itemCode)
         .input("quantity", item.quantity)
         .query(query);
 

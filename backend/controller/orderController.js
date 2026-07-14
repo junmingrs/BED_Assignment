@@ -36,15 +36,15 @@ async function getOrderByStallId(req, res) {
 
 async function checkoutCart(req, res) {
     const { cart, customerId } = req.body;
-    const cartParsed = typeof cart == "string" ? JSON.parse(cart) : cart; // array
+    const cartMap = typeof cart == "string" ? JSON.parse(cart) : cart;
 
     // {stall_id: [item]}
-    const cartMap = cartParsed.reduce((map, item) => {
-        const stallId = item.stall_id;
-        if (!map[stallId]) map[stallId] = [];
-        map[stallId].push(item);
-        return map;
-    }, {});
+    // const cartMap = cartParsed.reduce((map, item) => {
+    //     const stallId = item.stall_id;
+    //     if (!map[stallId]) map[stallId] = [];
+    //     map[stallId].push(item);
+    //     return map;
+    // }, {});
 
     try {
         const orderPromises = Object.keys(cartMap).map(async (stallId) => {

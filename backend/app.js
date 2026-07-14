@@ -27,8 +27,6 @@ app.use(express.static(path.join("public")));
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 
-// to use auth:
-
 // TODO: refactor the verifyJWT so that you can pass in the authorised roles for this endpoint
 app.post("/menuitem", verifyJWT, menuItemController.createMenuItem);
 app.put("/menuitem", verifyJWT, menuItemController.updateMenuItem);
