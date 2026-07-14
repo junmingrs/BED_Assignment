@@ -9,7 +9,8 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
-const { verifyJWT } = require("./middleware/auth");
+const stallController = require("./controller/stallController");
+const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
 // TODO: Import Validations
@@ -18,37 +19,40 @@ const { validateRegister, validateLogin } = require("./middleware/validate");
 const app = express();
 const port = process.env.PORT || 3000;
 
-// TODO: Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 app.use(express.static(path.join("public")));
 
-// TODO: ROUTES
+// Routes
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 
-// TODO: refactor the verifyJWT so that you can pass in the authorised roles for this endpoint
-app.post("/menuitem", verifyJWT, menuItemController.createMenuItem);
-app.put("/menuitem", verifyJWT, menuItemController.updateMenuItem);
-app.delete("/menuitem", verifyJWT, menuItemController.deleteMenuItem);
+app.post("/menuitem", authorise("Vendor"), menuItemController.createMenuItem);
+app.put("/menuitem", authorise("Vendor"), menuItemController.updateMenuItem);
+app.delete("/menuitem", authorise("Vendor"), menuItemController.deleteMenuItem);
 app.get(
     "/menuitem",
-    verifyJWT,
+    authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get("/menuitems", verifyJWT, menuItemController.getAllMenuItems);
+app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
 app.get(
-    "/menuitemsbystore",
-    verifyJWT,
+    "/menuitemsbystall",
+    authorise("Vendor"),
     menuItemController.getMenuItemsByStallId,
 );
 
-app.post("/checkout", verifyJWT, orderController.checkoutCart);
-app.get("/order/:orderId", verifyJWT, orderController.getOrderById);
+app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
+app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
 app.get(
     "/stalls/:stallId/orders",
-    verifyJWT,
+    authorise("Customer", "Vendor"),
     orderController.getOrderByStallId,
+);
+app.get(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.getStallInfo,
 );
 
 // Start server
@@ -56,16 +60,10 @@ app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
 
-// Graceful shutdown
+// shutdown
 process.on("SIGINT", async () => {
     console.log("Server is gracefully shutting down");
     await sql.close();
     console.log("Database connections closed");
     process.exit(0);
 });
-
-// ============ STALL ROUTES ============
-const stallController = require("./controller/stallController");
-
-// GET /stalls/:stallId - get stall info (orders, ratings, complaints)
-app.get("/stalls/:stallId", verifyJWT, stallController.getStallInfo);

@@ -122,6 +122,7 @@ async function checkout() {
         alert(data.message);
         if (response.ok) {
             window.location.href = "/customer/order-status.html?success=true";
+            localStorage.setItem(LS_KEYS.cart, "[]");
         } else {
             console.error(data);
         }
