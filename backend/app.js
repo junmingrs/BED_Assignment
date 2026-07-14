@@ -53,5 +53,8 @@ process.on("SIGINT", async () => {
 // ============ STALL ROUTES ============
 const stallController = require("./controller/stallController");
 
+// GET /stalls - get all stalls
+app.get("/stalls", verifyJWT, stallController.getAllStalls);
+
 // GET /stalls/:stallId - get stall info (orders, ratings, complaints)
 app.get("/stalls/:stallId", verifyJWT, stallController.getStallInfo);

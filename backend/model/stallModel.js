@@ -284,9 +284,28 @@ const deleteMenuItem = async (stallId, itemId) => {
         .query("DELETE FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemId");
 };
 
+// getallStalls 
+const getAllStalls = async () => {
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+        .query(`
+            SELECT 
+                s.stall_id,
+                s.stall_name,
+                s.stall_unit_no,
+                v.vendor_id
+            FROM Stall s
+            JOIN Vendor v ON s.vendor_id = v.vendor_id
+            ORDER BY s.stall_name
+        `);
+
+    return result.recordset;
+};
 module.exports = {
     getStallInfo,
     addMenuItem,
     updateMenuItem,
-    deleteMenuItem
+    deleteMenuItem,
+    getAllStalls
 };

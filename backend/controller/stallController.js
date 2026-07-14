@@ -12,8 +12,17 @@ const getStallInfo = async (req, res) => {
     }
 };
 
-
+const getAllStalls = async (req, res) => {
+    try {
+        const result = await stallModel.getAllStalls();
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error in getAllStalls:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
 
 module.exports = {
-    getStallInfo
+    getStallInfo,
+    getAllStalls
 };
