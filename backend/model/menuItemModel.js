@@ -4,7 +4,7 @@ const { poolPromise } = require("../db");
 async function getAllMenuItems() {
   const query = "SELECT * FROM MenuItem";
   const pool = await poolPromise;
-  const result = await pool.request().input("email", email).query(query);
+  const result = await pool.request().query(query);
   if (result.recordset.length === 0) return null; // User not found
   return result.recordset;
 }
