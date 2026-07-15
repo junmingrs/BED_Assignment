@@ -8,7 +8,7 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 // TODO: Import Controllers
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
-const orderController = require("./controller/orderController");
+// const orderController = require("./controller/orderController");
 const stallController = require("./controller/stallController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
@@ -42,13 +42,13 @@ app.get(
     menuItemController.getMenuItemsByStallId,
 );
 
-app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
-app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
-app.get(
-    "/stalls/:stallId/orders",
-    authorise("Customer", "Vendor"),
-    orderController.getOrderByStallId,
-);
+// app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
+// app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
+// app.get(
+//     "/stalls/:stallId/orders",
+//     authorise("Customer", "Vendor"),
+//     orderController.getOrderByStallId,
+// );
 app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls);
 app.get(
     "/stalls/:stallId",

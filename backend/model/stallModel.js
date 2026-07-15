@@ -14,7 +14,6 @@ const getStallInfo = async (stallId) => {
                 s.stall_name,
                 s.stall_unit_no,
                 v.vendor_id,
-                v.vendor_name,
                 a.account_email
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
