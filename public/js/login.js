@@ -6,7 +6,6 @@ const form = document.getElementById("loginForm");
 
 async function loginUser(e) {
     e.preventDefault();
-console.log(emailInput.value, passwordInput.value);
     try {
         const response = await fetch("/login", {
             method: "POST",
@@ -29,7 +28,6 @@ console.log(emailInput.value, passwordInput.value);
         } else {
             localStorage.setItem(LS_KEYS.authToken, data.token);
             window.location.href = "/customer/";
-            console.log(data.token);
         }
     } catch (err) {
         console.error(err);
