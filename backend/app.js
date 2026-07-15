@@ -55,7 +55,12 @@ app.get(
     authorise("Vendor", "Operator"),
     stallController.getStallInfo,
 );
-
+// PUT /stalls/:stallId - update stall info
+app.put(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.updateStall
+);
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

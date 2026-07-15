@@ -22,7 +22,33 @@ const getAllStalls = async (req, res) => {
     }
 };
 
+const updateStall = async (req, res) => {
+    try {
+        const { stallId } = req.params;
+        const { stall_name, stall_unit_no } = req.body;
+        const accountId = req.user.id;
+
+        if (!stall_name && !stall_unit_no) {
+            return res.status(400).json({
+                error: "At least one field to update is required: stall_name, stall_unit_no"
+            });
+        }
+
+        // Check if stall exists and user has permission
+        // (Only Vendor who owns the stall or Operator can update)
+        const result = await stallModel.updateStall(stallId, accountId, {
+            stall_name,
+            stall_unit_no
+        });
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error in updateStall:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
 module.exports = {
     getStallInfo,
-    getAllStalls
+    getAllStalls,
+    updateStall
 };

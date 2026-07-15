@@ -96,6 +96,78 @@ const getStallInfo = async (stallId) => {
         complaints: complaintsResult.recordset
     };
 };
+// PUT /stalls/:stallId - update stall info
+const updateStall = async (stallId, accountId, updateData) => {
+    const { stall_name, stall_unit_no } = updateData;
+    const pool = await poolPromise;
+
+    // Check if stall exists
+    const stallCheck = await pool.request()
+        .input("stallId", stallId)
+        .query(`
+            SELECT 
+                s.stall_id,
+                s.vendor_id,
+                v.account_id
+            FROM Stall s
+            JOIN Vendor v ON s.vendor_id = v.vendor_id
+            WHERE s.stall_id = @stallId
+        `);
+
+    if (stallCheck.recordset.length === 0) {
+        throw new Error("Stall not found");
+    }
+
+    const stall = stallCheck.recordset[0];
+
+    // Check permission: only the vendor who owns the stall or operator can update
+    if (stall.account_id !== accountId) {
+        throw new Error("You are not authorized to update this stall");
+    }
+
+    // Build dynamic update query
+    let updateQuery = "UPDATE Stall SET ";
+    const updates = [];
+    const request = pool.request();
+    request.input("stallId", stallId);
+
+    if (stall_name !== undefined) {
+        updates.push("stall_name = @stallName");
+        request.input("stallName", stall_name);
+    }
+    if (stall_unit_no !== undefined) {
+        updates.push("stall_unit_no = @stallUnitNo");
+        request.input("stallUnitNo", stall_unit_no);
+    }
+
+    if (updates.length === 0) {
+        throw new Error("No fields to update");
+    }
+
+    updateQuery += updates.join(", ");
+    updateQuery += " WHERE stall_id = @stallId";
+
+    await request.query(updateQuery);
+
+    // Return updated stall
+    const result = await pool.request()
+        .input("stallId", stallId)
+        .query(`
+            SELECT 
+                s.stall_id,
+                s.stall_name,
+                s.stall_unit_no,
+                v.vendor_id,
+                v.vendor_name,
+                a.account_email
+            FROM Stall s
+            JOIN Vendor v ON s.vendor_id = v.vendor_id
+            JOIN Account a ON v.account_id = a.account_id
+            WHERE s.stall_id = @stallId
+        `);
+
+    return result.recordset[0];
+};
 
 // POST /stalls/:stallId/menu - add menu item
 const addMenuItem = async (stallId, menuData) => {
@@ -306,5 +378,6 @@ module.exports = {
     addMenuItem,
     updateMenuItem,
     deleteMenuItem,
-    getAllStalls
+    getAllStalls,
+    updateStall
 };
