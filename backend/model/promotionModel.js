@@ -1,50 +1,71 @@
 const sql = require("mssql");
-const { poolPromise } = require("../config/db"); // adjust path to match your db config
-
-async function createPromotion({ stallId, title, description, startDate, endDate }) {
-  const pool = await poolPromise;
-  const result = await pool.request()
-    .input("stallId", sql.Int, stallId)
-    .input("title", sql.VarChar, title)
-    .input("description", sql.VarChar, description)
-    .input("startDate", sql.Date, startDate)
-    .input("endDate", sql.Date, endDate)
-    .query(`INSERT INTO Promotion (stallId, title, description, startDate, endDate)
-            OUTPUT INSERTED.*
-            VALUES (@stallId, @title, @description, @startDate, @endDate)`);
-  return result.recordset[0];
-}
+const { poolPromise } = require("../db");
 
 async function getPromotionsByStallId(stallId) {
+  const query = "SELECT * FROM Promotion WHERE stall_id = @stall_id";
   const pool = await poolPromise;
-  const result = await pool.request()
-    .input("stallId", sql.Int, stallId)
-    .query("SELECT * FROM Promotion WHERE stallId = @stallId");
+  const result = await pool.request().input("stall_id", stallId).query(query);
   return result.recordset;
 }
 
-async function updatePromotion({ promotionId, title, description, startDate, endDate }) {
+async function getPromotionById(promotionId) {
+  const query = "SELECT * FROM Promotion WHERE promotion_id = @promotion_id";
+  const pool = await poolPromise;
+  const result = await pool.request().input("promotion_id", promotionId).query(query);
+  return result.recordset.length === 0 ? null : result.recordset[0];
+}
+
+async function createPromotion(promo) {
+  const query = `
+    INSERT INTO Promotion (stall_id, title, description, start_date, end_date)
+    OUTPUT INSERTED.*
+    VALUES (@stall_id, @title, @description, @start_date, @end_date)
+  `;
   const pool = await poolPromise;
   const result = await pool.request()
-    .input("promotionId", sql.Int, promotionId)
-    .input("title", sql.VarChar, title)
-    .input("description", sql.VarChar, description)
-    .input("startDate", sql.Date, startDate)
-    .input("endDate", sql.Date, endDate)
-    .query(`UPDATE Promotion
-            SET title = @title, description = @description,
-                startDate = @startDate, endDate = @endDate
-            OUTPUT INSERTED.*
-            WHERE promotionId = @promotionId`);
+    .input("stall_id", promo.stallId)
+    .input("title", promo.title)
+    .input("description", promo.description)
+    .input("start_date", promo.startDate)
+    .input("end_date", promo.endDate)
+    .query(query);
+
   return result.recordset[0];
+}
+
+async function updatePromotion(promo) {
+  const query = `
+    UPDATE Promotion
+    SET title = COALESCE(@title, title),
+        description = COALESCE(@description, description),
+        start_date = COALESCE(@start_date, start_date),
+        end_date = COALESCE(@end_date, end_date)
+    OUTPUT INSERTED.*
+    WHERE promotion_id = @promotion_id
+  `;
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input("promotion_id", promo.promotionId)
+    .input("title", promo.title)
+    .input("description", promo.description)
+    .input("start_date", promo.startDate)
+    .input("end_date", promo.endDate)
+    .query(query);
+
+  return result.recordset.length === 0 ? null : result.recordset[0];
 }
 
 async function deletePromotion(promotionId) {
+  const query = "DELETE FROM Promotion OUTPUT DELETED.* WHERE promotion_id = @promotion_id";
   const pool = await poolPromise;
-  const result = await pool.request()
-    .input("promotionId", sql.Int, promotionId)
-    .query("DELETE FROM Promotion OUTPUT DELETED.* WHERE promotionId = @promotionId");
-  return result.recordset[0];
+  const result = await pool.request().input("promotion_id", promotionId).query(query);
+  return result.recordset.length === 0 ? null : result.recordset[0];
 }
 
-module.exports = { createPromotion, getPromotionsByStallId, updatePromotion, deletePromotion };
+module.exports = {
+  getPromotionsByStallId,
+  getPromotionById,
+  createPromotion,
+  updatePromotion,
+  deletePromotion,
+};

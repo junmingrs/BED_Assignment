@@ -18,9 +18,9 @@ async function loginUser(e) {
                 password: passwordInput.value,
             }),
         });
-
+        
         const data = await response.json();
-
+        
         alert(data.message);
         if (!response.ok) {
             console.log("ERROR WHILE LOGIN: " + data.error);
