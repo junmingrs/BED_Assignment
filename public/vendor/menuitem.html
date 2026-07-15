@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu Item</title>
+
+  <link rel="stylesheet" href="../css/menuitem.css" />
+</head>
+
+<body>
+
+  <header class="board-header">
+    <div class="board-header__stamp">
+      <span class="board-header__eyebrow">Stall No. <span id="stallIdDisplay">—</span></span>
+      <h1 class="board-header__title">Your Menu Board</h1>
+    </div>
+    <button id="addItemBtn" class="btn btn--primary btn--add">
+      <span class="btn__plus">+</span> Add a dish
+    </button>
+  </header>
+
+  <main class="board">
+
+    <section class="toolbar" aria-label="Search and filter dishes">
+      <div class="toolbar__search">
+        <input type="search" id="searchInput" placeholder="Search your dishes by name…" aria-label="Search dishes"
+          autocomplete="off" />
+      </div>
+      <div class="toolbar__filter">
+        <label for="categoryFilter" class="toolbar__filter-label">Category</label>
+        <select id="categoryFilter" aria-label="Filter by category">
+          <option value="">All dishes</option>
+        </select>
+      </div>
+      <div class="toolbar__count" id="itemCount" aria-live="polite"></div>
+    </section>
+
+    <section aria-label="Menu items">
+      <div id="loadingState" class="state-panel" hidden>
+        <div class="chit chit--skeleton"></div>
+        <div class="chit chit--skeleton"></div>
+        <div class="chit chit--skeleton"></div>
+      </div>
+
+      <div id="emptyState" class="state-panel state-panel--empty" hidden>
+        <p class="state-panel__title">No dishes on the board yet.</p>
+        <p class="state-panel__body">Add your first dish and it'll show up here for customers to see.</p>
+        <button class="btn btn--primary" id="emptyAddBtn">+ Add a dish</button>
+      </div>
+
+      <div id="errorState" class="state-panel state-panel--error" hidden>
+        <p class="state-panel__title">Couldn't load your menu.</p>
+        <p class="state-panel__body" id="errorMessage">Check your connection and try again.</p>
+        <button class="btn btn--ghost" id="retryBtn">Retry</button>
+      </div>
+
+      <div id="itemGrid" class="item-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- Add / Edit Modal -->
+  <div id="itemModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__header">
+        <h2 id="modalTitle" class="modal__title">Add a dish</h2>
+        <button class="modal__close" id="closeModalBtn" aria-label="Close">&times;</button>
+      </div>
+
+      <form id="itemForm" class="item-form" novalidate>
+        <input type="hidden" id="itemCodeOriginal" />
+        <input type="hidden" id="isEditMode" value="false" />
+
+        <div class="form-row">
+          <label for="itemCode">Item code</label>
+          <input type="text" id="itemCode" name="itemCode" placeholder="e.g. CH01" required maxlength="20" />
+          <span class="form-hint" id="itemCodeHint">A short code you'll use to identify this dish. Can't be changed once
+            saved.</span>
+        </div>
+
+        <div class="form-row">
+          <label for="itemDesc">Dish name</label>
+          <input type="text" id="itemDesc" name="itemDesc" placeholder="e.g. Chicken Rice" required maxlength="100" />
+        </div>
+
+        <div class="form-row form-row--split">
+          <div>
+            <label for="itemPrice">Price (SGD)</label>
+            <input type="number" id="itemPrice" name="itemPrice" placeholder="0.00" step="0.01" min="0" required />
+          </div>
+          <div>
+            <label for="itemCategory">Category</label>
+            <input type="text" id="itemCategory" name="itemCategory" placeholder="e.g. Rice, Noodles, Drinks"
+              list="categorySuggestions" required maxlength="50" />
+            <datalist id="categorySuggestions"></datalist>
+          </div>
+        </div>
+
+        <p class="form-error" id="formError" hidden></p>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" id="cancelFormBtn">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="saveItemBtn">Save dish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div id="deleteModal" class="modal-overlay" hidden>
+    <div class="modal modal--small" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="modal__header">
+        <h2 id="deleteModalTitle" class="modal__title">Remove this dish?</h2>
+        <button class="modal__close" id="closeDeleteModalBtn" aria-label="Close">&times;</button>
+      </div>
+      <p class="modal__body">
+        <strong id="deleteItemName"></strong> will be taken off your menu board. This can't be undone.
+      </p>
+      <div class="form-actions">
+        <button type="button" class="btn btn--ghost" id="cancelDeleteBtn">Cancel</button>
+        <button type="button" class="btn btn--danger" id="confirmDeleteBtn">Remove dish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="../js/menuitem.js"></script>
+</body>
+
+</html>
