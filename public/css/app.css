@@ -7,3 +7,7 @@ body {
 section {
     margin: 2em 0;
 }
+
+button {
+    cursor: pointer;
+}
