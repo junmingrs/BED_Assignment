@@ -2,6 +2,7 @@ import { getIdFromToken, statusStyle } from "./helper.js";
 import { LS_KEYS } from "./const.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 const orderTable = document.getElementById("order-table");
+const statusFilter = document.getElementById("statusFilter");
 
 async function getStallId(vendorId) {
     try {
@@ -39,9 +40,6 @@ async function getOrders() {
     }
 }
 
-const orders = await getOrders();
-loadOrders();
-
 function formatItems(items) {
     const itemDetails = items.map((item) => {
         return `${item.item_desc} x${item.quantity}`;
@@ -49,8 +47,9 @@ function formatItems(items) {
     return itemDetails.join(", ");
 }
 
-function loadOrders() {
+function loadOrders(status) {
     const orderRows = orders.map((order) => {
+        if (order.status != status && status != "All") return;
         const row = `
           <tr class="transition-colors hover:bg-slate-50">
             <td class="px-5 py-4 text-lg font-bold text-slate-900">${order.queue_number}</td>
@@ -96,6 +95,14 @@ function loadOrders() {
     });
 
     orderTable.innerHTML = orderRows.join("");
+
+    lucide.createIcons();
 }
 
-lucide.createIcons();
+const orders = await getOrders();
+loadOrders("All");
+
+statusFilter.addEventListener("change", () => {
+    const status = statusFilter.value;
+    loadOrders(status);
+});
