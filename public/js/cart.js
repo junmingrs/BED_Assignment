@@ -1,4 +1,5 @@
 import { LS_KEYS } from "./const.js";
+import { getCustomerIdFromToken } from "./helper.js";
 const cartContainer = document.getElementById("container");
 const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
@@ -167,12 +168,6 @@ async function renderCartItems() {
     cartTotal.textContent = "$" + totalAmount.toFixed(2);
 }
 
-function getCustomerIdFromToken(token) {
-    // splits the token back to header, payload, signature and decodes it back from base64
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.id;
-}
-
 async function checkout() {
     const customerId = getCustomerIdFromToken(token);
     try {
@@ -217,7 +212,6 @@ function deleteItem(stallId, itemCode) {
 }
 
 function setEcoOption(stallId, checked) {
-    console.log("changed: ", checked);
     cartMap[stallId].isEco = checked;
 }
 

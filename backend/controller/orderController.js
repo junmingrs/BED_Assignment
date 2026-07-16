@@ -11,6 +11,18 @@ async function getOrderById(req, res) {
     }
 }
 
+async function getOrdersByCustomer(req, res) {
+    const { customerId } = req.params;
+    const { status } = req.query;
+    try {
+        const orders = await orderModel.getOrdersByCustomer(customerId, status);
+        return res.status(200).json(orders);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 async function getOrderByStallId(req, res) {
     const { stallId } = req.params;
     try {
@@ -83,4 +95,5 @@ module.exports = {
     getOrderById,
     getOrderByStallId,
     updateOrderStatus,
+    getOrdersByCustomer,
 };
