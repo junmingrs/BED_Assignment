@@ -1,17 +1,5 @@
 const orderModel = require("../model/orderModel");
 
-// TODO: delete placeholder
-// {
-//     cart: [
-//         {
-//             stall_id: "",
-//             item_code: "M001",
-//             quantity: 3,
-//             is_eco: false, // cart is sorted by stalls, and under each one you can tick if you want eco friendly packaging (like shopee)
-//         },
-//     ],
-// };
-
 async function getOrderById(req, res) {
     const { orderId } = req.params;
     try {
@@ -57,9 +45,9 @@ async function checkoutCart(req, res) {
     try {
         const orderPromises = Object.keys(cartMap).map(async (stallId) => {
             const orderId = crypto.randomUUID();
-            const items = cartMap[stallId]; // []
+            const items = cartMap[stallId].items; // []
             const total = await orderModel.getTotalAmount(stallId, items);
-            const isEco = items[0]?.is_eco || false;
+            const isEco = cartMap[stallId].isEco || false;
 
             await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
 

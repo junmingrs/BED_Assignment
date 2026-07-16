@@ -5,7 +5,7 @@ const addCartBtn = document.querySelector(".addToCartBtn");
 
 function ifItemInCart(cart, item) {
     if (cart[item.stallId]) {
-        if (cart[item.stallId].find((i) => i.itemCode == item.itemCode))
+        if (cart[item.stallId].items.find((i) => i.itemCode == item.itemCode))
             return true;
     }
     return false;
@@ -29,8 +29,8 @@ async function addToCart() {
         return;
     }
 
-    if (cart[item.stallId]) cart[item.stallId].push(item);
-    else cart[item.stallId] = [item];
+    if (cart[item.stallId]) cart[item.stallId].items.push(item);
+    else cart[item.stallId] = { items: [item], isEco: false };
     localStorage.setItem(LS_KEYS.cart, JSON.stringify(cart));
 
     alert("Added to cart!");

@@ -8,13 +8,6 @@ const main = document.getElementsByTagName("main");
 const token = localStorage.getItem(LS_KEYS.authToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
 
-// const cartMap = cart.reduce((map, item) => {
-//     const stallId = item.stallId;
-//     if (!map[stallId]) map[stallId] = [];
-//     map[stallId].push(item);
-//     return map;
-// }, {});
-
 async function getItemById(stallId, itemCode) {
     try {
         const response = await fetch(
@@ -93,8 +86,9 @@ async function renderCartItems() {
     let totalAmount = 0;
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
+            const stallItems = cartMap[stallId].items;
             const itemCards = await Promise.all(
-                cartMap[stallId].map(async (item) => {
+                stallItems.map(async (item) => {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
                     totalAmount += menuItem.item_price * item.quantity;
 
@@ -135,10 +129,28 @@ async function renderCartItems() {
             );
 
             // TODO: get stall name by id
+
             return `
             <section class="space-y-4">
                 <h2 class="text-2xl font-semibold">Stall Name (TODO)</h2>
                 ${itemCards.join("")}
+                <div class="mt-2">
+                    <label class="flex cursor-pointer items-center gap-3">
+                        <input
+                            type="checkbox"
+                            class="eco-checkbox size-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black"
+                            data-stall-id="${stallId}"
+                        />
+                        <div>
+                            <p class="text-sm font-medium leading-none">
+                                Eco-friendly packaging
+                            </p>
+                            <p class="mt-1 text-xs text-gray-500">
+                                Use paper containers and reduce plastic where possible.
+                            </p>
+                        </div>
+                    </label>
+                </div>
             </section>
         `;
         }),
@@ -195,13 +207,18 @@ async function checkout() {
 }
 
 function changeQuality(stallId, itemCode, amount) {
-    const item = cartMap[stallId].find((item) => item.itemCode == itemCode);
+    const item = cartMap[stallId].items.find((item) => item.itemCode == itemCode);
     // min is 1, because if it's 0 then they should delete it
     item.quantity = Math.max(item.quantity + amount, 1);
 }
 
 function deleteItem(stallId, itemCode) {
-    cartMap = cartMap[stallId].filter((item) => item.itemCode != itemCode);
+    cartMap = cartMap[stallId].items.filter((item) => item.itemCode != itemCode);
+}
+
+function setEcoOption(stallId, checked) {
+    console.log("changed: ", checked);
+    cartMap[stallId].isEco = checked;
 }
 
 checkoutBtn.addEventListener("click", checkout);
@@ -223,6 +240,14 @@ cartContainer.addEventListener("click", async (e) => {
     } else if (button.classList.contains("delete")) {
         deleteItem(stallId, itemCode);
     }
+
     localStorage.setItem(LS_KEYS.cart, JSON.stringify(cartMap));
     await renderCartItems();
+});
+
+cartContainer.addEventListener("change", (e) => {
+    const checkbox = e.target.closest('input[type="checkbox"]');
+    if (!checkbox) return;
+
+    setEcoOption(checkbox.dataset.stallId, checkbox.checked);
 });
