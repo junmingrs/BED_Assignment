@@ -67,6 +67,25 @@ app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsBySt
 app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
 app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
 
+// app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
+// app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
+// app.get(
+//     "/stalls/:stallId/orders",
+//     authorise("Customer", "Vendor"),
+//     orderController.getOrderByStallId,
+// );
+app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls);
+app.get(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.getStallInfo,
+);
+// PUT /stalls/:stallId - update stall info
+app.put(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.updateStall
+);
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

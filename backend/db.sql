@@ -122,6 +122,7 @@ CREATE TABLE Complaint
     status VARCHAR(20) DEFAULT 'Open' CHECK (status IN ('Open', 'Investigating', 'Resolved', 'Closed')),
     created_at DATETIME DEFAULT GETDATE()
 );
+GO
 
 CREATE TABLE Promotion
 (
