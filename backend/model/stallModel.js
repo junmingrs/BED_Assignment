@@ -5,9 +5,7 @@ const { poolPromise } = require("../db");
 const getStallInfo = async (stallId) => {
     const pool = await poolPromise;
 
-    const stallResult = await pool.request()
-        .input("stallId", stallId)
-        .query(`
+    const stallResult = await pool.request().input("stallId", stallId).query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -33,9 +31,7 @@ const updateStall = async (stallId, accountId, updateData) => {
     const pool = await poolPromise;
 
     // Check if stall exists and belongs to this vendor
-    const stallCheck = await pool.request()
-        .input("stallId", stallId)
-        .query(`
+    const stallCheck = await pool.request().input("stallId", stallId).query(`
             SELECT s.stall_id, v.account_id
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
@@ -75,9 +71,7 @@ const updateStall = async (stallId, accountId, updateData) => {
     await request.query(updateQuery);
 
     // Return updated stall
-    const result = await pool.request()
-        .input("stallId", stallId)
-        .query(`
+    const result = await pool.request().input("stallId", stallId).query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -97,8 +91,7 @@ const updateStall = async (stallId, accountId, updateData) => {
 const getAllStalls = async () => {
     const pool = await poolPromise;
 
-    const result = await pool.request()
-        .query(`
+    const result = await pool.request().query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -110,9 +103,28 @@ const getAllStalls = async () => {
         `);
 
     return result.recordset;
-}
+};
+
+const getStallIdByVendorId = async (vendorId) => {
+    const pool = await poolPromise;
+
+    const stallResult = await pool.request().input("vendorId", vendorId).query(`
+            SELECT
+                s.stall_id
+            FROM Stall s
+            WHERE s.vendor_id = @vendorId
+        `);
+
+    if (stallResult.recordset.length === 0) {
+        throw new Error("Stall not found");
+    }
+
+    return stallResult.recordset[0];
+};
+
 module.exports = {
     getStallInfo,
     updateStall,
     getAllStalls,
+    getStallIdByVendorId,
 };

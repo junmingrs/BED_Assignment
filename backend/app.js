@@ -14,7 +14,6 @@ const promotionController = require("./controller/promotionController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
-
 // TODO: Import Validations
 
 // Create Express app
@@ -66,30 +65,37 @@ app.get(
     authorise("Vendor", "Operator"),
     stallController.getStallInfo,
 );
-
-app.post("/promotion", authorise("Vendor"), promotionController.createPromotion);
-app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsByStallId);
-app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
-app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
-
-// app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
-// app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
-// app.get(
-//     "/stalls/:stallId/orders",
-//     authorise("Customer", "Vendor"),
-//     orderController.getOrderByStallId,
-// );
-app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls);
 app.get(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.getStallInfo,
+    "/stalls",
+    authorise("Vendor", "Customer"),
+    stallController.getAllStalls,
 );
-// PUT /stalls/:stallId - update stall info
 app.put(
     "/stalls/:stallId",
     authorise("Vendor", "Operator"),
-    stallController.updateStall
+    stallController.updateStall,
+);
+app.get(
+    "/vendors/:vendorId/stall",
+    authorise("Vendor"),
+    stallController.getStallIdByVendorId,
+);
+
+app.post(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.createPromotion,
+);
+app.get(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.getPromotionsByStallId,
+);
+app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
+app.delete(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.deletePromotion,
 );
 // Start server
 app.listen(port, () => {

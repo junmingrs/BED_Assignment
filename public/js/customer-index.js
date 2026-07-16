@@ -1,4 +1,4 @@
-import { getCustomerIdFromToken, statusStyle } from "./helper.js";
+import { getIdFromToken, statusStyle } from "./helper.js";
 import { LS_KEYS } from "./const.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 
@@ -7,7 +7,7 @@ const orders = await getOrders();
 loadOrders();
 
 async function getOrders() {
-    const customerId = getCustomerIdFromToken(token);
+    const customerId = getIdFromToken(token);
     try {
         const params = new URLSearchParams();
         params.append("status", "Pending");
