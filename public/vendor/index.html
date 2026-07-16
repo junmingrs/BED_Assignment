@@ -20,146 +20,46 @@
         <h1 class="text-3xl">Dashboard</h1>
     </section>
 
-    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <!-- Pending -->
-        <section class="rounded-lg border border-slate-200 bg-slate-50">
+        <div class="rounded-lg border border-slate-200 bg-slate-50">
             <header class="flex items-center justify-between border-b px-5 py-4">
                 <h2 class="font-semibold text-amber-700">Pending</h2>
 
-                <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
-                    2
+                <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700" id="pending-count">
                 </span>
             </header>
 
-            <div class="divide-y divide-slate-200">
-                <article class="grid grid-cols-[30px_1fr_auto] gap-x-5 border-b border-slate-200 p-5">
-                    <div class="flex items-center justify-center">
-                        <span class="text-2xl font-bold text-slate-900"> 12 </span>
-                    </div>
-                    <div class="flex flex-col justify-between">
-                        <div class="space-y-1 text-sm text-slate-800">
-                            <div>Chicken Rice ×3</div>
-                            <div>Fishball Soup ×2</div>
-                            <div>Barley ×1</div>
-                        </div>
-
-                        <div class="mt-4 text-xs text-slate-500">
-                            Created at
-                            <span class="font-medium">16 Jul 2026, 11:42 AM</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-end justify-between">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="leaf" class="h-4 w-4 text-emerald-600"></i>
-
-                            <span class="text-lg font-semibold"> $8.50 </span>
-                        </div>
-
-                        <button
-                            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100">
-                            Start
-                        </button>
-                    </div>
-                </article>
-            </div>
-        </section>
+            <div id="pending-container" class="divide-y divide-slate-200"></div>
+        </div>
 
         <!-- Preparing -->
-        <section class="rounded-lg border border-slate-200 bg-slate-50">
+        <div class="rounded-lg border border-slate-200 bg-slate-50">
             <header class="flex items-center justify-between border-b px-5 py-4">
                 <h2 class="font-semibold text-blue-700">Preparing</h2>
 
-                <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
-                    1
-                </span>
+                <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+                    id="preparing-count"></span>
             </header>
 
-            <div class="divide-y divide-slate-200">
-                <article class="grid grid-cols-[30px_1fr_auto] gap-x-5 border-b border-slate-200 p-5">
-                    <div class="flex items-center justify-center">
-                        <span class="text-2xl font-bold text-slate-900">10</span>
-                    </div>
-
-                    <div class="flex flex-col justify-between">
-                        <div class="space-y-1 text-sm text-slate-800">
-                            <div>Wanton Mee ×1</div>
-                            <div>Fishball Soup ×1</div>
-                            <div>Barley ×1</div>
-                        </div>
-
-                        <div class="mt-4 flex items-center gap-4 text-xs text-slate-500">
-                            <span>
-                                Created at
-                                <span class="font-medium">16 Jul 2026, 11:45 AM</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-end justify-between">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="leaf" class="h-4 w-4 text-emerald-600"></i>
-                            <span class="text-lg font-semibold"> $8.50 </span>
-                        </div>
-
-                        <button
-                            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100">
-                            Ready
-                        </button>
-                    </div>
-                </article>
-            </div>
-        </section>
+            <div class="divide-y divide-slate-200" id="preparing-container"></div>
+        </div>
 
         <!-- Ready -->
-        <section class="rounded-lg border border-slate-200 bg-slate-50">
+        <div class="rounded-lg border border-slate-200 bg-slate-50">
             <header class="flex items-center justify-between border-b px-5 py-4">
                 <h2 class="font-semibold text-emerald-700">Ready</h2>
 
-                <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">
-                    1
-                </span>
+                <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700"
+                    id="ready-count"></span>
             </header>
 
-            <div class="divide-y divide-slate-200">
-                <article class="grid grid-cols-[30px_1fr_auto] gap-x-5 border-b border-slate-200 p-5">
-                    <div class="flex items-center justify-center">
-                        <span class="text-2xl font-bold text-slate-900">8</span>
-                    </div>
+            <div class="divide-y divide-slate-200" id="ready-container"></div>
+        </div>
+    </div>
 
-                    <div class="flex flex-col justify-between">
-                        <div class="space-y-1 text-sm text-slate-800">
-                            <div>Chicken Rice ×2</div>
-                            <div>Fishball Soup ×1</div>
-                            <div>Barley ×1</div>
-                        </div>
-
-                        <div class="mt-4 flex items-center gap-4 text-xs text-slate-500">
-                            <span>
-                                Created at
-                                <span class="font-medium">16 Jul 2026, 11:38 AM</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-end justify-between">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="leaf" class="h-4 w-4 text-emerald-600"></i>
-                            <span class="text-lg font-semibold"> $8.50 </span>
-                        </div>
-
-                        <button
-                            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100">
-                            Complete
-                        </button>
-                    </div>
-                </article>
-            </div>
-        </section>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module" src="/js/vendor-index.js"></script>
 </body>
-
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>
-    lucide.createIcons();
-</script>
 
 </html>

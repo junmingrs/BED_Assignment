@@ -25,3 +25,51 @@ export function statusStyle(status) {
             return "bg-gray-100 text-gray-700";
     }
 }
+
+export function formatDate(date) {
+    return new Date(date).toLocaleString("en-SG", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+    });
+}
+
+// FOR VENDOR ORDER AND VENDOR INDEX PAGES
+async function getStallId(vendorId, token) {
+    try {
+        const response = await fetch(`/vendors/${vendorId}/stall`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return await response.json();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+export async function getOrders(token) {
+    const vendorId = getIdFromToken(token);
+    const stallId = await getStallId(vendorId, token);
+
+    try {
+        const response = await fetch(`/stalls/${stallId}/orders`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const orders = await response.json();
+        return orders;
+    } catch (err) {
+        console.error(err);
+    }
+}

@@ -1,44 +1,8 @@
-import { getIdFromToken, statusStyle } from "./helper.js";
+import { getOrders, statusStyle } from "./helper.js";
 import { LS_KEYS } from "./const.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 const orderTable = document.getElementById("order-table");
 const statusFilter = document.getElementById("statusFilter");
-
-async function getStallId(vendorId) {
-    try {
-        const response = await fetch(`/vendors/${vendorId}/stall`, {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        return await response.json();
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-async function getOrders() {
-    const vendorId = getIdFromToken(token);
-    const stallId = await getStallId(vendorId);
-
-    try {
-        const response = await fetch(`/stalls/${stallId}/orders`, {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        const orders = await response.json();
-        return orders;
-    } catch (err) {
-        console.error(err);
-    }
-}
 
 function formatItems(items) {
     const itemDetails = items.map((item) => {
@@ -99,7 +63,7 @@ function loadOrders(status) {
     lucide.createIcons();
 }
 
-const orders = await getOrders();
+const orders = await getOrders(token);
 loadOrders("All");
 
 statusFilter.addEventListener("change", () => {
