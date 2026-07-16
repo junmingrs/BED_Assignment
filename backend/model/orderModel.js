@@ -45,15 +45,28 @@ async function getOrderById(orderId) {
     return order;
 }
 
-async function getOrdersByCustomer(customerId, status) {
-    const query = `SELECT * FROM Orders WHERE customer_id= @id AND status=@status`;
+async function getOrdersByCustomer(customerId, statuses = []) {
     const pool = await poolPromise;
-    const result = await pool
-        .request()
-        .input("id", customerId)
-        .input("status", status)
-        .query(query);
+    const request = pool.request().input("customerId", customerId);
+    let query = `
+        SELECT *
+        FROM Orders
+        WHERE customer_id = @customerId
+    `;
 
+    if (statuses.length > 0) {
+        const params = statuses.map((_, index) => {
+            const paramName = `status${index}`;
+            request.input(paramName, statuses[index]);
+            return `@${paramName}`;
+        });
+
+        query += ` AND status IN (${params.join(", ")})`;
+    }
+
+    query += " ORDER BY order_date DESC;";
+
+    const result = await request.query(query);
     if (result.recordset.length === 0) return null;
 
     const orders = result.recordset;

@@ -13,9 +13,14 @@ async function getOrderById(req, res) {
 
 async function getOrdersByCustomer(req, res) {
     const { customerId } = req.params;
-    const { status } = req.query;
+    const statuses = Array.isArray(req.query.status)
+        ? req.query.status
+        : req.query.status
+            ? [req.query.status]
+            : [];
+
     try {
-        const orders = await orderModel.getOrdersByCustomer(customerId, status);
+        const orders = await orderModel.getOrdersByCustomer(customerId, statuses);
         return res.status(200).json(orders);
     } catch (err) {
         console.error(err);

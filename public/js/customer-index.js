@@ -9,17 +9,16 @@ loadOrders();
 async function getOrders() {
     const customerId = getCustomerIdFromToken(token);
     try {
-        // TODO: make this work for multiple status
-        const response = await fetch(
-            `/customer/${customerId}/orders?status=Pending`,
-            {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+        const params = new URLSearchParams();
+        params.append("status", "Pending");
+        params.append("status", "Preparing");
+        const response = await fetch(`/customer/${customerId}/orders?${params}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
             },
-        );
+        });
 
         const orders = await response.json();
         return orders;
