@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stall</title>
+
+    <link rel="stylesheet" href="../css/output.css" />
+  </head>
+
+  <body>
+    <nav class="flex justify-between">
+      <div class="flex gap-5">
+        <a href="/customer" class="text-xl">Home</a>
+        <a href="/customer/hawkers.html" class="text-xl">Browse</a>
+      </div>
+      <div class="flex gap-5">
+        <a href="/customer/cart.html" class="text-xl">Cart</a>
+        <a href="/customer/profile.html" class="text-xl">Profile</a>
+      </div>
+    </nav>
+
+    <section>
+      <h1 class="text-3xl">Stall 1</h1>
+      <p>details</p>
+    </section>
+
+    <!-- PLACEHOLDER, TO UPDATE THE CSS. NOTE DON'T REMOVE THE LOGIC FOR THE ADD TO CART THOUGH-->
+    <section class="grid grid-cols-3 gap-5">
+      <div
+        class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center"
+      >
+        Pizza
+        <button class="addToCartBtn font-bold">Add to Cart</button>
+      </div>
+      <div
+        class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center"
+      >
+        Matcha
+      </div>
+      <div
+        class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center"
+      >
+        Sushi
+      </div>
+    </section>
+    <script type="module" src="/js/stall.js"></script>
+  </body>
+</html>

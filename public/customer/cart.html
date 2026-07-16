@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stall</title>
+
+    <link rel="stylesheet" href="../css/output.css" />
+</head>
+
+<body>
+    <nav class="flex justify-between">
+        <div class="flex gap-5">
+            <a href="/customer" class="text-xl">Home</a>
+            <a href="/customer/hawkers.html" class="text-xl">Browse</a>
+        </div>
+        <div class="flex gap-5">
+            <a href="/customer/cart.html" class="text-xl">Cart</a>
+            <a href="/customer/profile.html" class="text-xl">Profile</a>
+        </div>
+    </nav>
+
+    <main class="mx-auto max-w-5xl space-y-6 p-8 pb-32">
+        <h1 class="text-3xl font-bold">Cart</h1>
+        <section id="container" class="grid gap-5"></section>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 border-t bg-white/95 backdrop-blur">
+        <div class="mx-auto flex max-w-5xl items-center justify-between p-5">
+            <div>
+                <p class="text-sm text-gray-500">Total</p>
+                <p id="cart-total" class="text-2xl font-bold">$0.00</p>
+            </div>
+
+            <div class="flex gap-4">
+                <!-- FOR TESTING -->
+                <button id="checkout-btn"
+                    class="rounded-lg bg-black px-8 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50">
+                    Checkout (success)
+                </button>
+                <button id="checkout-fail-btn"
+                    class="rounded-lg bg-red-400 px-8 py-3 font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
+                    Checkout (failure)
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="/js/cart.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

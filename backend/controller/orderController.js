@@ -1,17 +1,5 @@
 const orderModel = require("../model/orderModel");
 
-// TODO: delete placeholder
-// {
-//     cart: [
-//         {
-//             stall_id: "",
-//             item_code: "M001",
-//             quantity: 3,
-//             is_eco: false, // cart is sorted by stalls, and under each one you can tick if you want eco friendly packaging (like shopee)
-//         },
-//     ],
-// };
-
 async function getOrderById(req, res) {
     const { orderId } = req.params;
     try {
@@ -34,6 +22,22 @@ async function getOrderByStallId(req, res) {
     }
 }
 
+async function updateOrderStatus(req, res) {
+    const { orderId, status } = req.params;
+    try {
+        const updated = await orderModel.updateOrderStatus(orderId, status);
+        if (!updated) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        return res
+            .status(200)
+            .json({ message: "Order status updated successfully." });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 async function checkoutCart(req, res) {
     const { cart, customerId } = req.body;
     const cartMap = typeof cart == "string" ? JSON.parse(cart) : cart;
@@ -41,9 +45,9 @@ async function checkoutCart(req, res) {
     try {
         const orderPromises = Object.keys(cartMap).map(async (stallId) => {
             const orderId = crypto.randomUUID();
-            const items = cartMap[stallId]; // []
+            const items = cartMap[stallId].items; // []
             const total = await orderModel.getTotalAmount(stallId, items);
-            const isEco = items[0]?.is_eco || false;
+            const isEco = cartMap[stallId].isEco || false;
 
             await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
 
@@ -74,4 +78,9 @@ async function checkoutCart(req, res) {
     }
 }
 
-module.exports = { checkoutCart, getOrderById, getOrderByStallId };
+module.exports = {
+    checkoutCart,
+    getOrderById,
+    getOrderByStallId,
+    updateOrderStatus,
+};

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign In</title>
+    <title>Create Account</title>
     <link rel="stylesheet" href="css/styles.css" />
   </head>
 
@@ -19,15 +19,17 @@
             </div>
 
             <div class="stub-mid">
-              <h2 class="stub-headline">Welcome back<br />to the counter.</h2>
+              <h2 class="stub-headline">
+                Join the queue,<br />start ordering.
+              </h2>
               <p class="stub-copy">
-                Sign in to pick up where you left off — orders, history, and
-                your saved details.
+                Create a member account to place orders, track your history, and
+                skip the line next time.
               </p>
             </div>
 
             <div class="stub-foot">
-              <div class="stub-row"><span>Ticket</span><b>No. 01</b></div>
+              <div class="stub-row"><span>Ticket</span><b>No. 02</b></div>
               <div class="stub-row"><span>Lane</span><b>Member</b></div>
             </div>
           </div>
@@ -35,12 +37,26 @@
           <!-- Right: form -->
           <div class="ticket-form">
             <div class="form-head">
-              <span class="eyebrow">Sign in to your account</span>
-              <h1 class="form-title">Welcome back</h1>
+              <span class="eyebrow">Sign up to start ordering</span>
+              <h1 class="form-title">Create your account</h1>
               <p class="form-sub" id="formNote"></p>
             </div>
 
-            <form id="loginForm" novalidate>
+            <form id="registerForm">
+              <div class="field" id="nameField">
+                <label for="name">Name</label>
+                <div class="field-input">
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Full name"
+                    autocomplete="name"
+                  />
+                </div>
+                <span class="field-error" id="nameError"></span>
+              </div>
+
               <div class="field" id="emailField">
                 <label for="email">Email</label>
                 <div class="field-input">
@@ -62,18 +78,39 @@
                     type="password"
                     id="password"
                     name="password"
-                    placeholder="••••••••"
-                    autocomplete="current-password"
+                    placeholder="At least 8 characters, 1 number and 1 special character"
+                    autocomplete="new-password"
                   />
                 </div>
                 <span class="field-error" id="passwordError"></span>
               </div>
 
-              <button type="submit" class="btn" id="submitBtn">Sign in</button>
+              <div class="field" id="confirmField">
+                <label for="confirm">Confirm password</label>
+                <div class="field-input">
+                  <input
+                    type="password"
+                    id="confirm"
+                    name="confirm"
+                    placeholder="Retype password"
+                    autocomplete="new-password"
+                  />
+                </div>
+                <span class="field-error" id="confirmError"></span>
+              </div>
+
+              <button type="submit" class="btn" id="submitBtn">
+                Create account
+              </button>
             </form>
 
+            <div class="divider">or</div>
+            <a href="customers/index.html" class="btn-ghost"
+              >Continue as guest</a
+            >
+
             <p class="switch-line">
-              Don't have an account? <a href="register.html">Create one</a>
+              Already have an account? <a href="index.html">Sign in</a>
             </p>
           </div>
         </div>
@@ -84,6 +121,6 @@
       </div>
     </div>
 
-    <script type="module" src="js/login.js"></script>
+    <script type="module" src="js/register.js"></script>
   </body>
 </html>

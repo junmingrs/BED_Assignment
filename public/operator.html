@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Login</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="screen screen--staff">
+    <div class="stage">
+      <div class="staff-card">
+
+        <div class="staff-mark">
+          <div class="mark-glyph">H</div>
+          <div class="mark-word">Hawker Ups</div>
+        </div>
+
+        <div class="form-head">
+          <span class="eyebrow">Operator accounts only</span>
+          <h1 class="form-title">Staff sign in</h1>
+          <p class="form-sub" id="formNote"></p>
+        </div>
+
+        <form id="operatorForm" novalidate>
+          <div class="field" id="emailField">
+            <label for="email">Email</label>
+            <div class="field-input">
+              <input type="email" id="email" name="email" placeholder="operator@example.com" autocomplete="email">
+            </div>
+            <span class="field-error" id="emailError"></span>
+          </div>
+
+          <div class="field" id="passwordField">
+            <label for="password">Password</label>
+            <div class="field-input">
+              <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <span class="field-error" id="passwordError"></span>
+          </div>
+
+          <button type="submit" class="btn" id="submitBtn">Sign in as staff</button>
+        </form>
+
+        <p class="switch-line"><a href="index.html">← Back to customer sign-in</a></p>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/jwt-utils.js"></script>
+  <script src="js/operatorLogin.js"></script>
+</body>
+</html>
