@@ -1,5 +1,5 @@
 const sql = require("mssql");
-const { poolPromise } = require("../db");
+const { poolPromise } = require("../dbConfig");
 
 async function getPromotionsByStallId(stallId) {
   const query = "SELECT * FROM Promotion WHERE stall_id = @stall_id";
