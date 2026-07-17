@@ -1,38 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<title>Rental Agreement Details</title>
-<link rel="stylesheet" href="/css/rentalAgreement.css" />
+    <meta charset="UTF-8" />
+    <title>Rental Agreement Details</title>
+    <link rel="stylesheet" href="../css/output.css" />
+    <link rel="stylesheet" href="/css/rentalAgreement.css" />
 </head>
+
 <body>
+    <nav class="flex gap-8">
+        <a href="/operator" class="text-xl">Home</a>
+        <a href="/operator/rentalAgreement.html" class="text-xl">Rental Agreement</a>
+        <a href="/operator/hawkers.html" class="text-xl">Hawker Centres</a>
+    </nav>
 
-<nav>
-  <a href="index.html">Home</a>
-  <a href="rentalAgreements.html">Rental Agreements</a>
-  <a href="Hawkers.html">Hawker Centres</a>
-</nav>
+    <section>
+        <div class="card" id="detailsCard" style="display: none">
+            <div class="card-header">
+                <h1 id="stallLabel">Stall</h1>
+                <span class="status" id="statusBadge"></span>
+            </div>
+            <table>
+                <tr>
+                    <td class="label">Start date</td>
+                    <td class="value" id="startDate"></td>
+                </tr>
+                <tr>
+                    <td class="label">End date</td>
+                    <td class="value" id="endDate"></td>
+                </tr>
+                <tr>
+                    <td class="label">Rental fee</td>
+                    <td class="value" id="rentalFee"></td>
+                </tr>
+                <tr>
+                    <td class="label">Operator ID</td>
+                    <td class="value" id="operatorId"></td>
+                </tr>
+            </table>
+            <div class="actions">
+                <button onclick="window.location.href = 'rentalAgreement.html'">
+                    Back to table
+                </button>
+            </div>
+        </div>
+        <p id="message"></p>
+    </section>
 
-<main>
-  <div class="card" id="detailsCard" style="display:none;">
-    <div class="card-header">
-      <h1 id="stallLabel">Stall</h1>
-      <span class="status" id="statusBadge"></span>
-    </div>
-    <table>
-      <tr><td class="label">Start date</td><td class="value" id="startDate"></td></tr>
-      <tr><td class="label">End date</td><td class="value" id="endDate"></td></tr>
-      <tr><td class="label">Rental fee</td><td class="value" id="rentalFee"></td></tr>
-      <tr><td class="label">Operator ID</td><td class="value" id="operatorId"></td></tr>
-    </table>
-    <div class="actions">
-      <button onclick="window.location.href='rentalAgreements.html'">Back to table</button>
-    </div>
-  </div>
-  <p id="message"></p>
-</main>
-
-<script type="module" src="../js/rentalagreementdetails.js"></script>
-
+    <script type="module" src="../js/rentalagreementdetails.js"></script>
 </body>
+
 </html>

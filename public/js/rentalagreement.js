@@ -8,75 +8,77 @@ const params = new URLSearchParams(window.location.search);
 const initialStallId = params.get("stallId");
 
 function authHeaders() {
-    console.log(LS_KEYS.authToken)
-  const token = localStorage.getItem(LS_KEYS.authToken);
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
+    const token = localStorage.getItem(LS_KEYS.authToken);
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
 }
 
 async function loadStalls() {
-  try {
-    const response = await fetch("/stalls", {
-      method: "GET",
-      headers: authHeaders(),
-    });
-    console.log(response)
-    const data = await response.json();
+    try {
+        const response = await fetch("/stalls", {
+            method: "GET",
+            headers: authHeaders(),
+        });
+        console.log(response);
+        const data = await response.json();
 
-    if (!response.ok) {
-      messageEl.textContent = data.error || "Failed to load stall list";
-      return;
+        if (!response.ok) {
+            messageEl.textContent = data.error || "Failed to load stall list";
+            return;
+        }
+
+        data.forEach((stall) => {
+            const option = document.createElement("option");
+            option.value = stall.stall_id;
+            option.textContent = stall.stall_name;
+            stallSelect.appendChild(option);
+        });
+
+        if (initialStallId) {
+            stallSelect.value = initialStallId;
+            loadAgreements(initialStallId);
+        }
+    } catch (err) {
+        console.error(err);
+        messageEl.textContent = "Something went wrong while loading stalls.";
     }
-
-    data.forEach((stall) => {
-      const option = document.createElement("option");
-      option.value = stall.stall_id;
-      option.textContent = stall.stall_name;
-      stallSelect.appendChild(option);
-    });
-
-    if (initialStallId) {
-      stallSelect.value = initialStallId;
-      loadAgreements(initialStallId);
-    }
-  } catch (err) {
-    console.error(err);
-    messageEl.textContent = "Something went wrong while loading stalls.";
-  }
 }
 
 async function loadAgreements(stallId) {
-  tableBody.innerHTML = "";
-  messageEl.textContent = "";
+    tableBody.innerHTML = "";
+    messageEl.textContent = "";
 
-  if (!stallId) {
-    messageEl.textContent = "Select a stall to view its rental agreements.";
-    return;
-  }
-
-  try {
-    const response = await fetch(`/rentalagreement?stallId=${encodeURIComponent(stallId)}`, {
-      method: "GET",
-      headers: authHeaders(),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      messageEl.textContent = data.error || "Failed to load rental agreements";
-      return;
+    if (!stallId) {
+        messageEl.textContent = "Select a stall to view its rental agreements.";
+        return;
     }
 
-    if (data.length === 0) {
-      messageEl.textContent = "No rental agreements found for this stall.";
-      return;
-    }
+    try {
+        const response = await fetch(
+            `/rentalagreement?stallId=${encodeURIComponent(stallId)}`,
+            {
+                method: "GET",
+                headers: authHeaders(),
+            },
+        );
 
-    tableBody.innerHTML = data
-      .map(
-        (agreement) => `
+        const data = await response.json();
+
+        if (!response.ok) {
+            messageEl.textContent = data.error || "Failed to load rental agreements";
+            return;
+        }
+
+        if (data.length === 0) {
+            messageEl.textContent = "No rental agreements found for this stall.";
+            return;
+        }
+
+        tableBody.innerHTML = data
+            .map(
+                (agreement) => `
         <tr>
           <td>${agreement.stall_id}</td>
           <td>${agreement.start_date?.split("T")[0] ?? ""}</td>
@@ -85,13 +87,14 @@ async function loadAgreements(stallId) {
           <td><span class="status ${agreement.status}">${agreement.status}</span></td>
           <td><button class="view-btn" onclick="window.location.href='rentalAgreementDetails.html?id=${agreement.rental_agreement_id}'">View</button></td>
         </tr>
-      `
-      )
-      .join("");
-  } catch (err) {
-    console.error(err);
-    messageEl.textContent = "Something went wrong while loading rental agreements.";
-  }
+      `,
+            )
+            .join("");
+    } catch (err) {
+        console.error(err);
+        messageEl.textContent =
+            "Something went wrong while loading rental agreements.";
+    }
 }
 
 stallSelect.addEventListener("change", (e) => loadAgreements(e.target.value));

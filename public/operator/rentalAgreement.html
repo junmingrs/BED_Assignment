@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Rental Agreements</title>
+
+    <link rel="stylesheet" href="/css/rentalAgreement.css" />
+    <link rel="stylesheet" href="../css/output.css" />
+</head>
+
+<body>
+    <nav class="flex gap-8">
+        <a href="/operator" class="text-xl">Home</a>
+        <a href="/operator/rentalAgreement.html" class="text-xl">Rental Agreement</a>
+        <a href="/operator/hawkers.html" class="text-xl">Hawker Centres</a>
+    </nav>
+
+    <section>
+        <div class="header-row">
+            <h1 class="text-3xl">Rental Agreements</h1>
+            <select id="stallSelect">
+                <option value="">Select a stall...</option>
+            </select>
+        </div>
+    </section>
+    <section>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stall ID</th>
+                    <th>Start date</th>
+                    <th>End date</th>
+                    <th>Rental fee</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="agreementTableBody"></tbody>
+        </table>
+        <p id="message"></p>
+    </section>
+
+    <script type="module" src="../js/rentalagreement.js"></script>
+</body>
+
+</html>
