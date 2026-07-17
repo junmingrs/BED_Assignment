@@ -11,6 +11,7 @@ const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
 const stallController = require("./controller/stallController");
 const promotionController = require("./controller/promotionController");
+const rentalAgreementController = require("./controller/rentalAgreementController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
@@ -79,7 +80,8 @@ app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotio
 //     authorise("Customer", "Vendor"),
 //     orderController.getOrderByStallId,
 // );
-app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls);
+
+app.get("/stalls", authorise("Vendor", "Customer", "Operator"), stallController.getAllStalls);
 app.get(
     "/stalls/:stallId",
     authorise("Vendor", "Operator"),
@@ -91,6 +93,12 @@ app.put(
     authorise("Vendor", "Operator"),
     stallController.updateStall
 );
+
+app.get("/rentalagreement", authorise("Vendor", "Operator"), rentalAgreementController.getRentalAgreementsByStallId);
+app.get("/rentalagreement/:id", authorise("Vendor", "Operator"), rentalAgreementController.getRentalAgreementById);
+app.post("/rentalagreement", authorise("Vendor", "Operator"), rentalAgreementController.createRentalAgreement);
+app.put("/rentalagreement", authorise("Vendor", "Operator"), rentalAgreementController.updateRentalAgreement);
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
