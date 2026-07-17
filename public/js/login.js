@@ -23,6 +23,7 @@ async function loginUser(e) {
 
         if (!response.ok) {
             console.log("ERROR WHILE LOGIN: " + data.error);
+            alert(data.message);
             return;
         } else {
             switch (data.role) {
