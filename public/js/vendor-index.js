@@ -7,13 +7,28 @@ const readyContainer = document.getElementById("ready-container");
 const pendingCount = document.getElementById("pending-count");
 const preparingCount = document.getElementById("preparing-count");
 const readyCount = document.getElementById("ready-count");
-
 const token = localStorage.getItem(LS_KEYS.authToken);
 
-const orders = await getOrders(token);
-loadOrderSection("Pending", pendingContainer, pendingCount);
-loadOrderSection("Preparing", preparingContainer, preparingCount);
-loadOrderSection("Ready", readyContainer, readyCount);
+const sections = [
+    {
+        status: "Pending",
+        nextStatus: "Preparing",
+        container: pendingContainer,
+        count: pendingCount,
+    },
+    {
+        status: "Preparing",
+        nextStatus: "Ready",
+        container: preparingContainer,
+        count: preparingCount,
+    },
+    {
+        status: "Ready",
+        nextStatus: "Completed",
+        container: readyContainer,
+        count: readyCount,
+    },
+];
 
 function formatItems(items) {
     const itemDetails = items.map((item) => {
@@ -22,7 +37,7 @@ function formatItems(items) {
     return itemDetails.join("");
 }
 
-function loadOrderSection(status, container, countElement) {
+function loadOrderSection(orders, status, container, countElement) {
     const filtered = orders.filter((o) => o.status == status);
     const cards = filtered.map((order) => {
         return `
@@ -48,8 +63,9 @@ function loadOrderSection(status, container, countElement) {
                 </div>
 
                 <button
+                    data-order-id=${order.order_id}
                     class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100">
-                    Start
+                    Done
                 </button>
             </div>
         </article>
@@ -59,5 +75,40 @@ function loadOrderSection(status, container, countElement) {
     container.innerHTML = cards.join("");
     countElement.innerHTML = filtered.length;
 }
+
+async function updateStatus(orderId, status) {
+    try {
+        const response = await fetch(`/orders/${orderId}/${status}`, {
+            method: "PATCH",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return await response.json();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function loadSections() {
+    const orders = await getOrders(token);
+    sections.forEach((section) => {
+        loadOrderSection(orders, section.status, section.container, section.count);
+    });
+}
+
+await loadSections();
+
+sections.forEach((section) => {
+    section.container.addEventListener("click", async (e) => {
+        const button = e.target.closest("button");
+        if (!button) return;
+        const { orderId } = button.dataset;
+
+        await updateStatus(orderId, section.nextStatus);
+        await loadSections();
+    });
+});
 
 lucide.createIcons();
