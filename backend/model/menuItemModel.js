@@ -30,42 +30,46 @@ async function getMenuItemsByStallIdAndItemCode(stallId, itemCode) {
 // Create new menu item
 async function createMenuItem(menuItem) {
     const query =
-        "INSERT INTO MenuItem VALUES (@stallId, @itemCode, @itemDesc, @itemPrice, @itemCategory);";
+        "INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category)  OUTPUT inserted.item_code, inserted.stall_id, inserted.item_desc, inserted.item_price, inserted.item_category VALUES (@stallId, NEWID(), @itemDesc, @itemPrice, @itemCategory);";
     const pool = await poolPromise;
     const result = await pool.request()
-        .input("stallId", menuItem.stallId)
-        .input("itemCode", menuItem.itemCode)
-        .input("itemDesc", menuItem.itemDesc)
-        .input("itemPrice", menuItem.itemPrice)
-        .input("itemCategory", menuItem.itemCategory)
+        .input("stallId", menuItem.stall_id)
+        .input("itemDesc", menuItem.item_desc)
+        .input("itemPrice", menuItem.item_price)
+        .input("itemCategory", menuItem.item_category)
         .query(query);
 
-    const newMenuItemId = { stallId: result.recordset[0].stallId, itemCode: result.recordset[0].itemCode };
-    return await getMenuItemsByStallIdAndItemCode(newMenuItemId.stallId, newMenuItemId.itemCode);
+    return result.recordset[0];
 }
 
 // Update menu item
 async function updateMenuItem(menuItemData) {
     const query = "UPDATE MenuItem SET item_desc = COALESCE(@itemDesc, item_desc), item_price = COALESCE(@itemPrice, item_price), item_category = COALESCE(@itemCategory, item_category) WHERE stall_id = @stallId AND item_code = @itemCode;";
     const pool = await poolPromise;
-    const result = await pool.request()
-        .input("stallId", menuItemData.stallId)
-        .input("itemCode", menuItemData.itemCode)
-        .input("itemDesc", menuItemData.itemDesc)
-        .input("itemPrice", menuItemData.itemPrice)
-        .input("itemCategory", menuItemData.itemCategory)
+    await pool.request()
+        .input("stallId", menuItemData.stall_id)
+        .input("itemCode", menuItemData.item_code)
+        .input("itemDesc", menuItemData.item_desc)
+        .input("itemPrice", menuItemData.item_price)
+        .input("itemCategory", menuItemData.item_category)
         .query(query);
 
-    return await getMenuItemsByStallIdAndItemCode(menuItemData.stallId, menuItemData.itemCode);
+    return await getMenuItemsByStallIdAndItemCode(menuItemData.stall_id, menuItemData.item_code);
 }
 
 // Delete menu item
 async function deleteMenuItem(stallId, itemCode) {
-    const deleteMenuItemCuisineQuery = "DELETE FROM MenuItemCuisine WHERE stall_id = @stallId AND item_code = @itemCode"
-    const query = "DELETE FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode";
-    const pool = await poolPromise;
-    await pool.request().input("stallId", stallId).input("itemCode", itemCode).query(deleteMenuItemCuisineQuery);
-    await pool.request().input("stallId", stallId).input("itemCode", itemCode).query(query);
+    try {
+        const deleteMenuItemCuisineQuery = "DELETE FROM MenuItemCuisine WHERE stall_id = @stallId AND item_code = @itemCode"
+        const query = "DELETE FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode";
+        const pool = await poolPromise;
+        await pool.request().input("stallId", stallId).input("itemCode", itemCode).query(deleteMenuItemCuisineQuery);
+        await pool.request().input("stallId", stallId).input("itemCode", itemCode).query(query);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
 }
 
 module.exports = {
