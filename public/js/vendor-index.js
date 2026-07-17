@@ -98,7 +98,24 @@ async function loadSections() {
     });
 }
 
+// main
 await loadSections();
+
+// web socket
+const socket = new WebSocket("ws://localhost:3000");
+socket.onopen = () => {
+    console.log("VENDOR: Connected to websocket");
+};
+
+socket.onmessage = async (event) => {
+    const msg = JSON.parse(event.data);
+    if (msg.type == "NEW_ORDER" || msg.type == "ORDER_UPDATED")
+        await loadSections();
+};
+
+socket.onclose = () => {
+    console.log("VENDOR: Websocket disconnected");
+};
 
 sections.forEach((section) => {
     section.container.addEventListener("click", async (e) => {
@@ -107,7 +124,6 @@ sections.forEach((section) => {
         const { orderId } = button.dataset;
 
         await updateStatus(orderId, section.nextStatus);
-        await loadSections();
     });
 });
 

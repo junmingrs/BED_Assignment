@@ -3,8 +3,21 @@ import { LS_KEYS } from "./const.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 
 const ordersContainer = document.getElementById("orders-container");
-const orders = await getOrders();
-loadOrders();
+await loadOrders();
+
+const socket = new WebSocket("ws://localhost:3000");
+socket.onopen = () => {
+    console.log("CUSTOMER: Connected to websocket");
+};
+
+socket.onmessage = async (event) => {
+    const msg = JSON.parse(event.data);
+    if (msg.type == "ORDER_UPDATED") await loadOrders();
+};
+
+socket.onclose = () => {
+    console.log("CUSTOMER: Websocket disconnected");
+};
 
 async function getOrders() {
     const customerId = getIdFromToken(token);
@@ -12,6 +25,7 @@ async function getOrders() {
         const params = new URLSearchParams();
         params.append("status", "Pending");
         params.append("status", "Preparing");
+        params.append("status", "Ready");
         const response = await fetch(`/customer/${customerId}/orders?${params}`, {
             method: "GET",
             headers: {
@@ -42,7 +56,8 @@ function loadItems(items) {
     return cards;
 }
 
-function loadOrders() {
+async function loadOrders() {
+    const orders = await getOrders();
     if (!orders || orders.length === 0) {
         ordersContainer.innerHTML = `
             <div class="flex items-center justify-center rounded-xl border border-dashed py-12">

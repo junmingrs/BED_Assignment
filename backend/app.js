@@ -2,6 +2,8 @@
 const path = require("path");
 const express = require("express");
 const sql = require("mssql");
+const http = require("http");
+const { initWebSocket, initWebServer } = require("./ws.js");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -19,6 +21,11 @@ const { validateRegister, validateLogin } = require("./middleware/validate");
 // Create Express app
 const app = express();
 const port = process.env.PORT || 3000;
+
+// create websocket
+const server = http.createServer(app);
+initWebServer(server);
+server.listen(3000);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies

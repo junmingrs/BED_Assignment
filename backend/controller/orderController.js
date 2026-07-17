@@ -1,4 +1,5 @@
 const orderModel = require("../model/orderModel");
+const { broadcast } = require("../ws");
 
 async function getOrderById(req, res) {
     const { orderId } = req.params;
@@ -46,6 +47,11 @@ async function updateOrderStatus(req, res) {
         if (!updated) {
             return res.status(404).json({ message: "Order not found" });
         }
+
+        broadcast({
+            type: "ORDER_UPDATED",
+        });
+
         return res
             .status(200)
             .json({ message: "Order status updated successfully." });
@@ -84,6 +90,11 @@ async function checkoutCart(req, res) {
             map[current.stallId] = current.orderId;
             return map;
         }, {});
+
+        // broadcast to web socket
+        broadcast({
+            type: "NEW_ORDER",
+        });
 
         return res.status(200).json({
             message: "Orders placed successfully. Food is now being prepared",
