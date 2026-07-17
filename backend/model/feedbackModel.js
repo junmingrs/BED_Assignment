@@ -50,7 +50,32 @@ const createFeedback = async (stallId, customerId, description) => {
     return result.recordset[0];
 };
 
+// DELETE /feedback/:feedbackId - delete feedback
+const deleteFeedback = async (feedbackId, customerId) => {
+    const pool = await poolPromise;
+
+    // Check if feedback exists and belongs to this customer
+    const checkResult = await pool.request()
+        .input("feedbackId", feedbackId)
+        .input("customerId", customerId)
+        .query(`
+            SELECT feedback_id FROM Feedback 
+            WHERE feedback_id = @feedbackId AND customer_id = @customerId
+        `);
+
+    if (checkResult.recordset.length === 0) {
+        throw new Error("Feedback not found or you are not authorized to delete it");
+    }
+
+    await pool.request()
+        .input("feedbackId", feedbackId)
+        .query("DELETE FROM Feedback WHERE feedback_id = @feedbackId");
+
+    return { message: "Feedback deleted successfully" };
+};
+
 module.exports = {
     getFeedbackByStallId,
-    createFeedback
+    createFeedback,
+    deleteFeedback
 };

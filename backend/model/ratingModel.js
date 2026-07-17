@@ -53,7 +53,32 @@ const createRating = async (stallId, customerId, rating, comment) => {
     return result.recordset[0];
 };
 
+// DELETE /ratings/:ratingId - delete a rating
+const deleteRating = async (ratingId, customerId) => {
+    const pool = await poolPromise;
+
+    // Check if rating exists and belongs to this customer
+    const checkResult = await pool.request()
+        .input("ratingId", ratingId)
+        .input("customerId", customerId)
+        .query(`
+            SELECT rating_id FROM Rating 
+            WHERE rating_id = @ratingId AND customer_id = @customerId
+        `);
+
+    if (checkResult.recordset.length === 0) {
+        throw new Error("Rating not found or you are not authorized to delete it");
+    }
+
+    await pool.request()
+        .input("ratingId", ratingId)
+        .query("DELETE FROM Rating WHERE rating_id = @ratingId");
+
+    return { message: "Rating deleted successfully" };
+};
+
 module.exports = {
     getRatingsByStallId,
-    createRating
+    createRating,
+    deleteRating
 };

@@ -46,7 +46,22 @@ const submitFeedback = async (req, res) => {
     }
 };
 
+// DELETE /feedback/:feedbackId - delete feedback
+const deleteFeedback = async (req, res) => {
+    try {
+        const { feedbackId } = req.params;
+        const customerId = req.user.id;
+
+        const result = await feedbackModel.deleteFeedback(feedbackId, customerId);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error in deleteFeedback:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getFeedback,
-    submitFeedback
+    submitFeedback,
+    deleteFeedback
 };

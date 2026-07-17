@@ -55,7 +55,22 @@ const submitComplaint = async (req, res) => {
     }
 };
 
+// DELETE /complaints/:complaintId - delete a complaint
+const deleteComplaint = async (req, res) => {
+    try {
+        const { complaintId } = req.params;
+        const customerId = req.user.id;
+
+        const result = await complaintModel.deleteComplaint(complaintId, customerId);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error in deleteComplaint:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getComplaints,
-    submitComplaint
+    submitComplaint,
+    deleteComplaint
 };

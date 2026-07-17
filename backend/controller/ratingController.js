@@ -57,7 +57,22 @@ const submitRating = async (req, res) => {
     }
 };
 
+// DELETE /ratings/:ratingId - delete a rating
+const deleteRating = async (req, res) => {
+    try {
+        const { ratingId } = req.params;
+        const customerId = req.user.id;
+
+        const result = await ratingModel.deleteRating(ratingId, customerId);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error in deleteRating:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getRatings,
-    submitRating
+    submitRating,
+    deleteRating
 };

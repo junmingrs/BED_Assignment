@@ -55,7 +55,32 @@ const createComplaint = async (stallId, customerId, subject, description) => {
     return result.recordset[0];
 };
 
+// DELETE /complaints/:complaintId - delete a complaint
+const deleteComplaint = async (complaintId, customerId) => {
+    const pool = await poolPromise;
+
+    // Check if complaint exists and belongs to this customer
+    const checkResult = await pool.request()
+        .input("complaintId", complaintId)
+        .input("customerId", customerId)
+        .query(`
+            SELECT complaint_id FROM Complaint 
+            WHERE complaint_id = @complaintId AND customer_id = @customerId
+        `);
+
+    if (checkResult.recordset.length === 0) {
+        throw new Error("Complaint not found or you are not authorized to delete it");
+    }
+
+    await pool.request()
+        .input("complaintId", complaintId)
+        .query("DELETE FROM Complaint WHERE complaint_id = @complaintId");
+
+    return { message: "Complaint deleted successfully" };
+};
+
 module.exports = {
     getComplaintsByStallId,
-    createComplaint
+    createComplaint,
+    deleteComplaint
 };

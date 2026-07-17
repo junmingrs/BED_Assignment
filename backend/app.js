@@ -103,6 +103,13 @@ app.post(
     authorise("Customer"),
     ratingController.submitRating
 );
+// DELETE /ratings/:ratingId - delete a rating
+app.delete(
+    "/ratings/:ratingId",
+    authorise("Customer"),
+    ratingController.deleteRating
+);
+
 // GET /stalls/:stallId/complaints - get complaints for a stall
 app.get(
     "/stalls/:stallId/complaints",
@@ -116,6 +123,12 @@ app.post(
     authorise("Customer"),
     complaintController.submitComplaint
 );
+// DELETE /complaints/:complaintId - delete a complaint
+app.delete(
+    "/complaints/:complaintId",
+    authorise("Customer"),
+    complaintController.deleteComplaint
+);
 // GET /stalls/:stallId/feedback - get feedbacks for a stall
 app.get(
     "/stalls/:stallId/feedback",
@@ -127,6 +140,12 @@ app.post(
     "/stalls/:stallId/feedback",
     authorise("Customer"),
     feedbackController.submitFeedback
+);
+// DELETE /feedback/:feedbackId - delete a feedback
+app.delete(
+    "/feedback/:feedbackId",
+    authorise("Customer"),
+    feedbackController.deleteFeedback
 );
 
 // Start server
