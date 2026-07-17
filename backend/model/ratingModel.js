@@ -1,19 +1,18 @@
 const { poolPromise } = require("../db");
 
-// GET /stalls/:stallId/complaints - get complaints for a stall
-const getComplaintsByStallId = async (stallId) => {
+// GET /stalls/:stallId/ratings - get ratings for a stall
+const getRatingsByStallId = async (stallId) => {
     const pool = await poolPromise;
 
     const result = await pool.request()
         .input("stallId", stallId)
         .query(`
             SELECT 
-                complaint_id,
-                subject,
-                description,
-                status,
+                rating_id,
+                rating,
+                comment,
                 created_at
-            FROM Complaint
+            FROM Rating
             WHERE stall_id = @stallId
             ORDER BY created_at DESC
         `);
@@ -21,18 +20,18 @@ const getComplaintsByStallId = async (stallId) => {
     return result.recordset;
 };
 
-// POST /stalls/:stallId/complaints - create a complaint
-const createComplaint = async (stallId, customerId, subject, description) => {
+// POST /stalls/:stallId/ratings - create a rating
+const createRating = async (stallId, customerId, rating, comment) => {
     const pool = await poolPromise;
 
     await pool.request()
         .input("stallId", stallId)
         .input("customerId", customerId)
-        .input("subject", subject)
-        .input("description", description)
+        .input("rating", rating)
+        .input("comment", comment || null)
         .query(`
-            INSERT INTO Complaint (stall_id, customer_id, subject, description, status)
-            VALUES (@stallId, @customerId, @subject, @description, 'Open')
+            INSERT INTO Rating (stall_id, customer_id, rating, comment)
+            VALUES (@stallId, @customerId, @rating, @comment)
         `);
 
     const result = await pool.request()
@@ -40,14 +39,13 @@ const createComplaint = async (stallId, customerId, subject, description) => {
         .input("customerId", customerId)
         .query(`
             SELECT TOP 1
-                complaint_id,
+                rating_id,
                 stall_id,
                 customer_id,
-                subject,
-                description,
-                status,
+                rating,
+                comment,
                 created_at
-            FROM Complaint
+            FROM Rating
             WHERE stall_id = @stallId AND customer_id = @customerId
             ORDER BY created_at DESC
         `);
@@ -56,6 +54,6 @@ const createComplaint = async (stallId, customerId, subject, description) => {
 };
 
 module.exports = {
-    getComplaintsByStallId,
-    createComplaint
+    getRatingsByStallId,
+    createRating
 };

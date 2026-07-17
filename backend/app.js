@@ -11,6 +11,8 @@ const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
 const stallController = require("./controller/stallController");
 const promotionController = require("./controller/promotionController");
+const ratingController = require("./controller/ratingController");
+const complaintController = require("./controller/complaintController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
@@ -86,6 +88,34 @@ app.put(
     authorise("Vendor", "Operator"),
     stallController.updateStall
 );
+
+// GET /stalls/:stallId/ratings - get ratings for a stall
+app.get(
+    "/stalls/:stallId/ratings",
+    authorise("Vendor", "Customer", "Operator"),
+    ratingController.getRatings
+);
+
+// POST /stalls/:stallId/ratings - submit a rating
+app.post(
+    "/stalls/:stallId/ratings",
+    authorise("Customer"),
+    ratingController.submitRating
+);
+// GET /stalls/:stallId/complaints - get complaints for a stall
+app.get(
+    "/stalls/:stallId/complaints",
+    authorise("Vendor", "Customer", "Operator"),
+    complaintController.getComplaints
+);
+
+// POST /stalls/:stallId/complaints - submit a complaint
+app.post(
+    "/stalls/:stallId/complaints",
+    authorise("Customer"),
+    complaintController.submitComplaint
+);
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

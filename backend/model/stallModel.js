@@ -36,7 +36,7 @@ const updateStall = async (stallId, accountId, updateData) => {
     const stallCheck = await pool.request()
         .input("stallId", stallId)
         .query(`
-            SELECT s.stall_id, v.account_id
+            SELECT s.stall_id, v.vendor_id
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
             WHERE s.stall_id = @stallId
@@ -86,7 +86,7 @@ const updateStall = async (stallId, accountId, updateData) => {
                 a.account_email
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
-            JOIN Account a ON v.account_id = a.account_id
+            JOIN Account a ON v.vendor_id = a.vendor_id
             WHERE s.stall_id = @stallId
         `);
 
