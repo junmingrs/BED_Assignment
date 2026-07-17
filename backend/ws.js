@@ -10,7 +10,6 @@ function initWebServer(server) {
 
 function broadcast(data) {
     if (!wss) return;
-    console.log("broadcasting..");
     wss.clients.forEach((client) => {
         client.send(JSON.stringify(data));
     });

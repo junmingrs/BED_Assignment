@@ -1,5 +1,11 @@
-import { getOrders, statusStyle } from "./helper.js";
+import {
+    getIdFromToken,
+    getOrders,
+    getStallId,
+    statusStyle,
+} from "./helper.js";
 import { LS_KEYS } from "./const.js";
+import { getSocket } from "./websocket.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 const orderTable = document.getElementById("order-table");
 const statusFilter = document.getElementById("statusFilter");
@@ -11,7 +17,8 @@ function formatItems(items) {
     return itemDetails.join(", ");
 }
 
-function loadOrders(status) {
+async function loadOrders(status) {
+    const orders = await getOrders(token);
     const orderRows = orders.map((order) => {
         if (order.status != status && status != "All") return;
         const row = `
@@ -63,8 +70,18 @@ function loadOrders(status) {
     lucide.createIcons();
 }
 
-const orders = await getOrders(token);
-loadOrders("All");
+const vendorId = await getIdFromToken(token);
+const stallId = await getStallId(vendorId, token);
+await loadOrders("All");
+
+// web socket
+const socket = getSocket();
+socket.addEventListener("message", async (event) => {
+    const msg = JSON.parse(event.data);
+    if (msg.type != "NEW_ORDER") return;
+    if (msg.stallId != stallId) return;
+    await loadOrders("All");
+});
 
 statusFilter.addEventListener("change", () => {
     const status = statusFilter.value;

@@ -1,5 +1,6 @@
-import { formatDate, getOrders } from "./helper.js";
+import { formatDate, getIdFromToken, getOrders, getStallId } from "./helper.js";
 import { LS_KEYS } from "./const.js";
+import { getSocket } from "./websocket.js";
 
 const pendingContainer = document.getElementById("pending-container");
 const preparingContainer = document.getElementById("preparing-container");
@@ -100,22 +101,17 @@ async function loadSections() {
 
 // main
 await loadSections();
+const vendorId = await getIdFromToken(token);
+const stallId = await getStallId(vendorId, token);
 
 // web socket
-const socket = new WebSocket("ws://localhost:3000");
-socket.onopen = () => {
-    console.log("VENDOR: Connected to websocket");
-};
-
-socket.onmessage = async (event) => {
+const socket = getSocket();
+socket.addEventListener("message", async (event) => {
     const msg = JSON.parse(event.data);
-    if (msg.type == "NEW_ORDER" || msg.type == "ORDER_UPDATED")
-        await loadSections();
-};
-
-socket.onclose = () => {
-    console.log("VENDOR: Websocket disconnected");
-};
+    if (msg.type != "NEW_ORDER") return;
+    if (msg.stallId != stallId) return;
+    await loadSections();
+});
 
 sections.forEach((section) => {
     section.container.addEventListener("click", async (e) => {
@@ -124,6 +120,7 @@ sections.forEach((section) => {
         const { orderId } = button.dataset;
 
         await updateStatus(orderId, section.nextStatus);
+        await loadSections();
     });
 });
 

@@ -1,26 +1,21 @@
 import { formatDate, getIdFromToken, statusStyle } from "./helper.js";
 import { LS_KEYS } from "./const.js";
+import { getSocket } from "./websocket.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
+const customerId = getIdFromToken(token);
 
 const ordersContainer = document.getElementById("orders-container");
 await loadOrders();
 
-const socket = new WebSocket("ws://localhost:3000");
-socket.onopen = () => {
-    console.log("CUSTOMER: Connected to websocket");
-};
-
-socket.onmessage = async (event) => {
+const socket = getSocket();
+socket.addEventListener("message", async (event) => {
     const msg = JSON.parse(event.data);
-    if (msg.type == "ORDER_UPDATED") await loadOrders();
-};
 
-socket.onclose = () => {
-    console.log("CUSTOMER: Websocket disconnected");
-};
+    if (msg.type == "ORDER_UPDATED" && msg.customerId == customerId)
+        await loadOrders();
+});
 
 async function getOrders() {
-    const customerId = getIdFromToken(token);
     try {
         const params = new URLSearchParams();
         params.append("status", "Pending");

@@ -38,7 +38,7 @@ export function formatDate(date) {
 }
 
 // FOR VENDOR ORDER AND VENDOR INDEX PAGES
-async function getStallId(vendorId, token) {
+export async function getStallId(vendorId, token) {
     try {
         const response = await fetch(`/vendors/${vendorId}/stall`, {
             method: "GET",
