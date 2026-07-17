@@ -1,3 +1,5 @@
+import { LS_KEYS } from "./const.js";
+
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const confirmInput = document.getElementById("confirm");
@@ -33,7 +35,7 @@ async function registerUser(e) {
             console.log("ERROR WHILE REGISTERING: " + data.error);
             return;
         } else {
-            localStorage.setItem("token", data.token);
+            localStorage.setItem(LS_KEYS.authToken, data.token);
             window.location.href = "/customer/";
         }
     } catch (err) {

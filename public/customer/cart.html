@@ -21,10 +21,84 @@
         </div>
     </nav>
 
-    <section>
-        <h1 class="text-3xl">Cart</h1>
-        <p>TODO</p>
-    </section>
+    <main class="mx-auto max-w-5xl space-y-6 p-8 pb-32">
+        <h1 class="text-3xl font-bold">Cart</h1>
+        <section id="container" class="grid gap-5"></section>
+        <!-- payment method -->
+        <section id="payment-container" class="hidden rounded-xl border bg-white p-6 shadow-sm mt-20!">
+            <h2 class="text-xl font-semibold">Payment Method</h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Select your preferred payment method.
+            </p>
+
+            <div class="mt-6 space-y-3">
+                <label
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
+                    <input type="radio" name="payment" value="card" class="h-4 w-4 accent-black" checked />
+
+                    <div class="flex-1">
+                        <p class="font-medium">Credit / Debit Card</p>
+                        <p class="text-sm text-gray-500">
+                            Visa, Mastercard, American Express
+                        </p>
+                    </div>
+                </label>
+
+                <label
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
+                    <input type="radio" name="payment" value="paynow" class="h-4 w-4 accent-black" />
+
+                    <div class="flex-1">
+                        <p class="font-medium">PayNow</p>
+                        <p class="text-sm text-gray-500">
+                            Pay instantly using your banking app.
+                        </p>
+                    </div>
+                </label>
+
+                <label
+                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
+                    <input type="radio" name="payment" value="cash" class="h-4 w-4 accent-black" />
+
+                    <div class="flex-1">
+                        <p class="font-medium">Cash</p>
+                        <p class="text-sm text-gray-500">
+                            Pay at the stall upon collection.
+                        </p>
+                    </div>
+                </label>
+            </div>
+        </section>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 border-t bg-white/95 backdrop-blur">
+        <div class="mx-auto flex max-w-5xl items-center justify-between p-5">
+            <div>
+                <p class="text-sm text-gray-500">Total</p>
+                <p id="cart-total" class="text-2xl font-bold">$0.00</p>
+            </div>
+
+            <div class="flex gap-4">
+                <!-- FOR TESTING -->
+                <button id="checkout-btn"
+                    class="rounded-lg bg-black px-8 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50">
+                    Checkout (success)
+                </button>
+                <button id="checkout-fail-btn"
+                    class="rounded-lg bg-red-400 px-8 py-3 font-medium text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
+                    Checkout (failure)
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="/js/cart.js"></script>
+    <script type="module" src="/js/helper.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 
 </html>

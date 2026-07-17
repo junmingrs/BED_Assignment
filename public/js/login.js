@@ -1,3 +1,5 @@
+import { LS_KEYS } from "./const.js";
+
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const form = document.getElementById("loginForm");
@@ -24,12 +26,23 @@ async function loginUser(e) {
             console.log("ERROR WHILE LOGIN: " + data.error);
             return;
         } else {
-            localStorage.setItem("token", data.token);
-            window.location.href = "/customer/";
+            localStorage.setItem(LS_KEYS.authToken, data.token);
+            switch (data.role) {
+                case "Vendor":
+                    window.location.href = "/vendor/";
+                    break;
+                case "Operator":
+                    window.location.href = "/operator/";
+                    break;
+                case "NEA":
+                    window.location.href = "/nea/";
+                    break;
+                default:
+                    window.location.href = "/customer/";
+            }
         }
     } catch (err) {
         console.error(err);
-        alert(err);
     }
 }
 
