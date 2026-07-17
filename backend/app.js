@@ -39,7 +39,7 @@ app.get(
 );
 app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
 app.get(
-    "/menuitemsbystall",
+    "/menuitemsbystall/:stallId",
     authorise("Vendor"),
     menuItemController.getMenuItemsByStallId,
 );
@@ -66,6 +66,12 @@ app.post("/promotion", authorise("Vendor"), promotionController.createPromotion)
 app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsByStallId);
 app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
 app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
+
+app.get(
+    "/vendors/:vendorId/stall",
+    authorise("Vendor"),
+    stallController.getStallIdByVendorId,
+);
 
 // Start server
 app.listen(port, () => {
