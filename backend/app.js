@@ -13,6 +13,7 @@ const stallController = require("./controller/stallController");
 const promotionController = require("./controller/promotionController");
 const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
+const feedbackController = require("./controller/feedbackController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
@@ -114,6 +115,18 @@ app.post(
     "/stalls/:stallId/complaints",
     authorise("Customer"),
     complaintController.submitComplaint
+);
+// GET /stalls/:stallId/feedback - get feedbacks for a stall
+app.get(
+    "/stalls/:stallId/feedback",
+    authorise("Vendor", "Customer", "Operator"),
+    feedbackController.getFeedback
+);
+// POST /stalls/:stallId/feedback - submit feedback(only by customer)
+app.post(
+    "/stalls/:stallId/feedback",
+    authorise("Customer"),
+    feedbackController.submitFeedback
 );
 
 // Start server
