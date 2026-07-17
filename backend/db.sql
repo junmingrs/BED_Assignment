@@ -17,7 +17,8 @@ DROP TABLE IF EXISTS Vendor;
 DROP TABLE IF EXISTS Operator;
 DROP TABLE IF EXISTS NEA;
 DROP TABLE IF EXISTS Account;
-GO
+DROP TABLE IF EXISTS Feedback;
+DROP TABLE IF EXISTS Promotion;
 
 CREATE TABLE Account
 (
@@ -136,6 +137,14 @@ CREATE TABLE Complaint
     created_at DATETIME DEFAULT GETDATE()
 );
 
+CREATE TABLE Feedback (
+    feedback_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
+    customer_id UNIQUEIDENTIFIER NOT NULL REFERENCES Customer(customer_id),
+    description TEXT NOT NULL,
+    created_at DATETIME DEFAULT GETDATE()
+);
+
 CREATE TABLE Promotion
 (
     promotion_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
@@ -246,6 +255,11 @@ INSERT INTO Complaint (complaint_id, stall_id, customer_id, subject, description
 (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '22222222-2222-2222-2222-222222222222', 'Overcharged for order', 'I was charged $16.00 but my order total was only $12.50. Need a refund.', 'Open', '2026-07-02 14:10:00'),
 (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'Order came late', 'Delivery took 45 minutes longer than expected. Food was cold.', 'Resolved', '2026-07-01 20:00:00'),
 (NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'Staff was rude', 'The vendor was really rude when I asked for extra kimchi. Very disappointed.', 'Closed', '2026-07-03 12:25:00');
+
+INSERT INTO Feedback (feedback_id, stall_id, customer_id, description, created_at) VALUES
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'The food was amazing! Will come back again.', '2026-07-15 12:30:00'),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '22222222-2222-2222-2222-222222222222', 'Please add more vegetarian options on the menu.', '2026-07-16 18:00:00'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'The salmon was fresh and delicious!', '2026-07-14 20:00:00');
 
 INSERT INTO Promotion (stall_id, title, description, start_date, end_date) VALUES
 ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '10% off Kimchi Fried Rice', 'Weekday lunch special', '2026-07-14', '2026-07-31'),
