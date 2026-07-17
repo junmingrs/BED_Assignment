@@ -2,6 +2,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const accountModel = require("../model/accountModel");
 
+function generateToken(id, role) {
+    return jwt.sign({ id, role }, process.env.JWT_SECRET_KEY, {
+        expiresIn: "3600s",
+    });
+}
+
 async function registerUser(req, res) {
     const { name, email, password, role } = req.body;
     try {
@@ -36,7 +42,11 @@ async function registerUser(req, res) {
                 break;
         }
 
-        return res.status(201).json({ message: "Account created successfully" });
+        const token = generateToken(accountId, role);
+
+        return res
+            .status(201)
+            .json({ token, role, message: "Account created successfully" });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Internal server error" });
@@ -58,15 +68,10 @@ async function loginUser(req, res) {
                 .status(401)
                 .json({ message: "The username or password is incorrect." });
 
-        const payload = {
-            id: user.account_id,
-            role: user.role,
-        };
-        const role = user.role;
-        const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-            expiresIn: "3600s",
-        });
-        return res.status(200).json({ token, role, message: "Logged in successfully" });
+        const token = generateToken(user.account_id, user.role);
+        return res
+            .status(200)
+            .json({ token, role, message: "Logged in successfully" });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Internal server error" });
