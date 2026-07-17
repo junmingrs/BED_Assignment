@@ -85,7 +85,7 @@ async function loadAgreements(stallId) {
           <td>${agreement.end_date?.split("T")[0] ?? ""}</td>
           <td>$${Number(agreement.rental_fee).toFixed(2)}</td>
           <td><span class="status ${agreement.status}">${agreement.status}</span></td>
-          <td><button class="view-btn" onclick="window.location.href='rentalAgreementDetails.html?id=${agreement.rental_agreement_id}'">View</button></td>
+          <td><button class="view-btn" onclick="window.location.href='hawkerDetails.html?id=${agreement.rental_agreement_id}'">View</button></td>
         </tr>
       `,
             )
