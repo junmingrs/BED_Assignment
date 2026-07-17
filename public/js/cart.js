@@ -1,6 +1,7 @@
 import { LS_KEYS } from "./const.js";
 import { getCustomerIdFromToken } from "./helper.js";
 const cartContainer = document.getElementById("container");
+const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
@@ -27,56 +28,6 @@ async function getItemById(stallId, itemCode) {
     } catch (err) {
         console.error(err);
     }
-}
-
-async function renderPaymentUI() {
-    main.innerHTML += `
-        <!-- payment method -->
-        <section class="rounded-xl border bg-white p-6 shadow-sm mt-20!">
-            <h2 class="text-xl font-semibold">Payment Method</h2>
-            <p class="mt-1 text-sm text-gray-500">
-                Select your preferred payment method.
-            </p>
-
-            <div class="mt-6 space-y-3">
-                <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
-                    <input type="radio" name="payment" value="card" class="h-4 w-4 accent-black" checked />
-
-                    <div class="flex-1">
-                        <p class="font-medium">Credit / Debit Card</p>
-                        <p class="text-sm text-gray-500">
-                            Visa, Mastercard, American Express
-                        </p>
-                    </div>
-                </label>
-
-                <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
-                    <input type="radio" name="payment" value="paynow" class="h-4 w-4 accent-black" />
-
-                    <div class="flex-1">
-                        <p class="font-medium">PayNow</p>
-                        <p class="text-sm text-gray-500">
-                            Pay instantly using your banking app.
-                        </p>
-                    </div>
-                </label>
-
-                <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
-                    <input type="radio" name="payment" value="cash" class="h-4 w-4 accent-black" />
-
-                    <div class="flex-1">
-                        <p class="font-medium">Cash</p>
-                        <p class="text-sm text-gray-500">
-                            Pay at the stall upon collection.
-                        </p>
-                    </div>
-                </label>
-            </div>
-        </section>
-    `;
 }
 
 async function renderCartItems() {
@@ -161,8 +112,9 @@ async function renderCartItems() {
     if (cartContainer.innerHTML == "") {
         cartContainer.innerHTML =
             '<p class="text-sm text-gray-500 text-center py-8">No items added in cart</p>';
+        paymentContainer.classList.add("hidden");
     } else {
-        renderPaymentUI();
+        paymentContainer.classList.remove("hidden");
     }
 
     cartTotal.textContent = "$" + totalAmount.toFixed(2);
