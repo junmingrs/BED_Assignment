@@ -27,7 +27,19 @@ async function loginUser(e) {
             return;
         } else {
             localStorage.setItem(LS_KEYS.authToken, data.token);
-            window.location.href = "/customer/";
+            switch (data.role) {
+                case "Vendor":
+                    window.location.href = "/vendor/";
+                    break;
+                case "Operator":
+                    window.location.href = "/operator/";
+                    break;
+                case "NEA":
+                    window.location.href = "/nea/";
+                    break;
+                default:
+                    window.location.href = "/customer/";
+            }
         }
     } catch (err) {
         console.error(err);

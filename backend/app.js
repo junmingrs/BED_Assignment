@@ -10,8 +10,10 @@ const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
 const stallController = require("./controller/stallController");
+const promotionController = require("./controller/promotionController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
+
 
 // TODO: Import Validations
 
@@ -65,6 +67,30 @@ app.get(
     stallController.getStallInfo,
 );
 
+app.post("/promotion", authorise("Vendor"), promotionController.createPromotion);
+app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsByStallId);
+app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
+app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
+
+// app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
+// app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
+// app.get(
+//     "/stalls/:stallId/orders",
+//     authorise("Customer", "Vendor"),
+//     orderController.getOrderByStallId,
+// );
+app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls);
+app.get(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.getStallInfo,
+);
+// PUT /stalls/:stallId - update stall info
+app.put(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.updateStall
+);
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
