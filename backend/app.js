@@ -15,7 +15,7 @@ const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
 const { authorise } = require("./middleware/auth");
-const { validateRegister, validateLogin } = require("./middleware/validate");
+const { validateRegister, validateLogin, authenticateToken } = require("./middleware/validate");
 
 
 // TODO: Import Validations
@@ -32,6 +32,9 @@ app.use(express.static(path.join("public")));
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 
+// refresh token
+app.post("/refresh", authenticateToken, accountController.refreshToken);
+
 app.post("/menuitem", authorise("Vendor"), menuItemController.createMenuItem);
 app.put("/menuitem", authorise("Vendor"), menuItemController.updateMenuItem);
 app.delete("/menuitem", authorise("Vendor"), menuItemController.deleteMenuItem);
@@ -40,7 +43,7 @@ app.get(
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
+app.get("/menuitems", authorise("Vendor"), authenticateToken, menuItemController.getAllMenuItems);
 app.get(
     "/menuitemsbystall",
     authorise("Vendor"),

@@ -34,6 +34,26 @@ async function createAccount(account) {
     return newId;
 }
 
+async function createRefreshToken(account_id, refresh_token) {
+    const query = `INSERT INTO RefreshToken (account_id, refresh_token) VALUES (@account_id, @refresh_token)`;
+    const pool = await poolPromise;
+    await pool
+        .request()
+        .input("account_id", account_id)
+        .input("refresh_token", refresh_token)
+        .query(query);
+}
+
+async function updateRefreshToken(account_id, refresh_token) {
+    const query = `UPDATE RefreshToken SET refresh_token = @refresh_token WHERE account_id = @account_id`;
+    const pool = await poolPromise;
+    await pool
+        .request()
+        .input("account_id", account_id)
+        .input("refresh_token", refresh_token)
+        .query(query);
+}
+
 async function createCustomer(account_id, name) {
     const query = `INSERT INTO Customer (customer_id, customer_name) VALUES (@id, @name)`;
     const pool = await poolPromise;
@@ -58,6 +78,14 @@ async function createNEA(account_id) {
     await pool.request().input("id", account_id).query(query);
 }
 
+async function findRefreshToken(refresh_token) {
+    const query = `SELECT EXISTS (SELECT 1 FROM RefreshToken WHERE refresh_token = @refresh_token)`;
+    const pool = await poolPromise;
+    const exists = await pool.request().input("refresh_token", refresh_token).query(query);
+    console.log(exists);
+    return exists.recordset[0];
+}
+
 module.exports = {
     createAccount,
     getAccountById,
@@ -66,4 +94,7 @@ module.exports = {
     createVendor,
     createOperator,
     createNEA,
+    createRefreshToken,
+    updateRefreshToken,
+    findRefreshToken,
 };
