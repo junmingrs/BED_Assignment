@@ -58,6 +58,12 @@ async function createNEA(account_id) {
     await pool.request().input("id", account_id).query(query);
 }
 
+function getVendorIdFromToken(token) {
+    // splits the token back to header, payload, signature and decodes it back from base64
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.id;
+}
+
 module.exports = {
     createAccount,
     getAccountById,

@@ -42,7 +42,7 @@ app.get(
 );
 app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
 app.get(
-    "/menuitemsbystall",
+    "/menuitemsbystall/:stallId",
     authorise("Vendor"),
     menuItemController.getMenuItemsByStallId,
 );
@@ -75,6 +75,10 @@ app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsBySt
 app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
 app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
 
+app.get(
+    "/vendors/:vendorId/stall",
+    authorise("Vendor"),
+    stallController.getStallIdByVendorId,
 // app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
 // app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
 // app.get(
