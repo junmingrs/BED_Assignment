@@ -35,31 +35,27 @@ async function createAccount(account) {
 }
 
 async function createCustomer(account_id, name) {
-    const query = `INSERT INTO Customer (account_id, customer_name) VALUES (@account_id, @name)`;
+    const query = `INSERT INTO Customer (customer_id, customer_name) VALUES (@id, @name)`;
     const pool = await poolPromise;
-    await pool
-        .request()
-        .input("account_id", account_id)
-        .input("name", name)
-        .query(query);
+    await pool.request().input("id", account_id).input("name", name).query(query);
 }
 
 async function createVendor(account_id) {
-    const query = `INSERT INTO Vendor (account_id) VALUES (@account_id)`;
+    const query = `INSERT INTO Vendor (vendor_id) VALUES (@id)`;
     const pool = await poolPromise;
-    await pool.request().input("account_id", account_id).query(query);
+    await pool.request().input("id", account_id).query(query);
 }
 
 async function createOperator(account_id) {
-    const query = `INSERT INTO Operator (account_id) VALUES (@account_id)`;
+    const query = `INSERT INTO Operator (operator_id) VALUES (@id)`;
     const pool = await poolPromise;
-    await pool.request().input("account_id", account_id).query(query);
+    await pool.request().input("id", account_id).query(query);
 }
 
 async function createNEA(account_id) {
-    const query = `INSERT INTO NEA (account_id) VALUES (@account_id)`;
+    const query = `INSERT INTO NEA (nea_id) VALUES (@id)`;
     const pool = await poolPromise;
-    await pool.request().input("account_id", account_id).query(query);
+    await pool.request().input("id", account_id).query(query);
 }
 
 function getVendorIdFromToken(token) {

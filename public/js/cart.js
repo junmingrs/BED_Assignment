@@ -1,5 +1,7 @@
 import { LS_KEYS } from "./const.js";
+import { getCustomerIdFromToken } from "./helper.js";
 const cartContainer = document.getElementById("container");
+const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
@@ -7,13 +9,6 @@ const main = document.getElementsByTagName("main");
 
 const token = localStorage.getItem(LS_KEYS.authToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
-
-// const cartMap = cart.reduce((map, item) => {
-//     const stallId = item.stallId;
-//     if (!map[stallId]) map[stallId] = [];
-//     map[stallId].push(item);
-//     return map;
-// }, {});
 
 async function getItemById(stallId, itemCode) {
     try {
@@ -35,56 +30,6 @@ async function getItemById(stallId, itemCode) {
     }
 }
 
-async function renderPaymentUI() {
-    main.innerHTML += `
-        <!-- payment method -->
-        <section class="rounded-xl border bg-white p-6 shadow-sm mt-20!">
-            <h2 class="text-xl font-semibold">Payment Method</h2>
-            <p class="mt-1 text-sm text-gray-500">
-                Select your preferred payment method.
-            </p>
-
-            <div class="mt-6 space-y-3">
-                <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
-                    <input type="radio" name="payment" value="card" class="h-4 w-4 accent-black" checked />
-
-                    <div class="flex-1">
-                        <p class="font-medium">Credit / Debit Card</p>
-                        <p class="text-sm text-gray-500">
-                            Visa, Mastercard, American Express
-                        </p>
-                    </div>
-                </label>
-
-                <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
-                    <input type="radio" name="payment" value="paynow" class="h-4 w-4 accent-black" />
-
-                    <div class="flex-1">
-                        <p class="font-medium">PayNow</p>
-                        <p class="text-sm text-gray-500">
-                            Pay instantly using your banking app.
-                        </p>
-                    </div>
-                </label>
-
-                <label
-                    class="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition hover:bg-gray-50 has-checked:border-black has-checked:bg-gray-50">
-                    <input type="radio" name="payment" value="cash" class="h-4 w-4 accent-black" />
-
-                    <div class="flex-1">
-                        <p class="font-medium">Cash</p>
-                        <p class="text-sm text-gray-500">
-                            Pay at the stall upon collection.
-                        </p>
-                    </div>
-                </label>
-            </div>
-        </section>
-    `;
-}
-
 async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
@@ -93,8 +38,9 @@ async function renderCartItems() {
     let totalAmount = 0;
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
+            const stallItems = cartMap[stallId].items;
             const itemCards = await Promise.all(
-                cartMap[stallId].map(async (item) => {
+                stallItems.map(async (item) => {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
                     totalAmount += menuItem.item_price * item.quantity;
 
@@ -135,10 +81,28 @@ async function renderCartItems() {
             );
 
             // TODO: get stall name by id
+
             return `
             <section class="space-y-4">
                 <h2 class="text-2xl font-semibold">Stall Name (TODO)</h2>
                 ${itemCards.join("")}
+                <div class="mt-2">
+                    <label class="flex cursor-pointer items-center gap-3">
+                        <input
+                            type="checkbox"
+                            class="eco-checkbox size-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black"
+                            data-stall-id="${stallId}"
+                        />
+                        <div>
+                            <p class="text-sm font-medium leading-none">
+                                Eco-friendly packaging
+                            </p>
+                            <p class="mt-1 text-xs text-gray-500">
+                                Use paper containers and reduce plastic where possible.
+                            </p>
+                        </div>
+                    </label>
+                </div>
             </section>
         `;
         }),
@@ -148,17 +112,12 @@ async function renderCartItems() {
     if (cartContainer.innerHTML == "") {
         cartContainer.innerHTML =
             '<p class="text-sm text-gray-500 text-center py-8">No items added in cart</p>';
+        paymentContainer.classList.add("hidden");
     } else {
-        renderPaymentUI();
+        paymentContainer.classList.remove("hidden");
     }
 
     cartTotal.textContent = "$" + totalAmount.toFixed(2);
-}
-
-function getCustomerIdFromToken(token) {
-    // splits the token back to header, payload, signature and decodes it back from base64
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.id;
 }
 
 async function checkout() {
@@ -195,13 +154,17 @@ async function checkout() {
 }
 
 function changeQuality(stallId, itemCode, amount) {
-    const item = cartMap[stallId].find((item) => item.itemCode == itemCode);
+    const item = cartMap[stallId].items.find((item) => item.itemCode == itemCode);
     // min is 1, because if it's 0 then they should delete it
     item.quantity = Math.max(item.quantity + amount, 1);
 }
 
 function deleteItem(stallId, itemCode) {
-    cartMap = cartMap[stallId].filter((item) => item.itemCode != itemCode);
+    cartMap = cartMap[stallId].items.filter((item) => item.itemCode != itemCode);
+}
+
+function setEcoOption(stallId, checked) {
+    cartMap[stallId].isEco = checked;
 }
 
 checkoutBtn.addEventListener("click", checkout);
@@ -223,6 +186,14 @@ cartContainer.addEventListener("click", async (e) => {
     } else if (button.classList.contains("delete")) {
         deleteItem(stallId, itemCode);
     }
+
     localStorage.setItem(LS_KEYS.cart, JSON.stringify(cartMap));
     await renderCartItems();
+});
+
+cartContainer.addEventListener("change", (e) => {
+    const checkbox = e.target.closest('input[type="checkbox"]');
+    if (!checkbox) return;
+
+    setEcoOption(checkbox.dataset.stallId, checkbox.checked);
 });

@@ -2,7 +2,7 @@ import { LS_KEYS } from "./const.js";
 
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
-const form = document.getElementById("loginForm");
+const form = document.getElementById("operatorForm");
 
 async function loginUser(e) {
     e.preventDefault();
@@ -26,21 +26,18 @@ async function loginUser(e) {
             alert(data.message);
             return;
         } else {
-            switch (data.role) {
-                case "Vendor":
-                    alert(data.message);
-                    localStorage.setItem(LS_KEYS.authToken, data.token);
-                    window.location.href = "/vendor/";
-                    break;
-                case "Customer":
-                    alert(data.message);
-                    localStorage.setItem(LS_KEYS.authToken, data.token);
-                    window.location.href = "/customer/";
-                    break;
-                default:
-                    alert(
-                        "You need to be a Vendor or Customer to log in via this portal. For operators and NEA officers, please use the staff log in.",
-                    );
+            if (data.role == "Operator") {
+                alert(data.message);
+                localStorage.setItem(LS_KEYS.authToken, data.token);
+                window.location.href = "/operator/";
+            } else if (data.role == "NEA") {
+                alert(data.message);
+                localStorage.setItem(LS_KEYS.authToken, data.token);
+                window.location.href = "/nea/";
+            } else {
+                alert(
+                    "You need to be an Operator or an NEA Officer to log in via this portal.",
+                );
             }
         }
     } catch (err) {

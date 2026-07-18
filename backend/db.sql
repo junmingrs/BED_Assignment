@@ -6,6 +6,9 @@ DROP TABLE IF EXISTS OrderItem;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Rating;
 DROP TABLE IF EXISTS Complaint;
+DROP TABLE IF EXISTS Feedback;
+DROP TABLE IF EXISTS Promotion;
+DROP TABLE IF EXISTS Inspection;
 DROP TABLE IF EXISTS MenuItem;
 DROP TABLE IF EXISTS Cuisine;
 DROP TABLE IF EXISTS Stall;
@@ -14,7 +17,6 @@ DROP TABLE IF EXISTS Vendor;
 DROP TABLE IF EXISTS Operator;
 DROP TABLE IF EXISTS NEA;
 DROP TABLE IF EXISTS Account;
-DROP TABLE IF EXISTS Promotion;
 GO
 
 CREATE TABLE Account
@@ -53,6 +55,16 @@ CREATE TABLE Stall
     vendor_id UNIQUEIDENTIFIER NOT NULL REFERENCES Vendor(vendor_id),
     stall_name VARCHAR(255) NOT NULL,
     stall_unit_no CHAR(6) NOT NULL CHECK (stall_unit_no LIKE '#[0-9][0-9]-[0-9][0-9]')
+);
+
+CREATE TABLE Inspection (
+    inspection_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
+    nea_id UNIQUEIDENTIFIER NOT NULL REFERENCES NEA(nea_id),
+    inspection_date DATETIME DEFAULT GETDATE(),
+    score INT NOT NULL CHECK (score BETWEEN 0 AND 100),
+    remarks TEXT,
+    hygiene_grade CHAR(1) NOT NULL CHECK (hygiene_grade IN ('A', 'B', 'C', 'D'))
 );
 
 CREATE TABLE MenuItem
@@ -122,6 +134,15 @@ CREATE TABLE Complaint
     status VARCHAR(20) DEFAULT 'Open' CHECK (status IN ('Open', 'Investigating', 'Resolved', 'Closed')),
     created_at DATETIME DEFAULT GETDATE()
 );
+GO
+
+CREATE TABLE Feedback (
+    feedback_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
+    customer_id UNIQUEIDENTIFIER NOT NULL REFERENCES Customer(customer_id),
+    description TEXT NOT NULL,
+    created_at DATETIME DEFAULT GETDATE()
+);
 
 CREATE TABLE Promotion
 (
@@ -139,7 +160,8 @@ INSERT INTO Account (account_id, account_email, password_hash, role) VALUES
 ('22222222-2222-2222-2222-222222222222', 'ben@email.com', '$2b$10$DT38aTBY2E4.jDNAkAKoNuGmlSVeJ5iX/70tY.CWWkNSukLP39Z1W', 'Customer'),
 ('33333333-3333-3333-3333-333333333333', 'kim@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
 ('44444444-4444-4444-4444-444444444444', 'sakura@email.com', '$2b$10$oB7LdYYyi5g/XB1thrO0luWRClhaRUTs2ZqFGd18XKb8TXTqnSSvG', 'Vendor'),
-('55555555-5555-5555-5555-555555555555', 'operator@email.com', '$2b$10$7JAl8APklPKi/49gSRhbe.Pdtf8bLzTSJzZoODzRJztw1I4Ys4YDS', 'Operator');
+('55555555-5555-5555-5555-555555555555', 'operator@email.com', '$2b$10$7JAl8APklPKi/49gSRhbe.Pdtf8bLzTSJzZoODzRJztw1I4Ys4YDS', 'Operator'),
+('66666666-6666-6666-6666-666666666666', 'nea@email.com', '$2b$10$hG7H9YfRkLmNpQsTuVwXyZ1234567890AbCdEfGhIjKlMnOpQrStU', 'NEA');
 -- operator password is hashed_pw5, go up means hashed_pw{number} decrease by 1
 INSERT INTO Customer (customer_id, customer_name, loyalty_points) VALUES
 ('11111111-1111-1111-1111-111111111111', 'Alice Tan', 0),
@@ -150,11 +172,21 @@ INSERT INTO Vendor (vendor_id) VALUES
 ('44444444-4444-4444-4444-444444444444');
 
 INSERT INTO Operator (operator_id) VALUES
-('55555555-5555-5555-5555-555555555555');
+('55555555-5555-5555-5555-555555555555'),
+('66666666-6666-6666-6666-666666666666');
+
+INSERT INTO NEA (nea_id) VALUES
+('66666666-6666-6666-6666-666666666666');
 
 INSERT INTO Stall (stall_id, vendor_id, stall_name, stall_unit_no) VALUES
 ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '33333333-3333-3333-3333-333333333333', 'Kim Kitchen', '#01-01'),
 ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '44444444-4444-4444-4444-444444444444', 'Sakura Sushi', '#01-02');
+
+INSERT INTO Inspection (inspection_id, stall_id, nea_id, inspection_date, score, remarks, hygiene_grade) VALUES
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '66666666-6666-6666-6666-666666666666', '2026-07-10 10:00:00', 85, 'Good hygiene practices observed. Minor improvements needed on food storage.', 'B'),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '66666666-6666-6666-6666-666666666666', '2026-05-15 14:30:00', 72, 'Several violations found. Food not covered properly.', 'C'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '66666666-6666-6666-6666-666666666666', '2026-07-12 11:00:00', 92, 'Excellent cleanliness and food handling.', 'A'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '66666666-6666-6666-6666-666666666666', '2026-06-20 09:30:00', 68, 'Poor hygiene. Floors dirty and improper waste disposal.', 'D');
 
 INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
 ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Kimchi Fried Rice', 7.50, 'Main'),
@@ -216,6 +248,11 @@ INSERT INTO Complaint (complaint_id, stall_id, customer_id, subject, description
 (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '22222222-2222-2222-2222-222222222222', 'Overcharged for order', 'I was charged $16.00 but my order total was only $12.50. Need a refund.', 'Open', '2026-07-02 14:10:00'),
 (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'Order came late', 'Delivery took 45 minutes longer than expected. Food was cold.', 'Resolved', '2026-07-01 20:00:00'),
 (NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'Staff was rude', 'The vendor was really rude when I asked for extra kimchi. Very disappointed.', 'Closed', '2026-07-03 12:25:00');
+
+INSERT INTO Feedback (feedback_id, stall_id, customer_id, description, created_at) VALUES
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'The food was amazing! Will come back again.', '2026-07-15 12:30:00'),
+(NEWID(), 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '22222222-2222-2222-2222-222222222222', 'Please add more vegetarian options on the menu.', '2026-07-16 18:00:00'),
+(NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'The salmon was fresh and delicious!', '2026-07-14 20:00:00');
 
 INSERT INTO Promotion (stall_id, title, description, start_date, end_date) VALUES
 ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '10% off Kimchi Fried Rice', 'Weekday lunch special', '2026-07-14', '2026-07-31'),
