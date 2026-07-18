@@ -30,7 +30,9 @@ async function registerUser(e) {
         });
 
         const data = await response.json();
-        alert(data.message);
+        console.log(data);
+        console.log(response);
+        alert(data.message ? data.message : data.error);
         if (!response.ok) {
             console.log("ERROR WHILE REGISTERING: " + data.error);
             return;
