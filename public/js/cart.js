@@ -1,5 +1,5 @@
 import { LS_KEYS } from "./const.js";
-import { getCustomerIdFromToken } from "./helper.js";
+import { getIdFromToken } from "./helper.js";
 const cartContainer = document.getElementById("container");
 const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
@@ -121,7 +121,7 @@ async function renderCartItems() {
 }
 
 async function checkout() {
-    const customerId = getCustomerIdFromToken(token);
+    const customerId = getIdFromToken(token);
     try {
         const response = await fetch(`/checkout`, {
             method: "POST",
