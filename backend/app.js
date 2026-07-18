@@ -89,7 +89,7 @@ app.get(
 //     authorise("Customer", "Vendor"),
 //     orderController.getOrderByStallId,
 // );
-app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls);
+app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls));
 app.get(
     "/stalls/:stallId",
     authorise("Vendor", "Operator"),

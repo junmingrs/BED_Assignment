@@ -79,8 +79,6 @@ const getStallIdByVendorId = async (vendorId) => {
 
   return stallResult.recordset[0];
 };
-    return stallResult.recordset[0];
-};
 
 // PUT /stalls/:stallId - update stall info
 const updateStall = async (stallId, accountId, updateData) => {
