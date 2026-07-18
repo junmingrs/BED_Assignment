@@ -3,11 +3,12 @@ const { poolPromise } = require("../db");
 
 // GET /stalls/:stallId - get stall info (only stall details)
 const getStallInfo = async (stallId) => {
-    const pool = await poolPromise;
+  const pool = await poolPromise;
 
-    const stallResult = await pool.request()
-        .input("stallId", stallId)
-        .query(`
+  // 1. Get stall basic info
+  const stallResult = await pool.request()
+    .input("stallId", stallId)
+    .query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -20,10 +21,64 @@ const getStallInfo = async (stallId) => {
             WHERE s.stall_id = @stallId
         `);
 
-    if (stallResult.recordset.length === 0) {
-        throw new Error("Stall not found");
-    }
+  if (stallResult.recordset.length === 0) {
+    throw new Error("Stall not found");
+  }
 
+  const stall = stallResult.recordset[0];
+
+  // 4. Get ratings
+  const ratingsResult = await pool.request()
+    .input("stallId", stallId)
+    .query(`
+            SELECT 
+                rating_id,
+                rating,
+                comment,
+                created_at
+            FROM Rating
+            WHERE stall_id = @stallId
+            ORDER BY created_at DESC
+        `);
+
+  // 5. Get complaints
+  const complaintsResult = await pool.request()
+    .input("stallId", stallId)
+    .query(`
+            SELECT 
+                complaint_id,
+                subject,
+                description,
+                status,
+                created_at
+            FROM Complaint
+            WHERE stall_id = @stallId
+            ORDER BY created_at DESC
+        `);
+
+  return {
+    stall: stall,
+    ratings: ratingsResult.recordset,
+    complaints: complaintsResult.recordset
+  };
+};
+
+const getStallIdByVendorId = async (vendorId) => {
+  const pool = await poolPromise;
+
+  const stallResult = await pool.request().input("vendorId", vendorId).query(`
+            SELECT
+                s.stall_id
+            FROM Stall s
+            WHERE s.vendor_id = @vendorId
+        `);
+
+  if (stallResult.recordset.length === 0) {
+    throw new Error("Stall not found");
+  }
+
+  return stallResult.recordset[0];
+};
     return stallResult.recordset[0];
 };
 
@@ -112,7 +167,9 @@ const getAllStalls = async () => {
     return result.recordset;
 }
 module.exports = {
-    getStallInfo,
-    updateStall,
-    getAllStalls,
+  getStallInfo,
+  getStallIdByVendorId,
+  getStallInfo,
+  updateStall,
+  getAllStalls,
 };

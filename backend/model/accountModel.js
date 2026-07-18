@@ -86,6 +86,12 @@ async function findRefreshToken(refresh_token) {
     return exists.recordset[0];
 }
 
+function getVendorIdFromToken(token) {
+    // splits the token back to header, payload, signature and decodes it back from base64
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.id;
+}
+
 module.exports = {
     createAccount,
     getAccountById,
@@ -94,6 +100,7 @@ module.exports = {
     createVendor,
     createOperator,
     createNEA,
+    getVendorIdFromToken,
     createRefreshToken,
     updateRefreshToken,
     findRefreshToken,
