@@ -3,7 +3,7 @@ const path = require("path");
 const express = require("express");
 const sql = require("mssql");
 const http = require("http");
-const { initWebSocket, initWebServer } = require("./ws.js");
+const { broadcast, initWebServer } = require("./ws.js");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 

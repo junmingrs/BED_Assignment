@@ -63,23 +63,6 @@ const getStallInfo = async (stallId) => {
     };
 };
 
-const getStallIdByVendorId = async (vendorId) => {
-    const pool = await poolPromise;
-
-    const stallResult = await pool.request().input("vendorId", vendorId).query(`
-            SELECT
-                s.stall_id
-            FROM Stall s
-            WHERE s.vendor_id = @vendorId
-        `);
-
-    if (stallResult.recordset.length === 0) {
-        throw new Error("Stall not found");
-    }
-
-    return stallResult.recordset[0];
-};
-
 // PUT /stalls/:stallId - update stall info
 const updateStall = async (stallId, accountId, updateData) => {
     const { stall_name, stall_unit_no } = updateData;
@@ -178,6 +161,7 @@ const getStallIdByVendorId = async (vendorId) => {
 
     return stallResult.recordset[0];
 };
+
 
 module.exports = {
     getStallInfo,
