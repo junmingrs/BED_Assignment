@@ -68,7 +68,7 @@ async function loginUser(req, res) {
                 .status(401)
                 .json({ message: "The username or password is incorrect." });
 
-        const token = generateToken(user.account_id, user.role);
+        token = generateToken(user.account_id, user.role);
         const role = user.role;
         return res
             .status(200)
