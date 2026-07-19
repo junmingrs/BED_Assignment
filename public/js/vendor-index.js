@@ -1,5 +1,4 @@
 import { formatDate, getIdFromToken, getOrders, getStallId } from "./helper.js";
-import { LS_KEYS } from "./const.js";
 import { getSocket } from "./websocket.js";
 
 const pendingContainer = document.getElementById("pending-container");
@@ -108,7 +107,9 @@ const stallId = await getStallId(vendorId, token);
 const socket = getSocket();
 socket.addEventListener("message", async (event) => {
     const msg = JSON.parse(event.data);
-    if (msg.type != "NEW_ORDER") return;
+
+    if (msg.type != wsMessages.newOrder && msg.type != wsMessages.updateOrder)
+        return;
     if (msg.stallId != stallId) return;
     await loadSections();
 });

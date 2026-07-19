@@ -1,5 +1,3 @@
-import { LS_KEYS } from "./const.js";
-
 // TODO: make it work for all buttons
 const addCartBtn = document.querySelector(".addToCartBtn");
 

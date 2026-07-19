@@ -1,5 +1,3 @@
-import { LS_KEYS } from "./const.js";
-
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const form = document.getElementById("loginForm");
