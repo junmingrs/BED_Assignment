@@ -1,5 +1,3 @@
-import { LS_KEYS } from "./const.js";
-
 const signoutBtn = document.getElementById("signout-btn");
 
 function signOut() {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
@@ -7,18 +7,17 @@
     <title>Menu Board — Stall Vendor</title>
 
     <link rel="stylesheet" href="../css/output.css" />
-
 </head>
 
 <body class="">
     <header class="">
         <div class="flex flex-col">
-            <span>
-                Stall Unit No - <span id="stallUnitNo"></span>
-            </span>
+            <span> Stall Unit No - <span id="stallUnitNo"></span> </span>
             <div class="flex justify-between mr-2">
                 <span class="text-4xl md:text-5xl underline">Your Menu Items</span>
-                <button id="addItemBtn" class="p-1 rounded-xl border-2 border-black">+ Add Item</button>
+                <button id="addItemBtn" class="p-1 rounded-xl border-2 border-black">
+                    + Add Item
+                </button>
             </div>
         </div>
     </header>
@@ -69,8 +68,12 @@
                 <input id="editPriceInput" type="number" class="w-full focus:outline-none" placeholder="Item Price" />
             </div>
             <div class="flex gap-2">
-                <button id="editSaveBtn" type="submit" class="w-1/2 border-2 border-black bg-green-300">Save</button>
-                <button id="editCancelBtn" class="w-1/2 border-2 border-black">Cancel</button>
+                <button id="editSaveBtn" type="submit" class="w-1/2 border-2 border-black bg-green-300">
+                    Save
+                </button>
+                <button id="editCancelBtn" class="w-1/2 border-2 border-black">
+                    Cancel
+                </button>
             </div>
             <span id="editMsg" class="text-green-600 hidden">Edit successful</span>
         </form>
@@ -82,13 +85,18 @@
             <span id="deleteName">Item Name</span>
             <span id="deletePrice">Item Price</span>
             <div class="flex gap-2">
-                <button id="deleteConfirmBtn" class="w-1/2 border-2 border-black bg-red-300">Delete</button>
-                <button id="deleteCancelBtn" class="w-1/2 border-2 border-black">Cancel</button>
+                <button id="deleteConfirmBtn" class="w-1/2 border-2 border-black bg-red-300">
+                    Delete
+                </button>
+                <button id="deleteCancelBtn" class="w-1/2 border-2 border-black">
+                    Cancel
+                </button>
             </div>
             <span id="deleteErrorMsg" class="text-red-600 hidden">Unable to delete item: Theres still orders with this
                 item</span>
         </div>
     </div>
+    <script src="/js/const.js"></script>
     <script type="module" src="/js/menuitem.js"></script>
 </body>
 

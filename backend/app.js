@@ -62,7 +62,7 @@ app.get(
 );
 app.patch(
     "/orders/:orderId/:status",
-    authorise("Vendor"),
+    authorise("Vendor", "Customer"),
     orderController.updateOrderStatus,
 );
 app.get(
@@ -112,58 +112,58 @@ app.delete(
 app.get(
     "/stalls/:stallId/ratings",
     authorise("Vendor", "Customer", "Operator"),
-    ratingController.getRatings
+    ratingController.getRatings,
 );
 
 // POST /stalls/:stallId/ratings - submit a rating
 app.post(
     "/stalls/:stallId/ratings",
     authorise("Customer"),
-    ratingController.submitRating
+    ratingController.submitRating,
 );
 // DELETE /ratings/:ratingId - delete a rating
 app.delete(
     "/ratings/:ratingId",
     authorise("Customer"),
-    ratingController.deleteRating
+    ratingController.deleteRating,
 );
 
 // GET /stalls/:stallId/complaints - get complaints for a stall
 app.get(
     "/stalls/:stallId/complaints",
     authorise("Vendor", "Customer", "Operator"),
-    complaintController.getComplaints
+    complaintController.getComplaints,
 );
 
 // POST /stalls/:stallId/complaints - submit a complaint
 app.post(
     "/stalls/:stallId/complaints",
     authorise("Customer"),
-    complaintController.submitComplaint
+    complaintController.submitComplaint,
 );
 // DELETE /complaints/:complaintId - delete a complaint
 app.delete(
     "/complaints/:complaintId",
     authorise("Customer"),
-    complaintController.deleteComplaint
+    complaintController.deleteComplaint,
 );
 // GET /stalls/:stallId/feedback - get feedbacks for a stall
 app.get(
     "/stalls/:stallId/feedback",
     authorise("Vendor", "Customer", "Operator"),
-    feedbackController.getFeedback
+    feedbackController.getFeedback,
 );
 // POST /stalls/:stallId/feedback - submit feedback(only by customer)
 app.post(
     "/stalls/:stallId/feedback",
     authorise("Customer"),
-    feedbackController.submitFeedback
+    feedbackController.submitFeedback,
 );
 // DELETE /feedback/:feedbackId - delete a feedback
 app.delete(
     "/feedback/:feedbackId",
     authorise("Customer"),
-    feedbackController.deleteFeedback
+    feedbackController.deleteFeedback,
 );
 
 // Start server

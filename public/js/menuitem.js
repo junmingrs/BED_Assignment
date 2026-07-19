@@ -1,4 +1,3 @@
-import { LS_KEYS } from "./const.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 const vendor_id = JSON.parse(atob(token.split(".")[1])).id;
 
@@ -30,8 +29,8 @@ const getStallId = async () => {
         method: "GET",
         headers: {
             Accept: "application/json",
-            Authorization: `Bearer ${token}`
-        }
+            Authorization: `Bearer ${token}`,
+        },
     });
     return await response.json();
 };
@@ -40,8 +39,8 @@ const getStallInfo = async () => {
         method: "GET",
         headers: {
             Accept: "application/json",
-            Authorization: `Bearer ${token}`
-        }
+            Authorization: `Bearer ${token}`,
+        },
     });
     return await response.json();
 };
@@ -57,9 +56,9 @@ async function fetchItems() {
                 Accept: "application/json",
                 Authorization: `Bearer ${token}`,
             },
-        })
-        let data = await response.json()
-        return data
+        });
+        let data = await response.json();
+        return data;
     } catch (e) {
         alert("FETCH ERROR: ", e);
     }
@@ -74,10 +73,10 @@ async function createItem(payload) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload)
-        })
-        let data = response.json()
-        return data
+            body: JSON.stringify(payload),
+        });
+        let data = response.json();
+        return data;
     } catch (e) {
         alert(e);
     }
@@ -92,10 +91,10 @@ async function updateItem(payload) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload)
-        })
-        let data = response.json()
-        return data
+            body: JSON.stringify(payload),
+        });
+        let data = response.json();
+        return data;
     } catch (e) {
         alert("ERROR: ", e);
     }
@@ -110,13 +109,13 @@ async function deleteItemRequest(stallId, itemCode) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ stallId, itemCode })
-        })
+            body: JSON.stringify({ stallId, itemCode }),
+        });
         if (!response.ok) {
             return false;
         }
-        let data = response.json()
-        return data
+        let data = response.json();
+        return data;
     } catch (e) {
         alert(e);
     }
@@ -125,7 +124,8 @@ async function deleteItemRequest(stallId, itemCode) {
 stallUnitNoRef.innerText = stallInfo.stall.stall_unit_no;
 
 const displayEditDialog = (item) => {
-    editDialogRef.className = "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
+    editDialogRef.className =
+        "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
     editNameInputRef.value = item.item_desc;
     editPriceInputRef.value = item.item_price.toFixed(2);
     editMsgRef.classList.add("hidden");
@@ -139,16 +139,17 @@ const displayEditDialog = (item) => {
             editMsgRef.classList.remove("hidden");
         }
         loadMenuItems();
-    }
+    };
     editCancelBtnRef.onclick = () => {
         editMsgRef.classList.add("hidden");
         editDialogRef.classList.add("hidden");
-    }
-}
+    };
+};
 
 const displayDeleteDialog = (item) => {
     // TODO: needs testing
-    deleteDialogRef.className = "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
+    deleteDialogRef.className =
+        "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
     deleteNameRef.innerText = `Name: ${item.item_desc}`;
     deletePriceRef.innerText = `Price: $${item.item_price.toFixed(2)}`;
     deleteConfirmBtnRef.onclick = async () => {
@@ -164,24 +165,25 @@ const displayDeleteDialog = (item) => {
         deleteDialogRef.classList.add("hidden");
         deleteErrorMsgRef.classList.add("hidden");
     };
-}
+};
 
 const createCard = (item) => {
     const d = document.createElement("div");
-    d.className = "flex flex-col max-w-full max-h-40 h-fit gap-1 rounded-xl border-2 border-black p-2"
+    d.className =
+        "flex flex-col max-w-full max-h-40 h-fit gap-1 rounded-xl border-2 border-black p-2";
     const nameRef = document.createElement("span");
     const priceRef = document.createElement("span");
     nameRef.innerText = `${item.item_desc}`;
     priceRef.innerText = `$${item.item_price.toFixed(2)}`;
     // actions
     const action = document.createElement("div");
-    action.className = "flex gap-1 pt-2"
+    action.className = "flex gap-1 pt-2";
     const edit = document.createElement("button");
     edit.innerText = "edit";
-    edit.className = "w-1/2 border-2 border-black"
+    edit.className = "w-1/2 border-2 border-black";
     edit.addEventListener("click", () => displayEditDialog(item));
     const del = document.createElement("button");
-    del.className = "w-1/2 border-2 border-black"
+    del.className = "w-1/2 border-2 border-black";
     del.innerText = "delete";
     del.addEventListener("click", () => displayDeleteDialog(item));
 
@@ -190,13 +192,14 @@ const createCard = (item) => {
     d.appendChild(nameRef);
     d.appendChild(priceRef);
     d.appendChild(action);
-    cardContainerRef.appendChild(d)
-}
+    cardContainerRef.appendChild(d);
+};
 
 async function setup() {
     await loadMenuItems();
     addItemBtnRef.addEventListener("click", () => {
-        addDialogRef.className = "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
+        addDialogRef.className =
+            "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
         addMsgRef.classList.add("hidden");
         addNameInputRef.value = "";
         addPriceInputRef.value = null;
@@ -242,7 +245,7 @@ async function loadMenuItems() {
     const items = await fetchItems();
     items.map((item) => {
         createCard(item);
-    })
+    });
 }
 
 function validateMenuItem(fields) {
@@ -259,4 +262,3 @@ function validateMenuItem(fields) {
 }
 
 await setup();
-
