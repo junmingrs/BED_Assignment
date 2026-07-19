@@ -12,6 +12,17 @@ const getStallInfo = async (req, res) => {
     }
 };
 
+const getStallIdByVendorId = async (req, res) => {
+    const { vendorId } = req.params;
+    try {
+        const result = await stallModel.getStallIdByVendorId(vendorId);
+        res.status(200).json(result.stall_id);
+    } catch (error) {
+        console.error("Error in getStallIdByVendorId:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const getAllStalls = async (req, res) => {
     try {
         const result = await stallModel.getAllStalls();
@@ -45,17 +56,6 @@ const updateStall = async (req, res) => {
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in updateStall:", error);
-        res.status(500).json({ error: error.message });
-    }
-};
-
-const getStallIdByVendorId = async (req, res) => {
-    const { vendorId } = req.params;
-    try {
-        const result = await stallModel.getStallIdByVendorId(vendorId);
-        res.status(200).json(result.stall_id);
-    } catch (error) {
-        console.error("Error in getStallIdByVendorId:", error);
         res.status(500).json({ error: error.message });
     }
 };

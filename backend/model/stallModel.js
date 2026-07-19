@@ -5,7 +5,10 @@ const { poolPromise } = require("../db");
 const getStallInfo = async (stallId) => {
     const pool = await poolPromise;
 
-    const stallResult = await pool.request().input("stallId", stallId).query(`
+    // 1. Get stall basic info
+    const stallResult = await pool.request()
+        .input("stallId", stallId)
+        .query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -22,7 +25,42 @@ const getStallInfo = async (stallId) => {
         throw new Error("Stall not found");
     }
 
-    return stallResult.recordset[0];
+    const stall = stallResult.recordset[0];
+
+    // 4. Get ratings
+    const ratingsResult = await pool.request()
+        .input("stallId", stallId)
+        .query(`
+            SELECT 
+                rating_id,
+                rating,
+                comment,
+                created_at
+            FROM Rating
+            WHERE stall_id = @stallId
+            ORDER BY created_at DESC
+        `);
+
+    // 5. Get complaints
+    const complaintsResult = await pool.request()
+        .input("stallId", stallId)
+        .query(`
+            SELECT 
+                complaint_id,
+                subject,
+                description,
+                status,
+                created_at
+            FROM Complaint
+            WHERE stall_id = @stallId
+            ORDER BY created_at DESC
+        `);
+
+    return {
+        stall: stall,
+        ratings: ratingsResult.recordset,
+        complaints: complaintsResult.recordset
+    };
 };
 
 // PUT /stalls/:stallId - update stall info
@@ -123,6 +161,7 @@ const getStallIdByVendorId = async (vendorId) => {
 
     return stallResult.recordset[0];
 };
+
 
 module.exports = {
     getStallInfo,

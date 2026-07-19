@@ -71,8 +71,8 @@ CREATE TABLE Inspection
 CREATE TABLE MenuItem
 (
     stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
-    item_code UNIQUEIDENTIFIER NOT NULL,
-    item_desc TEXT,
+    item_code UNIQUEIDENTIFIER DEFAULT NEWID() NOT NULL,
+    item_desc TEXT, 
     item_price SMALLMONEY NOT NULL,
     item_category VARCHAR(255) NOT NULL CHECK (item_category IN ('Drinks', 'Dessert', 'Main', 'Sides')),
     CONSTRAINT PK_MenuItem PRIMARY KEY (stall_id, item_code)
