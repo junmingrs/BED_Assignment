@@ -22,7 +22,8 @@ async function loginUser(e) {
         const data = await response.json();
 
         if (!response.ok) {
-            console.log("ERROR WHILE LOGIN: " + data.error);
+            console.log("ERROR WHILE LOGIN: " + data.message);
+            alert(data.message);
             return;
         } else {
             switch (data.role) {
