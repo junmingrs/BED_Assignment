@@ -3,12 +3,12 @@ const { poolPromise } = require("../db");
 
 // GET /stalls/:stallId - get stall info (only stall details)
 const getStallInfo = async (stallId) => {
-  const pool = await poolPromise;
+    const pool = await poolPromise;
 
-  // 1. Get stall basic info
-  const stallResult = await pool.request()
-    .input("stallId", stallId)
-    .query(`
+    // 1. Get stall basic info
+    const stallResult = await pool.request()
+        .input("stallId", stallId)
+        .query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -21,16 +21,16 @@ const getStallInfo = async (stallId) => {
             WHERE s.stall_id = @stallId
         `);
 
-  if (stallResult.recordset.length === 0) {
-    throw new Error("Stall not found");
-  }
+    if (stallResult.recordset.length === 0) {
+        throw new Error("Stall not found");
+    }
 
-  const stall = stallResult.recordset[0];
+    const stall = stallResult.recordset[0];
 
-  // 4. Get ratings
-  const ratingsResult = await pool.request()
-    .input("stallId", stallId)
-    .query(`
+    // 4. Get ratings
+    const ratingsResult = await pool.request()
+        .input("stallId", stallId)
+        .query(`
             SELECT 
                 rating_id,
                 rating,
@@ -41,10 +41,10 @@ const getStallInfo = async (stallId) => {
             ORDER BY created_at DESC
         `);
 
-  // 5. Get complaints
-  const complaintsResult = await pool.request()
-    .input("stallId", stallId)
-    .query(`
+    // 5. Get complaints
+    const complaintsResult = await pool.request()
+        .input("stallId", stallId)
+        .query(`
             SELECT 
                 complaint_id,
                 subject,
@@ -56,29 +56,27 @@ const getStallInfo = async (stallId) => {
             ORDER BY created_at DESC
         `);
 
-  return {
-    stall: stall,
-    ratings: ratingsResult.recordset,
-    complaints: complaintsResult.recordset
-  };
+    return {
+        stall: stall,
+        ratings: ratingsResult.recordset,
+        complaints: complaintsResult.recordset
+    };
 };
 
 const getStallIdByVendorId = async (vendorId) => {
-  const pool = await poolPromise;
+    const pool = await poolPromise;
 
-  const stallResult = await pool.request().input("vendorId", vendorId).query(`
+    const stallResult = await pool.request().input("vendorId", vendorId).query(`
             SELECT
                 s.stall_id
             FROM Stall s
             WHERE s.vendor_id = @vendorId
         `);
 
-  if (stallResult.recordset.length === 0) {
-    throw new Error("Stall not found");
-  }
+    if (stallResult.recordset.length === 0) {
+        throw new Error("Stall not found");
+    }
 
-  return stallResult.recordset[0];
-};
     return stallResult.recordset[0];
 };
 
@@ -130,9 +128,7 @@ const updateStall = async (stallId, accountId, updateData) => {
     await request.query(updateQuery);
 
     // Return updated stall
-    const result = await pool.request()
-        .input("stallId", stallId)
-        .query(`
+    const result = await pool.request().input("stallId", stallId).query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -152,8 +148,7 @@ const updateStall = async (stallId, accountId, updateData) => {
 const getAllStalls = async () => {
     const pool = await poolPromise;
 
-    const result = await pool.request()
-        .query(`
+    const result = await pool.request().query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -165,11 +160,28 @@ const getAllStalls = async () => {
         `);
 
     return result.recordset;
-}
+};
+
+const getStallIdByVendorId = async (vendorId) => {
+    const pool = await poolPromise;
+
+    const stallResult = await pool.request().input("vendorId", vendorId).query(`
+            SELECT
+                s.stall_id
+            FROM Stall s
+            WHERE s.vendor_id = @vendorId
+        `);
+
+    if (stallResult.recordset.length === 0) {
+        throw new Error("Stall not found");
+    }
+
+    return stallResult.recordset[0];
+};
+
 module.exports = {
-  getStallInfo,
-  getStallIdByVendorId,
-  getStallInfo,
-  updateStall,
-  getAllStalls,
+    getStallInfo,
+    updateStall,
+    getAllStalls,
+    getStallIdByVendorId,
 };

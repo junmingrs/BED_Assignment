@@ -2,6 +2,8 @@
 const path = require("path");
 const express = require("express");
 const sql = require("mssql");
+const http = require("http");
+const { initWebSocket, initWebServer } = require("./ws.js");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -17,12 +19,16 @@ const feedbackController = require("./controller/feedbackController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
-
 // TODO: Import Validations
 
 // Create Express app
 const app = express();
 const port = process.env.PORT || 3000;
+
+// create websocket
+const server = http.createServer(app);
+initWebServer(server);
+server.listen(3000);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
@@ -69,34 +75,37 @@ app.get(
     authorise("Vendor", "Operator"),
     stallController.getStallInfo,
 );
-
-app.post("/promotion", authorise("Vendor"), promotionController.createPromotion);
-app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsByStallId);
-app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
-app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
-
+app.get(
+    "/stalls",
+    authorise("Vendor", "Customer"),
+    stallController.getAllStalls,
+);
+app.put(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.updateStall,
+);
 app.get(
     "/vendors/:vendorId/stall",
     authorise("Vendor"),
     stallController.getStallIdByVendorId,
-// app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
-// app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
-// app.get(
-//     "/stalls/:stallId/orders",
-//     authorise("Customer", "Vendor"),
-//     orderController.getOrderByStallId,
-// );
-app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls);
-app.get(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.getStallInfo,
 );
-// PUT /stalls/:stallId - update stall info
-app.put(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.updateStall
+
+app.post(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.createPromotion,
+);
+app.get(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.getPromotionsByStallId,
+);
+app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
+app.delete(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.deletePromotion,
 );
 
 // GET /stalls/:stallId/ratings - get ratings for a stall

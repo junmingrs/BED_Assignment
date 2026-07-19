@@ -1,5 +1,5 @@
 import { LS_KEYS } from "./const.js";
-import { getCustomerIdFromToken } from "./helper.js";
+import { getIdFromToken } from "./helper.js";
 const cartContainer = document.getElementById("container");
 const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
@@ -34,7 +34,7 @@ async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
 
-    cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "[]");
+    cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
     let totalAmount = 0;
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
@@ -121,7 +121,7 @@ async function renderCartItems() {
 }
 
 async function checkout() {
-    const customerId = getCustomerIdFromToken(token);
+    const customerId = getIdFromToken(token);
     try {
         const response = await fetch(`/checkout`, {
             method: "POST",
@@ -187,7 +187,10 @@ cartContainer.addEventListener("click", async (e) => {
         deleteItem(stallId, itemCode);
     }
 
-    localStorage.setItem(LS_KEYS.cart, JSON.stringify(cartMap));
+    localStorage.setItem(
+        LS_KEYS.cart,
+        JSON.stringify(Object.keys(cartMap).length == 0 ? {} : cartMap),
+    );
     await renderCartItems();
 });
 

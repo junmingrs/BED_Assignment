@@ -1,4 +1,5 @@
 const orderModel = require("../model/orderModel");
+const { broadcast } = require("../ws");
 
 async function getOrderById(req, res) {
     const { orderId } = req.params;
@@ -46,6 +47,13 @@ async function updateOrderStatus(req, res) {
         if (!updated) {
             return res.status(404).json({ message: "Order not found" });
         }
+        const newOrder = await orderModel.getOrderById(orderId);
+
+        broadcast({
+            type: "ORDER_UPDATED",
+            customerId: newOrder.customer_id,
+        });
+
         return res
             .status(200)
             .json({ message: "Order status updated successfully." });
@@ -82,6 +90,13 @@ async function checkoutCart(req, res) {
         // {stallId: orderId}
         const ordersMap = createdOrders.reduce((map, current) => {
             map[current.stallId] = current.orderId;
+
+            // broadcast to web socket
+            broadcast({
+                type: "NEW_ORDER",
+                stallId: current.stallId,
+            });
+
             return map;
         }, {});
 

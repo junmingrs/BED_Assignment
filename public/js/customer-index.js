@@ -1,17 +1,26 @@
-import { getCustomerIdFromToken, statusStyle } from "./helper.js";
+import { formatDate, getIdFromToken, statusStyle } from "./helper.js";
 import { LS_KEYS } from "./const.js";
+import { getSocket } from "./websocket.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
+const customerId = getIdFromToken(token);
 
 const ordersContainer = document.getElementById("orders-container");
-const orders = await getOrders();
-loadOrders();
+await loadOrders();
+
+const socket = getSocket();
+socket.addEventListener("message", async (event) => {
+    const msg = JSON.parse(event.data);
+
+    if (msg.type == "ORDER_UPDATED" && msg.customerId == customerId)
+        await loadOrders();
+});
 
 async function getOrders() {
-    const customerId = getCustomerIdFromToken(token);
     try {
         const params = new URLSearchParams();
         params.append("status", "Pending");
         params.append("status", "Preparing");
+        params.append("status", "Ready");
         const response = await fetch(`/customer/${customerId}/orders?${params}`, {
             method: "GET",
             headers: {
@@ -42,7 +51,8 @@ function loadItems(items) {
     return cards;
 }
 
-function loadOrders() {
+async function loadOrders() {
+    const orders = await getOrders();
     if (!orders || orders.length === 0) {
         ordersContainer.innerHTML = `
             <div class="flex items-center justify-center rounded-xl border border-dashed py-12">
@@ -58,14 +68,6 @@ function loadOrders() {
         orders.length >= 2 ? "grid gap-6 lg:grid-cols-2" : "flex";
 
     const orderCards = orders.map((order) => {
-        const formattedDate = new Date(order.order_date).toLocaleString("en-SG", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        });
         const card = `
         <article class="flex-1 rounded-xl border bg-white shadow-sm transition-shadow hover:shadow-md">
             <div class="border-b p-6">
@@ -79,7 +81,7 @@ function loadOrders() {
                 </span>
                 </div>
 
-            <p class="mt-3 text-sm text-gray-500">Ordered at ${formattedDate}</p>
+                <p class="mt-3 text-sm text-gray-500">Ordered at ${formatDate(order.order_date)}</p>
             </div>
 
             <div class="space-y-3 p-6">
