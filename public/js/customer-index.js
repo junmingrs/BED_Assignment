@@ -86,18 +86,17 @@ async function loadOrders() {
 
             <div class="space-y-3 p-6">
                 ${loadItems(order.items)}
-
+                ${order.is_eco_friendly_packaging
+                ? `
                 <div class="border-t pt-4">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="${order.is_eco_friendly_packaging ? "text-green-600" : "text-red-600"}">
-                            Eco-friendly packaging
-                        </span>
-
-                        <span class="font-medium ${order.is_eco_friendly_packaging ? "text-green-600" : "text-red-600"}">
-                            ${order.is_eco_friendly_packaging ? "✓" : "✕"}
-                        </span>
+                        <span>Eco-friendly packaging</span>
+                        <span class="font-medium">$0.30</span>
                     </div>
                 </div>
+                `
+                : ""
+            }
             </div>
 
             <div class="flex items-center justify-between border-t bg-gray-50 px-6 py-4 rounded-xl">

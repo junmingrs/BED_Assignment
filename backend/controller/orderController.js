@@ -71,8 +71,9 @@ async function checkoutCart(req, res) {
         const orderPromises = Object.keys(cartMap).map(async (stallId) => {
             const orderId = crypto.randomUUID();
             const items = cartMap[stallId].items; // []
-            const total = await orderModel.getTotalAmount(stallId, items);
             const isEco = cartMap[stallId].isEco || false;
+            let total = await orderModel.getTotalAmount(stallId, items);
+            if (isEco) total += 0.3; // extra fee for eco friendly packaging
 
             await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
 

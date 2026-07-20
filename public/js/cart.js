@@ -39,6 +39,8 @@ async function renderCartItems() {
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
             const stallItems = cartMap[stallId].items;
+            const isEco = cartMap[stallId].isEco === true;
+            if (isEco) totalAmount += 0.3;
             const itemCards = await Promise.all(
                 stallItems.map(async (item) => {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
@@ -86,12 +88,13 @@ async function renderCartItems() {
             <section class="space-y-4">
                 <h2 class="text-2xl font-semibold">Stall Name (TODO)</h2>
                 ${itemCards.join("")}
-                <div class="mt-2">
+                <div class="mt-2 flex justify-between items-center">
                     <label class="flex cursor-pointer items-center gap-3">
                         <input
                             type="checkbox"
                             class="eco-checkbox size-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black"
                             data-stall-id="${stallId}"
+                            ${isEco ? "checked" : ""}
                         />
                         <div>
                             <p class="text-sm font-medium leading-none">
@@ -102,6 +105,9 @@ async function renderCartItems() {
                             </p>
                         </div>
                     </label>
+                    <p class="text-sm font-semibold text-gray-900">
+                        +$0.30
+                    </p>
                 </div>
             </section>
         `;
@@ -164,7 +170,14 @@ function deleteItem(stallId, itemCode) {
 }
 
 function setEcoOption(stallId, checked) {
+    let currentTotal = parseFloat(cartTotal.textContent.split("$")[1]);
+    if (checked) {
+        currentTotal += 0.3;
+    } else {
+        currentTotal -= 0.3;
+    }
     cartMap[stallId].isEco = checked;
+    cartTotal.textContent = "$" + currentTotal.toFixed(2);
 }
 
 checkoutBtn.addEventListener("click", checkout);
