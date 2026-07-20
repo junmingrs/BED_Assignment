@@ -1,4 +1,3 @@
-// stallController.js
 const stallModel = require("../model/stallModel");
 
 const getStallInfo = async (req, res) => {

@@ -1,11 +1,9 @@
-// model/stallModel.js
 const { poolPromise } = require("../db");
 
-// GET /stalls/:stallId - get stall info (only stall details)
+// GET /stalls/:stallId - get stall info
 const getStallInfo = async (stallId) => {
     const pool = await poolPromise;
 
-    // 1. Get stall basic info
     const stallResult = await pool.request()
         .input("stallId", stallId)
         .query(`
@@ -25,42 +23,7 @@ const getStallInfo = async (stallId) => {
         throw new Error("Stall not found");
     }
 
-    const stall = stallResult.recordset[0];
-
-    // 4. Get ratings
-    const ratingsResult = await pool.request()
-        .input("stallId", stallId)
-        .query(`
-            SELECT 
-                rating_id,
-                rating,
-                comment,
-                created_at
-            FROM Rating
-            WHERE stall_id = @stallId
-            ORDER BY created_at DESC
-        `);
-
-    // 5. Get complaints
-    const complaintsResult = await pool.request()
-        .input("stallId", stallId)
-        .query(`
-            SELECT 
-                complaint_id,
-                subject,
-                description,
-                status,
-                created_at
-            FROM Complaint
-            WHERE stall_id = @stallId
-            ORDER BY created_at DESC
-        `);
-
-    return {
-        stall: stall,
-        ratings: ratingsResult.recordset,
-        complaints: complaintsResult.recordset
-    };
+    return stallResult.recordset[0];
 };
 
 // PUT /stalls/:stallId - update stall info
@@ -82,7 +45,7 @@ const updateStall = async (stallId, accountId, updateData) => {
         throw new Error("Stall not found");
     }
 
-    if (stallCheck.recordset[0].account_id !== accountId) {
+    if (stallCheck.recordset[0].vendor_id !== accountId) {
         throw new Error("You are not authorized to update this stall");
     }
 
@@ -111,7 +74,9 @@ const updateStall = async (stallId, accountId, updateData) => {
     await request.query(updateQuery);
 
     // Return updated stall
-    const result = await pool.request().input("stallId", stallId).query(`
+    const result = await pool.request()
+        .input("stallId", stallId)
+        .query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -120,7 +85,7 @@ const updateStall = async (stallId, accountId, updateData) => {
                 a.account_email
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
-            JOIN Account a ON v.vendor_id = a.vendor_id
+            JOIN Account a ON v.vendor_id = a.account_id
             WHERE s.stall_id = @stallId
         `);
 
@@ -131,7 +96,8 @@ const updateStall = async (stallId, accountId, updateData) => {
 const getAllStalls = async () => {
     const pool = await poolPromise;
 
-    const result = await pool.request().query(`
+    const result = await pool.request()
+        .query(`
             SELECT 
                 s.stall_id,
                 s.stall_name,
@@ -145,12 +111,14 @@ const getAllStalls = async () => {
     return result.recordset;
 };
 
+// GET stall_id by vendor_id
 const getStallIdByVendorId = async (vendorId) => {
     const pool = await poolPromise;
 
-    const stallResult = await pool.request().input("vendorId", vendorId).query(`
-            SELECT
-                s.stall_id
+    const stallResult = await pool.request()
+        .input("vendorId", vendorId)
+        .query(`
+            SELECT s.stall_id
             FROM Stall s
             WHERE s.vendor_id = @vendorId
         `);
@@ -161,7 +129,6 @@ const getStallIdByVendorId = async (vendorId) => {
 
     return stallResult.recordset[0];
 };
-
 
 module.exports = {
     getStallInfo,
