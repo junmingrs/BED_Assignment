@@ -4,7 +4,6 @@ import {
     getStallId,
     statusStyle,
 } from "./helper.js";
-import { LS_KEYS } from "./const.js";
 import { getSocket } from "./websocket.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 const orderTable = document.getElementById("order-table");
@@ -78,7 +77,8 @@ await loadOrders("All");
 const socket = getSocket();
 socket.addEventListener("message", async (event) => {
     const msg = JSON.parse(event.data);
-    if (msg.type != "NEW_ORDER") return;
+    if (msg.type != wsMessages.newOrder && msg.type != wsMessages.updateOrder)
+        return;
     if (msg.stallId != stallId) return;
     await loadOrders("All");
 });

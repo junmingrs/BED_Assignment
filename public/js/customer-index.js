@@ -1,5 +1,4 @@
 import { formatDate, getIdFromToken, statusStyle } from "./helper.js";
-import { LS_KEYS } from "./const.js";
 import { getSocket } from "./websocket.js";
 const token = localStorage.getItem(LS_KEYS.authToken);
 const customerId = getIdFromToken(token);
@@ -11,7 +10,7 @@ const socket = getSocket();
 socket.addEventListener("message", async (event) => {
     const msg = JSON.parse(event.data);
 
-    if (msg.type == "ORDER_UPDATED" && msg.customerId == customerId)
+    if (msg.type == wsMessages.updateOrder && msg.customerId == customerId)
         await loadOrders();
 });
 
@@ -51,6 +50,30 @@ function loadItems(items) {
     return cards;
 }
 
+async function cancelOrder(orderId) {
+    if (!confirm("Are you sure you want to cancel this order?")) return;
+    try {
+        const response = await fetch(`/orders/${orderId}/Cancelled`, {
+            method: "PATCH",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+        console.log(data);
+        if (response.ok) {
+            alert("Order cancelled successfully");
+        } else {
+            console.error(data.message);
+            alert("Unable to cancel order, please try again later.");
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 async function loadOrders() {
     const orders = await getOrders();
     if (!orders || orders.length === 0) {
@@ -65,7 +88,7 @@ async function loadOrders() {
     }
 
     ordersContainer.className =
-        orders.length >= 2 ? "grid gap-6 lg:grid-cols-2" : "flex";
+        orders.length >= 2 ? "grid gap-6 items-start lg:grid-cols-2" : "flex";
 
     const orderCards = orders.map((order) => {
         const card = `
@@ -76,7 +99,7 @@ async function loadOrders() {
                         <p class="text-sm text-gray-500">Queue Number</p>
                         <h3 class="mt-1 text-3xl font-bold">${order.queue_number}</h3>
                     </div>
-                <span class="inline-block mt-3 text-xs font-medium px-2 py-1 rounded-full ${statusStyle(order.status)}">
+                <span class="inline-block mt-3 text-xs font-medium px-2 py-1 rounded-xl ${statusStyle(order.status)}">
                     ${order.status}
                 </span>
                 </div>
@@ -98,12 +121,24 @@ async function loadOrders() {
                 : ""
             }
             </div>
-
-            <div class="flex items-center justify-between border-t bg-gray-50 px-6 py-4 rounded-xl">
+            <div class="flex justify-between border-t bg-gray-50 px-6 py-4 rounded-b-xl">
                 <div>
                     <p class="text-sm text-gray-500">Total</p>
                     <p class="text-xl font-bold">$${order.total_amount.toFixed(2)}</p>
                 </div>
+
+
+                ${order.status === "Pending"
+                ? `
+                        <button
+                            class="rounded-lg bg-red-600 px-3 py-0 text-sm font-medium text-white transition hover:bg-red-700"
+                            onclick="cancelOrder('${order.order_id}')"
+                        >
+                            Cancel Order
+                        </button>
+                        `
+                : ""
+            }
             </div>
         </article>
     `;
@@ -111,3 +146,5 @@ async function loadOrders() {
     });
     ordersContainer.innerHTML = orderCards.join("");
 }
+
+window.cancelOrder = cancelOrder;

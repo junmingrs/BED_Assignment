@@ -1,3 +1,4 @@
+const { wsMessages } = require("../../public/js/const.js");
 const orderModel = require("../model/orderModel");
 const { broadcast } = require("../ws");
 
@@ -50,8 +51,9 @@ async function updateOrderStatus(req, res) {
         const newOrder = await orderModel.getOrderById(orderId);
 
         broadcast({
-            type: "ORDER_UPDATED",
+            type: wsMessages.updateOrder,
             customerId: newOrder.customer_id,
+            stallId: newOrder.stall_id,
         });
 
         return res
@@ -94,7 +96,7 @@ async function checkoutCart(req, res) {
 
             // broadcast to web socket
             broadcast({
-                type: "NEW_ORDER",
+                type: wsMessages.newOrder,
                 stallId: current.stallId,
             });
 

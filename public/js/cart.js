@@ -1,11 +1,9 @@
-import { LS_KEYS } from "./const.js";
 import { getIdFromToken } from "./helper.js";
 const cartContainer = document.getElementById("container");
 const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
-const main = document.getElementsByTagName("main");
 
 const token = localStorage.getItem(LS_KEYS.authToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
