@@ -169,6 +169,16 @@ app.delete(
     feedbackController.deleteFeedback,
 );
 
+app.post("/menuitemlike/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
+app.delete("/menuitem/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
+app.get("/menuitem/:customerId", authorise("Customer"), menuItemController.getMenuItemLikeByCustomer);
+
+app.get(
+    "/menuitem",
+    authorise("Vendor", "Customer"),
+    menuItemController.getMenuItemsByStallIdAndItemCode,
+);
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
