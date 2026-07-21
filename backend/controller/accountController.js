@@ -4,8 +4,7 @@ const accountModel = require("../model/accountModel");
 
 function generateToken(id, role) {
     return jwt.sign({ id, role }, process.env.JWT_SECRET_KEY, {
-        // expiresIn: "3600s",
-        expiresIn: "30s",
+        expiresIn: "3600s",
     });
 }
 
@@ -45,7 +44,9 @@ async function registerUser(req, res) {
         }
 
         const token = generateToken(accountId, role);
-        const refreshToken = jwt.sign({ accountId, role }, process.env.REFRESH_TOKEN_SECRET_KEY);
+        const refreshToken = jwt.sign({ accountId, role }, process.env.REFRESH_TOKEN_SECRET_KEY, {
+            expiresIn: "604,800" // 7 days in seconds
+        });
         await accountModel.createRefreshToken(accountId, refreshToken);
 
         return res
