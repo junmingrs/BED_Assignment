@@ -16,6 +16,7 @@ const promotionController = require("./controller/promotionController");
 const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
+const analyticsController = require("./controller/analyticsController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin } = require("./middleware/validate");
 
@@ -164,6 +165,13 @@ app.delete(
     "/feedback/:feedbackId",
     authorise("Customer"),
     feedbackController.deleteFeedback,
+);
+
+// Stall Analytics
+app.get(
+    "/vendor/analytics/kpi/:stallId",
+    authorise("Vendor"),
+    analyticsController.getKPI,
 );
 
 // Start server
