@@ -34,6 +34,26 @@ async function createAccount(account) {
     return newId;
 }
 
+async function createRefreshToken(account_id, refresh_token) {
+    const query = `INSERT INTO RefreshToken (account_id, refresh_token) VALUES (@account_id, @refresh_token)`;
+    const pool = await poolPromise;
+    await pool
+        .request()
+        .input("account_id", account_id)
+        .input("refresh_token", refresh_token)
+        .query(query);
+}
+
+async function updateRefreshToken(account_id, refresh_token) {
+    const query = `UPDATE RefreshToken SET refresh_token = @refresh_token WHERE account_id = @account_id`;
+    const pool = await poolPromise;
+    await pool
+        .request()
+        .input("account_id", account_id)
+        .input("refresh_token", refresh_token)
+        .query(query);
+}
+
 async function createCustomer(account_id, name) {
     const query = `INSERT INTO Customer (customer_id, customer_name, loyalty_points) VALUES (@id, @name, @points)`;
     const pool = await poolPromise;
@@ -63,6 +83,13 @@ async function createNEA(account_id) {
     await pool.request().input("id", account_id).query(query);
 }
 
+async function findRefreshToken(refresh_token) {
+    const query = `SELECT COUNT(*) AS n FROM RefreshToken WHERE refresh_token = @refresh_token`;
+    const pool = await poolPromise;
+    const exists = await pool.request().input("refresh_token", refresh_token).query(query);
+    return exists.recordset[0].n;
+}
+
 function getVendorIdFromToken(token) {
     // splits the token back to header, payload, signature and decodes it back from base64
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -77,4 +104,8 @@ module.exports = {
     createVendor,
     createOperator,
     createNEA,
+    getVendorIdFromToken,
+    createRefreshToken,
+    updateRefreshToken,
+    findRefreshToken,
 };
