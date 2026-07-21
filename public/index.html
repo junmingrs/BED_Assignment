@@ -1,89 +1,82 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign In</title>
     <link rel="stylesheet" href="css/styles.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <div class="screen">
-      <div class="stage">
-        <div class="ticket">
-          <!-- Left: dark ticket stub -->
-          <div class="ticket-stub">
-            <div class="mark">
-              <div class="mark-glyph">H</div>
-              <div class="mark-word">Hawker Ups</div>
-            </div>
+        <div class="stage">
+            <div class="ticket">
+                <!-- Left: dark ticket stub -->
+                <div class="ticket-stub">
+                    <div class="mark">
+                        <div class="mark-glyph">H</div>
+                        <div class="mark-word">Hawker Ups</div>
+                    </div>
 
-            <div class="stub-mid">
-              <h2 class="stub-headline">Welcome back<br />to the counter.</h2>
-              <p class="stub-copy">
-                Sign in to pick up where you left off — orders, history, and
-                your saved details.
-              </p>
-            </div>
+                    <div class="stub-mid">
+                        <h2 class="stub-headline">Welcome back<br />to the counter.</h2>
+                        <p class="stub-copy">
+                            Sign in to pick up where you left off — orders, history, and
+                            your saved details.
+                        </p>
+                    </div>
 
-            <div class="stub-foot">
-              <div class="stub-row"><span>Ticket</span><b>No. 01</b></div>
-              <div class="stub-row"><span>Lane</span><b>Member</b></div>
-            </div>
-          </div>
-
-          <!-- Right: form -->
-          <div class="ticket-form">
-            <div class="form-head">
-              <span class="eyebrow">Sign in to your account</span>
-              <h1 class="form-title">Welcome back</h1>
-              <p class="form-sub" id="formNote"></p>
-            </div>
-
-            <form id="loginForm" novalidate>
-              <div class="field" id="emailField">
-                <label for="email">Email</label>
-                <div class="field-input">
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="you@example.com"
-                    autocomplete="email"
-                  />
+                    <div class="stub-foot">
+                        <div class="stub-row"><span>Ticket</span><b>No. 01</b></div>
+                        <div class="stub-row"><span>Lane</span><b>Member</b></div>
+                    </div>
                 </div>
-                <span class="field-error" id="emailError"></span>
-              </div>
 
-              <div class="field" id="passwordField">
-                <label for="password">Password</label>
-                <div class="field-input">
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="••••••••"
-                    autocomplete="current-password"
-                  />
+                <!-- Right: form -->
+                <div class="ticket-form">
+                    <div class="form-head">
+                        <span class="eyebrow">Sign in to your account</span>
+                        <h1 class="form-title">Welcome back</h1>
+                        <p class="form-sub" id="formNote"></p>
+                    </div>
+
+                    <form id="loginForm" novalidate>
+                        <div class="field" id="emailField">
+                            <label for="email">Email</label>
+                            <div class="field-input">
+                                <input type="email" id="email" name="email" placeholder="you@example.com"
+                                    autocomplete="email" />
+                            </div>
+                            <span class="field-error" id="emailError"></span>
+                        </div>
+
+                        <div class="field" id="passwordField">
+                            <label for="password">Password</label>
+                            <div class="field-input">
+                                <input type="password" id="password" name="password" placeholder="••••••••"
+                                    autocomplete="current-password" />
+                            </div>
+                            <span class="field-error" id="passwordError"></span>
+                        </div>
+
+                        <button type="submit" class="btn" id="submitBtn">Sign in</button>
+                    </form>
+
+                    <p class="switch-line">
+                        Don't have an account? <a href="register.html">Create one</a>
+                    </p>
                 </div>
-                <span class="field-error" id="passwordError"></span>
-              </div>
-
-              <button type="submit" class="btn" id="submitBtn">Sign in</button>
-            </form>
-
-            <p class="switch-line">
-              Don't have an account? <a href="register.html">Create one</a>
-            </p>
-          </div>
+            </div>
         </div>
-      </div>
 
-      <div class="foot-link">
-        <a href="operator.html">Staff login</a>
-      </div>
+        <div class="foot-link">
+            <a href="operator.html">Staff login</a>
+        </div>
     </div>
 
+    <script src="/js/const.js"></script>
     <script type="module" src="js/login.js"></script>
-  </body>
+</body>
+
 </html>

@@ -55,9 +55,14 @@ async function updateRefreshToken(account_id, refresh_token) {
 }
 
 async function createCustomer(account_id, name) {
-    const query = `INSERT INTO Customer (customer_id, customer_name) VALUES (@id, @name)`;
+    const query = `INSERT INTO Customer (customer_id, customer_name, loyalty_points) VALUES (@id, @name, @points)`;
     const pool = await poolPromise;
-    await pool.request().input("id", account_id).input("name", name).query(query);
+    await pool
+        .request()
+        .input("id", account_id)
+        .input("name", name)
+        .input("points", 0)
+        .query(query);
 }
 
 async function createVendor(account_id) {

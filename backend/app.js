@@ -2,6 +2,8 @@
 const path = require("path");
 const express = require("express");
 const sql = require("mssql");
+const http = require("http");
+const { broadcast, initWebServer } = require("./ws.js");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -17,12 +19,16 @@ const feedbackController = require("./controller/feedbackController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin, authenticateToken } = require("./middleware/validate");
 
-
 // TODO: Import Validations
 
 // Create Express app
 const app = express();
 const port = process.env.PORT || 3000;
+
+// create websocket
+const server = http.createServer(app);
+initWebServer(server);
+server.listen(3000);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
@@ -59,7 +65,7 @@ app.get(
 );
 app.patch(
     "/orders/:orderId/:status",
-    authorise("Vendor"),
+    authorise("Vendor", "Customer"),
     orderController.updateOrderStatus,
 );
 app.get(
@@ -72,92 +78,95 @@ app.get(
     authorise("Vendor", "Operator"),
     stallController.getStallInfo,
 );
-
-app.post("/promotion", authorise("Vendor"), promotionController.createPromotion);
-app.get("/promotion", authorise("Vendor"), promotionController.getPromotionsByStallId);
-app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
-app.delete("/promotion", authorise("Vendor"), promotionController.deletePromotion);
-
+app.get(
+    "/stalls",
+    authorise("Vendor", "Customer"),
+    stallController.getAllStalls,
+);
+app.put(
+    "/stalls/:stallId",
+    authorise("Vendor", "Operator"),
+    stallController.updateStall,
+);
 app.get(
     "/vendors/:vendorId/stall",
     authorise("Vendor"),
     stallController.getStallIdByVendorId,
-// app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
-// app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
-// app.get(
-//     "/stalls/:stallId/orders",
-//     authorise("Customer", "Vendor"),
-//     orderController.getOrderByStallId,
-// );
-app.get("/stalls", authorise("Vendor", "Customer"), stallController.getAllStalls));
-app.get(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.getStallInfo,
 );
-// PUT /stalls/:stallId - update stall info
-app.put(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.updateStall
+
+app.post(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.createPromotion,
+);
+app.get(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.getPromotionsByStallId,
+);
+app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
+app.delete(
+    "/promotion",
+    authorise("Vendor"),
+    promotionController.deletePromotion,
 );
 
 // GET /stalls/:stallId/ratings - get ratings for a stall
 app.get(
     "/stalls/:stallId/ratings",
     authorise("Vendor", "Customer", "Operator"),
-    ratingController.getRatings
+    ratingController.getRatings,
 );
 
 // POST /stalls/:stallId/ratings - submit a rating
 app.post(
     "/stalls/:stallId/ratings",
     authorise("Customer"),
-    ratingController.submitRating
+    ratingController.submitRating,
 );
 // DELETE /ratings/:ratingId - delete a rating
 app.delete(
     "/ratings/:ratingId",
     authorise("Customer"),
-    ratingController.deleteRating
+    ratingController.deleteRating,
 );
 
 // GET /stalls/:stallId/complaints - get complaints for a stall
 app.get(
     "/stalls/:stallId/complaints",
     authorise("Vendor", "Customer", "Operator"),
-    complaintController.getComplaints
+    complaintController.getComplaints,
 );
 
 // POST /stalls/:stallId/complaints - submit a complaint
 app.post(
     "/stalls/:stallId/complaints",
     authorise("Customer"),
-    complaintController.submitComplaint
+    complaintController.submitComplaint,
 );
 // DELETE /complaints/:complaintId - delete a complaint
 app.delete(
     "/complaints/:complaintId",
     authorise("Customer"),
-    complaintController.deleteComplaint
+    complaintController.deleteComplaint,
 );
 // GET /stalls/:stallId/feedback - get feedbacks for a stall
 app.get(
     "/stalls/:stallId/feedback",
     authorise("Vendor", "Customer", "Operator"),
-    feedbackController.getFeedback
+    feedbackController.getFeedback,
 );
 // POST /stalls/:stallId/feedback - submit feedback(only by customer)
 app.post(
     "/stalls/:stallId/feedback",
     authorise("Customer"),
-    feedbackController.submitFeedback
+    feedbackController.submitFeedback,
 );
 // DELETE /feedback/:feedbackId - delete a feedback
 app.delete(
     "/feedback/:feedbackId",
     authorise("Customer"),
-    feedbackController.deleteFeedback
+    feedbackController.deleteFeedback,
 );
 
 // Start server
