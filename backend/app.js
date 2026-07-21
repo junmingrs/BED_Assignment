@@ -33,7 +33,7 @@ app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 
 // refresh token
-app.post("/refresh", authenticateToken, accountController.refreshToken);
+app.post("/refresh", accountController.refreshJWTToken);
 
 app.post("/menuitem", authorise("Vendor"), menuItemController.createMenuItem);
 app.put("/menuitem", authorise("Vendor"), menuItemController.updateMenuItem);

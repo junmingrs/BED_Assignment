@@ -1,11 +1,11 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const accountModel = require("../model/accountModel");
-const { ref } = require("joi");
 
 function generateToken(id, role) {
     return jwt.sign({ id, role }, process.env.JWT_SECRET_KEY, {
-        expiresIn: "3600s",
+        // expiresIn: "3600s",
+        expiresIn: "30s",
     });
 }
 
@@ -75,6 +75,11 @@ async function loginUser(req, res) {
         const token = generateToken(user.account_id, user.role);
         const refreshToken = jwt.sign({ accountId: user.account_id, role: user.role }, process.env.REFRESH_TOKEN_SECRET_KEY);
         await accountModel.updateRefreshToken(user.account_id, refreshToken);
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+        })
         const role = user.role;
         return res
             .status(200)
@@ -85,24 +90,34 @@ async function loginUser(req, res) {
     }
 }
 
-async function refreshToken(req, res) {
+function parseCookie(header) {
+    return header.split(';').reduce((acc, pair) => {
+        const [key, ...v] = pair.trim().split('=');
+        if (key) acc[key] = decodeURIComponent(v.join('='));
+        return acc;
+    }, {});
+}
 
-    const refreshToken = req.body.token;
+async function refreshJWTToken(cookie) {
+
+    const refreshToken = parseCookie(cookie).refreshToken;
     try {
         const exists = await accountModel.findRefreshToken(refreshToken);
 
-        if (!exists) {
-            return res.status(401).json({ message: "Refresh token not found. Log in again to create refresh token" });
+        if (exists == 0) {
+            return null;
         }
-        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY, (err, user) => {
-            if (err) return res.status(401).json({ message: "Refresh token not found. Log in again to create refresh token" });
-            const token = generateToken(user.account_id, user.role);
-            res.json({ token })
-        })
+        const user = await new Promise((resolve, reject) => {
+            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY, (err, user) => {
+                if (err) return reject(err);
+                return resolve(user);
+            });
+        });
+        return generateToken(user.account_id, user.role);
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Internal server error" });
+        console.log(err)
+        return null;
     }
 }
 
-module.exports = { registerUser, loginUser, refreshToken };
+module.exports = { registerUser, loginUser, refreshJWTToken };
