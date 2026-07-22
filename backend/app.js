@@ -23,7 +23,7 @@ const { validateRegister, validateLogin, authenticateToken } = require("./middle
 
 // Create Express app
 const app = express();
-const port = process.env.PORT || process.argv[2] ;
+const port = process.env.PORT || process.argv[2];
 
 // create websocket
 const server = http.createServer(app);
