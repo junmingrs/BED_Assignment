@@ -5,10 +5,8 @@ const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
 
-import { getSocket } from "./websocket.js";
 const token = sessionStorage.getItem(SS_KEYS.accessToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
-const socket = getSocket();
 
 async function getItemById(stallId, itemCode) {
     try {
