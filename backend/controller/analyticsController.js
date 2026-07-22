@@ -11,4 +11,15 @@ async function getKPI(req, res) {
     }
 }
 
-module.exports = { getKPI };
+async function getHourlySales(req, res) {
+    const { stallId } = req.params;
+    try {
+        const hourlySales = await analyticsModel.getHourlySales(stallId);
+        return res.status(200).json(hourlySales);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+module.exports = { getKPI, getHourlySales };

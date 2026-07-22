@@ -37,6 +37,12 @@ export function formatDate(date) {
     });
 }
 
+export function formatHour(hour) {
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+    return `${displayHour} ${ampm}`;
+}
+
 // FOR VENDOR ORDER AND VENDOR INDEX PAGES
 export async function getStallId(vendorId, token) {
     try {

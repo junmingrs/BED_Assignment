@@ -19,4 +19,23 @@ async function getKPI(stallId) {
     return result.recordset[0];
 }
 
-module.exports = { getKPI };
+async function getHourlySales(stallId) {
+    // TODO: filter by week. this is currently for "this week"
+    const query = `
+SELECT 
+    DATEPART(hour, order_date AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time') AS sales_hour,
+    ISNULL(SUM(total_amount), 0) AS totalRevenue
+FROM Orders
+WHERE stall_id = @id
+  AND CAST(order_date AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time' AS DATE) = CAST(GETDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time' AS DATE)
+GROUP BY DATEPART(hour, order_date AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time')
+ORDER BY sales_hour ASC;
+        `;
+    const pool = await poolPromise;
+    const result = await pool.request().input("id", stallId).query(query);
+
+    if (result.recordset.length === 0) return null;
+    return result.recordset;
+}
+
+module.exports = { getKPI, getHourlySales };

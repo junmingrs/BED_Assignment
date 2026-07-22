@@ -173,6 +173,11 @@ app.get(
     authorise("Vendor"),
     analyticsController.getKPI,
 );
+app.get(
+    "/vendor/analytics/hourly-sales/:stallId",
+    authorise("Vendor"),
+    analyticsController.getHourlySales,
+);
 
 // Start server
 app.listen(port, () => {
