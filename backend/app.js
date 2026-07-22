@@ -17,19 +17,24 @@ const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
 const analyticsController = require("./controller/analyticsController");
+const inspectionController = require("./controller/inspectionController");
 const { authorise } = require("./middleware/auth");
-const { validateRegister, validateLogin } = require("./middleware/validate");
+const {
+    validateRegister,
+    validateLogin,
+    authenticateToken,
+} = require("./middleware/validate");
 
 // TODO: Import Validations
 
 // Create Express app
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || process.argv[2];
 
 // create websocket
 const server = http.createServer(app);
 initWebServer(server);
-server.listen(3000);
+server.listen(port);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
@@ -39,6 +44,9 @@ app.use(express.static(path.join("public")));
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 
+// refresh token
+app.post("/refresh", accountController.refreshJWTToken);
+
 app.post("/menuitem", authorise("Vendor"), menuItemController.createMenuItem);
 app.put("/menuitem", authorise("Vendor"), menuItemController.updateMenuItem);
 app.delete("/menuitem", authorise("Vendor"), menuItemController.deleteMenuItem);
@@ -47,7 +55,12 @@ app.get(
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
+app.get(
+    "/menuitems",
+    authorise("Vendor"),
+    authenticateToken,
+    menuItemController.getAllMenuItems,
+);
 app.get(
     "/menuitemsbystall/:stallId",
     authorise("Vendor"),
@@ -165,6 +178,26 @@ app.delete(
     "/feedback/:feedbackId",
     authorise("Customer"),
     feedbackController.deleteFeedback,
+);
+// GET /stalls/:stallId/inspections - get inspections for a stall
+app.get(
+    "/stalls/:stallId/inspections",
+    authorise("NEA", "Vendor", "Operator"),
+    inspectionController.getInspections,
+);
+
+// POST /stalls/:stallId/inspections - create an inspection (NEA only)
+app.post(
+    "/stalls/:stallId/inspections",
+    authorise("NEA"),
+    inspectionController.createInspection,
+);
+
+// DELETE /inspections/:inspectionId - delete an inspection (NEA only)
+app.delete(
+    "/inspections/:inspectionId",
+    authorise("NEA"),
+    inspectionController.deleteInspection,
 );
 
 // Stall Analytics
