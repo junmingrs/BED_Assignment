@@ -22,4 +22,15 @@ async function getHourlySales(req, res) {
     }
 }
 
-module.exports = { getKPI, getHourlySales };
+async function getTopItems(req, res) {
+    const { stallId } = req.params;
+    try {
+        const topItems = await analyticsModel.getTopItems(stallId);
+        return res.status(200).json(topItems);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+module.exports = { getKPI, getHourlySales, getTopItems };

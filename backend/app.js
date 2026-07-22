@@ -178,6 +178,11 @@ app.get(
     authorise("Vendor"),
     analyticsController.getHourlySales,
 );
+app.get(
+    "/vendor/analytics/top-items/:stallId",
+    authorise("Vendor"),
+    analyticsController.getTopItems,
+);
 
 // Start server
 app.listen(port, () => {

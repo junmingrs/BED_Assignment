@@ -38,4 +38,33 @@ ORDER BY sales_hour ASC;
     return result.recordset;
 }
 
-module.exports = { getKPI, getHourlySales };
+async function getTopItems(stallId) {
+    // TODO: filter by week. this is currently for "this week"
+    const query = `
+        SELECT 
+            CAST(m.item_desc AS NVARCHAR(255)) AS itemName,
+            SUM(oi.quantity) AS totalSold,
+            SUM(oi.quantity * m.item_price) AS totalRevenue
+        FROM OrderItem oi
+        INNER JOIN Orders o 
+            ON oi.order_id = o.order_id
+        INNER JOIN MenuItem m 
+            ON oi.stall_id = m.stall_id 
+           AND oi.item_code = m.item_code
+        WHERE 
+            o.stall_id = @id
+            AND o.status = 'Completed'
+            AND (o.order_date AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time') >= DATEADD(day, -7, CAST(SYSDATETIMEOFFSET() AT TIME ZONE 'Singapore Standard Time' AS DATE))
+        GROUP BY 
+            CAST(m.item_desc AS NVARCHAR(255))
+        ORDER BY 
+            totalSold DESC;
+        `;
+    const pool = await poolPromise;
+    const result = await pool.request().input("id", stallId).query(query);
+
+    if (result.recordset.length === 0) return null;
+    return result.recordset;
+}
+
+module.exports = { getKPI, getHourlySales, getTopItems };

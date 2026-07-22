@@ -5,6 +5,7 @@ const kpiElements = {
     orderCount: document.getElementById("kpi-orders"),
     averageOrderValue: document.getElementById("kpi-aov"),
 };
+const maxMenuItemCount = document.getElementById("max-menu-item");
 
 const token = localStorage.getItem(LS_KEYS.authToken);
 const vendorId = await getIdFromToken(token);
@@ -88,21 +89,37 @@ function createSalesChart(hourlySales) {
     });
 }
 
-function createTopItemsChart() {
+function createTopItemsChart(topItems) {
+    const limit = 3;
+    maxMenuItemCount.textContent = Math.min(limit, topItems.length);
+    let others = {
+        itemName: "Others",
+        totalSold: 0,
+        totalRevenue: 0,
+    };
+    for (let i = limit; i < topItems.length; i++) {
+        others.totalSold += topItems[i].totalSold;
+        others.totalRevenue += topItems[i].totalRevenue;
+    }
+    let items = topItems.slice(0, limit);
+    if (topItems.length > limit) items.push(others);
+
+    let labels = [];
+    let data = [];
+    // TODO: add filter by top order count or top revenue
+    items.forEach((item) => {
+        labels.push(item.itemName);
+        data.push(item.totalSold);
+    });
+
     const ctxTopItems = document.getElementById("topItemsChart").getContext("2d");
     new Chart(ctxTopItems, {
         type: "doughnut",
         data: {
-            labels: [
-                "Chicken Rice",
-                "Laksa",
-                "Ice Lemon Tea",
-                "Wonton Mee",
-                "Spring Rolls",
-            ],
+            labels,
             datasets: [
                 {
-                    data: [120, 85, 70, 45, 30],
+                    data,
                     backgroundColor: [
                         "#0f172a",
                         "#334155",
@@ -155,6 +172,9 @@ async function loadUI() {
         `/vendor/analytics/hourly-sales/${stallId}`,
     );
     createSalesChart(hourlySales ?? []);
+
+    const topItems = await fetchAPI(`/vendor/analytics/top-items/${stallId}`);
+    createTopItemsChart(topItems ?? []);
 }
 
-loadUI();
+document.onload = loadUI();
