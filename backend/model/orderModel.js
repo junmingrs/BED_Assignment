@@ -81,12 +81,21 @@ async function getOrdersByCustomer(customerId, statuses = []) {
 }
 
 async function getOrderByStallId(stallId) {
-    const query = `SELECT order_id, stall_id, customer_id, order_date, total_amount, status, queue_number, is_eco_friendly_packaging FROM Orders WHERE stall_id= @id`;
+    const query = `SELECT * FROM Orders WHERE stall_id= @id ORDER BY queue_number ASC`;
     const pool = await poolPromise;
     const result = await pool.request().input("id", stallId).query(query);
 
     if (result.recordset.length === 0) return null;
-    return result.recordset;
+
+    const orders = result.recordset;
+
+    await Promise.all(
+        orders.map(async (order) => {
+            order.items = await getItemsFromOrder(order.order_id);
+        }),
+    );
+
+    return orders;
 }
 
 async function getNextQueueNum(stallId) {

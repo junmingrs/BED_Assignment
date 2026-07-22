@@ -1,5 +1,3 @@
-import { LS_KEYS } from "./const.js";
-
 // TODO: make it work for all buttons
 const addCartBtn = document.querySelector(".addToCartBtn");
 
@@ -15,7 +13,7 @@ async function addToCart() {
     // TODO: GET the menu item details by id. ie for each button in the data- there's an attribute to store the id of that menu item so can GET /menuItemByStallCodeAndItemCode
     const item = {
         stallId: "DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD",
-        itemCode: "M001",
+        itemCode: "DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD'",
         quantity: 1,
     };
 

@@ -1,4 +1,3 @@
-import { LS_KEYS } from "./const.js";
 import { statusStyle } from "./helper.js";
 
 const params = new URLSearchParams(window.location.search);
