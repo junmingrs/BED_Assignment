@@ -183,6 +183,11 @@ app.get(
     authorise("Vendor"),
     analyticsController.getTopItems,
 );
+app.get(
+    "/vendor/analytics/ai-summary/:stallId",
+    authorise("Vendor"),
+    analyticsController.getAISummary,
+);
 
 // Start server
 app.listen(port, () => {

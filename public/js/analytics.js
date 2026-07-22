@@ -159,6 +159,8 @@ function createTopItemsChart(topItems) {
     });
 }
 
+async function getAISummary() { }
+
 async function loadUI() {
     const kpiData = await fetchAPI(`/vendor/analytics/kpi/${stallId}`);
     for (const [item, container] of Object.entries(kpiElements)) {

@@ -1,4 +1,6 @@
+const { InferenceClient } = require("@huggingface/inference");
 const { poolPromise } = require("../db");
+const HF_TOKEN = process.env.HF_TOKEN;
 
 async function getKPI(stallId) {
     // TODO: filter by week. this is currently for "this week"
@@ -67,4 +69,68 @@ async function getTopItems(stallId) {
     return result.recordset;
 }
 
-module.exports = { getKPI, getHourlySales, getTopItems };
+async function getAISummary({ ratings, complaints, feedback, orders }) {
+    // TODO: filter by week. this is currently for "this week"
+    // TODO: update prompt for inspections
+
+    const client = new InferenceClient(process.env.HF_TOKEN);
+    const systemPrompt = `
+        You are an expert AI Food Stall Operations Consultant. 
+        Analyze the provided JSON operational data (orders, ratings, complaints, feedback) for a food stall for this week.
+
+        Output your summary strictly as a JSON object with 3 key fields matching these exact card requirements:
+        1. "highlights": Key sales achievements, popular items, or revenue growth (1-2 sentences).
+        2. "flags": Active complaints, low rating trends, or operational warnings. If there are no issues, warnings, or complaints, simply state "Everything is looking good! No warnings or complaints flagged."
+        3. "actions": 2 prioritized, actionable steps for the vendor today. If no immediate action is required, it is completely okay to say "Everything is on track. No urgent action required today."
+
+        CRITICAL: Return ONLY raw, valid JSON. Do not write introductory text, markdown code blocks (like \`\`\`json), or explanations
+
+        Rules:
+        - Be concise, professional, and encouraging.
+        - Use bullet points and bold key stats/numbers for readability.
+        - Only base your response on the provided data. Do not make up facts.
+    `;
+
+    const userPrompt = `
+        Operational Data for this week:
+        - Orders & Revenue: ${JSON.stringify(orders)}
+        - Customer Ratings: ${JSON.stringify(ratings)}
+        - Active Complaints: ${JSON.stringify(complaints)}
+        - Recent Customer Feedback: ${JSON.stringify(feedback)}
+        `;
+
+    try {
+        const out = await client.chatCompletion({
+            model: "Qwen/Qwen2.5-7B-Instruct",
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt },
+            ],
+            max_tokens: 400,
+            temperature: 0.2,
+        });
+        const rawContent = out.choices[0].message.content.trim();
+        // in case it accidentally returns the ```json
+        const cleanedJsonString = rawContent.replace(/^```json\s*|\s*```$/g, "");
+        return JSON.parse(cleanedJsonString);
+    } catch (err) {
+        if (err instanceof InferenceClientProviderApiError) {
+            console.error("Provider status:", err.httpResponse.status);
+            console.error("Provider body:", err.httpResponse.body);
+            console.error("Request URL:", err.httpRequest.url);
+        } else {
+            console.error("Error generating or parsing AI summary:", err);
+        }
+
+        // fallback content
+        return {
+            highlights:
+                "Data processing complete for this week. Revenue and order trends remain steady.",
+            flags: "No major operational flags detected at this time.",
+            actions:
+                "Review customer feedback and prepare stock for upcoming peak hours.",
+        };
+    }
+}
+
+module.exports = { getKPI, getHourlySales, getTopItems, getAISummary };

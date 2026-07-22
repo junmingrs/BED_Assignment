@@ -20,6 +20,9 @@
     },
     "homepage": "https://github.com/junmingrs/BED_Assignment#readme",
     "dependencies": {
+        "@huggingface/hub": "^2.13.3",
+        "@huggingface/inference": "^4.13.23",
+        "@huggingface/mcp-client": "^0.2.3",
         "bcrypt": "^6.0.0",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
