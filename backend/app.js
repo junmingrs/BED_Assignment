@@ -23,12 +23,13 @@ const { validateRegister, validateLogin, authenticateToken } = require("./middle
 
 // Create Express app
 const app = express();
-const port = process.env.PORT || 3000;
+// const port = process.argv[2] || process.env.PORT || 3000;
+const port = process.argv[2] || process.env.PORT;
 
 // create websocket
 const server = http.createServer(app);
 initWebServer(server);
-server.listen(3000);
+server.listen(port);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
