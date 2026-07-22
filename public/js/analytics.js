@@ -5,6 +5,12 @@ const kpiElements = {
     orderCount: document.getElementById("kpi-orders"),
     averageOrderValue: document.getElementById("kpi-aov"),
 };
+const summaryItems = {
+    highlights: document.getElementById("ai-highlights"),
+    flags: document.getElementById("ai-flags"),
+    actions: document.getElementById("ai-actions"),
+};
+
 const maxMenuItemCount = document.getElementById("max-menu-item");
 
 const token = localStorage.getItem(LS_KEYS.authToken);
@@ -159,10 +165,7 @@ function createTopItemsChart(topItems) {
     });
 }
 
-async function getAISummary() { }
-
-async function loadUI() {
-    const kpiData = await fetchAPI(`/vendor/analytics/kpi/${stallId}`);
+function loadKPI(kpiData) {
     for (const [item, container] of Object.entries(kpiElements)) {
         if (item == "orderCount") {
             container.textContent = kpiData[item];
@@ -170,6 +173,18 @@ async function loadUI() {
             container.textContent = "$" + kpiData[item].toFixed(2);
         }
     }
+}
+
+function loadAISummary(summary) {
+    for (const [item, container] of Object.entries(summaryItems)) {
+        container.textContent = summary[item].join("\n");
+    }
+}
+
+async function loadUI() {
+    const kpiData = await fetchAPI(`/vendor/analytics/kpi/${stallId}`);
+    loadKPI(kpiData);
+
     const hourlySales = await fetchAPI(
         `/vendor/analytics/hourly-sales/${stallId}`,
     );
@@ -177,6 +192,9 @@ async function loadUI() {
 
     const topItems = await fetchAPI(`/vendor/analytics/top-items/${stallId}`);
     createTopItemsChart(topItems ?? []);
+
+    const summary = await fetchAPI(`/vendor/analytics/ai-summary/${stallId}`);
+    loadAISummary(summary);
 }
 
 document.onload = loadUI();

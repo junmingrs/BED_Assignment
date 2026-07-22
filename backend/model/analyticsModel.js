@@ -1,6 +1,8 @@
-const { InferenceClient } = require("@huggingface/inference");
+const {
+    InferenceClient,
+    InferenceClientProviderApiError,
+} = require("@huggingface/inference");
 const { poolPromise } = require("../db");
-const HF_TOKEN = process.env.HF_TOKEN;
 
 async function getKPI(stallId) {
     // TODO: filter by week. this is currently for "this week"
