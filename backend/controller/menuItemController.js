@@ -115,11 +115,8 @@ async function deleteMenuItemLike(req, res) {
     try {
         const customerId = req.params.customerId;
         const { stallId, itemCode } = req.body;
-        const success = await menuItemModel.deleteMenuItemLike(stallId, itemCode, customerId);
-        if (!success) {
-            return res.status(500).json({ message: "Theres still orders with this menu item" });
-        }
-        return res.status(201).json({ success: "true" });
+        await menuItemModel.deleteMenuItemLike(stallId, itemCode, customerId);
+        return res.status(201).json({ success: true });
     } catch (error) {
         console.error("Controller error:", error);
         return res.status(500).json({ message: "Error deleting menu item" });
