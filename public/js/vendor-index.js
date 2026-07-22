@@ -1,4 +1,5 @@
 import { formatDate, getIdFromToken, getOrders, getStallId } from "./helper.js";
+import { showNotification, TYPE_STYLES } from "./notification.js";
 import { getSocket } from "./websocket.js";
 
 const pendingContainer = document.getElementById("pending-container");
@@ -7,7 +8,7 @@ const readyContainer = document.getElementById("ready-container");
 const pendingCount = document.getElementById("pending-count");
 const preparingCount = document.getElementById("preparing-count");
 const readyCount = document.getElementById("ready-count");
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 
 const sections = [
     {
@@ -108,9 +109,22 @@ const socket = getSocket();
 socket.addEventListener("message", async (event) => {
     const msg = JSON.parse(event.data);
 
-    if (msg.type != wsMessages.newOrder && msg.type != wsMessages.updateOrder)
+    if (msg.type != wsMessages.newOrder && msg.type != wsMessages.updateOrder && msg.type != wsMessages.newComplaint)
         return;
     if (msg.stallId != stallId) return;
+    if (msg.type === wsMessages.newOrder || msg.type === wsMessages.updateOrder) {
+        const response = await fetch(`/order/${msg.orderId}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        const order = await response.json();
+        showNotification(msg.type, { message: order.queue_number });
+    } else {
+        showNotification(msg.type, { message: "COMPLAINT CONTENT" }); // TODO: complaint content 
+    }
     await loadSections();
 });
 

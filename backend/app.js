@@ -58,7 +58,7 @@ app.get(
 );
 
 app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
-app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
+app.get("/order/:orderId", authorise("Customer", "Vendor"), orderController.getOrderById);
 app.get(
     "/customer/:customerId/orders",
     authorise("Customer"),

@@ -5,7 +5,7 @@ const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
 
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
 
 async function getItemById(stallId, itemCode) {
@@ -211,3 +211,4 @@ cartContainer.addEventListener("change", (e) => {
 
     setEcoOption(checkbox.dataset.stallId, checkbox.checked);
 });
+

@@ -1,4 +1,4 @@
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const vendor_id = JSON.parse(atob(token.split(".")[1])).id;
 
 const stallUnitNoRef = document.getElementById("stallUnitNo");

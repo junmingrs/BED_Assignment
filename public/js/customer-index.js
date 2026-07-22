@@ -1,6 +1,6 @@
 import { formatDate, getIdFromToken, statusStyle } from "./helper.js";
 import { getSocket } from "./websocket.js";
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const customerId = getIdFromToken(token);
 
 const ordersContainer = document.getElementById("orders-container");
