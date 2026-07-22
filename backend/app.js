@@ -16,6 +16,7 @@ const promotionController = require("./controller/promotionController");
 const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
+const inspectionController = require("./controller/inspectionController");
 const { authorise } = require("./middleware/auth");
 const { validateRegister, validateLogin, authenticateToken } = require("./middleware/validate");
 
@@ -167,6 +168,26 @@ app.delete(
     "/feedback/:feedbackId",
     authorise("Customer"),
     feedbackController.deleteFeedback,
+);
+// GET /stalls/:stallId/inspections - get inspections for a stall
+app.get(
+    "/stalls/:stallId/inspections",
+    authorise("NEA", "Vendor", "Operator"),
+    inspectionController.getInspections
+);
+
+// POST /stalls/:stallId/inspections - create an inspection (NEA only)
+app.post(
+    "/stalls/:stallId/inspections",
+    authorise("NEA"),
+    inspectionController.createInspection
+);
+
+// DELETE /inspections/:inspectionId - delete an inspection (NEA only)
+app.delete(
+    "/inspections/:inspectionId",
+    authorise("NEA"),
+    inspectionController.deleteInspection
 );
 
 // Start server
