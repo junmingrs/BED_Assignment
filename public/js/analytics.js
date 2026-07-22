@@ -177,7 +177,8 @@ function loadKPI(kpiData) {
 
 function loadAISummary(summary) {
     for (const [item, container] of Object.entries(summaryItems)) {
-        container.textContent = summary[item].join("\n");
+        const content = summary[item];
+        container.innerHTML = marked.parse(content);
     }
 }
 

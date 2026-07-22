@@ -1,7 +1,4 @@
-const {
-    InferenceClient,
-    InferenceClientProviderApiError,
-} = require("@huggingface/inference");
+const { Ollama } = require("ollama");
 const { poolPromise } = require("../db");
 
 async function getKPI(stallId) {
@@ -75,7 +72,6 @@ async function getAISummary({ ratings, complaints, feedback, orders }) {
     // TODO: filter by week. this is currently for "this week"
     // TODO: update prompt for inspections
 
-    const client = new InferenceClient(process.env.HF_TOKEN);
     const systemPrompt = `
         You are an expert AI Food Stall Operations Consultant. 
         Analyze the provided JSON operational data (orders, ratings, complaints, feedback) for a food stall for this week.
@@ -102,35 +98,32 @@ async function getAISummary({ ratings, complaints, feedback, orders }) {
         `;
 
     try {
-        const out = await client.chatCompletion({
-            model: "Qwen/Qwen2.5-7B-Instruct",
+        const ollama = new Ollama({
+            host: "https://ollama.com",
+            headers: {
+                Authorization: "Bearer " + process.env.OLLAMA_API_KEY,
+            },
+        });
+
+        const response = await ollama.chat({
+            model: "minimax-m3",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userPrompt },
             ],
-            max_tokens: 400,
-            temperature: 0.2,
         });
-        const rawContent = out.choices[0].message.content.trim();
+        const rawContent = response.message.content.trim();
         // in case it accidentally returns the ```json
         const cleanedJsonString = rawContent.replace(/^```json\s*|\s*```$/g, "");
         return JSON.parse(cleanedJsonString);
     } catch (err) {
-        if (err instanceof InferenceClientProviderApiError) {
-            console.error("Provider status:", err.httpResponse.status);
-            console.error("Provider body:", err.httpResponse.body);
-            console.error("Request URL:", err.httpRequest.url);
-        } else {
-            console.error("Error generating or parsing AI summary:", err);
-        }
+        console.error("Error generating or parsing AI summary:", err);
 
         // fallback content
         return {
-            highlights:
-                "Data processing complete for this week. Revenue and order trends remain steady.",
-            flags: "No major operational flags detected at this time.",
-            actions:
-                "Review customer feedback and prepare stock for upcoming peak hours.",
+            highlights: "Cannot generate AI summary at this time. Please try again.",
+            flags: "Cannot generate AI summary at this time. Please try again.",
+            actions: "Cannot generate AI summary at this time. Please try again.",
         };
     }
 }
