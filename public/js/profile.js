@@ -1,7 +1,7 @@
 const signoutBtn = document.getElementById("signout-btn");
 
 function signOut() {
-    localStorage.removeItem(LS_KEYS.authToken);
+    sessionStorage.removeItem(SS_KEYS.accessToken);
     localStorage.removeItem(LS_KEYS.cart);
 
     window.location.href = "/";
