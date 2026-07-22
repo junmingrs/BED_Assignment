@@ -2,6 +2,7 @@ USE bed_db;
 GO
 
 DROP TABLE IF EXISTS MenuItemCuisine;
+DROP TABLE IF EXISTS MenuItemLikes;
 DROP TABLE IF EXISTS OrderItem;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Rating;
@@ -12,7 +13,7 @@ DROP TABLE IF EXISTS Inspection;
 DROP TABLE IF EXISTS MenuItem;
 DROP TABLE IF EXISTS Cuisine;
 DROP TABLE IF EXISTS Stall;
-DROP TABLE IF EXISTS RefreshToken; -- new
+DROP TABLE IF EXISTS RefreshToken;
 DROP TABLE IF EXISTS Customer;
 DROP TABLE IF EXISTS Vendor;
 DROP TABLE IF EXISTS Operator;
@@ -85,6 +86,15 @@ CREATE TABLE MenuItem
     item_category VARCHAR(255) NOT NULL CHECK (item_category IN ('Drinks', 'Dessert', 'Main', 'Sides')),
     CONSTRAINT PK_MenuItem PRIMARY KEY (stall_id, item_code)
 );
+
+CREATE TABLE MenuItemLikes
+(
+    stall_id UNIQUEIDENTIFIER NOT NULL,
+    item_code UNIQUEIDENTIFIER NOT NULL,
+    customer_id UNIQUEIDENTIFIER NOT NULL REFERENCES Customer(customer_id),
+    CONSTRAINT PK_MenuItemLikes PRIMARY KEY (customer_id, stall_id, item_code),
+    CONSTRAINT FK_MenuItemLikes_MenuItem FOREIGN KEY (stall_id, item_code) REFERENCES MenuItem(stall_id, item_code)
+)
 
 CREATE TABLE Cuisine
 (
@@ -305,3 +315,4 @@ INSERT INTO Promotion
 VALUES
     ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '10% off Kimchi Fried Rice', 'Weekday lunch special', '2026-07-14', '2026-07-31'),
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Free Matcha Latte upgrade', 'Order any sushi set and get a free drink upgrade', '2026-07-10', '2026-08-01');
+
