@@ -76,7 +76,6 @@ await loadOrders("All");
 // web socket
 const socket = getSocket();
 socket.addEventListener("message", async (event) => {
-    console.log("that happened")
     const msg = JSON.parse(event.data);
     if (msg.type != wsMessages.newOrder && msg.type != wsMessages.updateOrder)
         return;
