@@ -2,7 +2,7 @@ import { statusStyle } from "./helper.js";
 
 const params = new URLSearchParams(window.location.search);
 const success = params.get("success") === "true";
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 
 const orderStatus = document.getElementById("order-status");
 

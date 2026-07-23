@@ -5,7 +5,8 @@ const { poolPromise } = require("../db");
 const getFeedback = async (req, res) => {
     try {
         const { stallId } = req.params;
-        const result = await feedbackModel.getFeedbackByStallId(stallId);
+        const timeframe = req.query.timeframe || null;
+        const result = await feedbackModel.getFeedbackByStallId(stallId, timeframe);
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in getFeedback:", error);
@@ -21,11 +22,14 @@ const submitFeedback = async (req, res) => {
         const accountId = req.user.id;
 
         if (!description) {
-            return res.status(400).json({ error: "Missing required field: description" });
+            return res
+                .status(400)
+                .json({ error: "Missing required field: description" });
         }
 
         const pool = await poolPromise;
-        const stallCheck = await pool.request()
+        const stallCheck = await pool
+            .request()
             .input("stallId", stallId)
             .query("SELECT stall_id FROM Stall WHERE stall_id = @stallId");
 
@@ -36,7 +40,7 @@ const submitFeedback = async (req, res) => {
         const result = await feedbackModel.createFeedback(
             stallId,
             accountId,
-            description
+            description,
         );
 
         res.status(201).json(result);
@@ -63,5 +67,5 @@ const deleteFeedback = async (req, res) => {
 module.exports = {
     getFeedback,
     submitFeedback,
-    deleteFeedback
+    deleteFeedback,
 };

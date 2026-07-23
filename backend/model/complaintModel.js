@@ -1,12 +1,12 @@
 const { poolPromise } = require("../db");
+const { getTimeFilter } = require("../helper");
 
 // GET /stalls/:stallId/complaints - get complaints for a stall
-const getComplaintsByStallId = async (stallId) => {
+const getComplaintsByStallId = async (stallId, timeframe = null) => {
     const pool = await poolPromise;
+    const timeFilter = getTimeFilter(timeframe, "created_at");
 
-    const result = await pool.request()
-        .input("stallId", stallId)
-        .query(`
+    const result = await pool.request().input("stallId", stallId).query(`
             SELECT 
                 complaint_id,
                 subject,
@@ -14,7 +14,7 @@ const getComplaintsByStallId = async (stallId) => {
                 status,
                 created_at
             FROM Complaint
-            WHERE stall_id = @stallId
+            WHERE stall_id = @stallId ${timeFilter}
             ORDER BY created_at DESC
         `);
 
@@ -25,20 +25,20 @@ const getComplaintsByStallId = async (stallId) => {
 const createComplaint = async (stallId, customerId, subject, description) => {
     const pool = await poolPromise;
 
-    await pool.request()
+    await pool
+        .request()
         .input("stallId", stallId)
         .input("customerId", customerId)
         .input("subject", subject)
-        .input("description", description)
-        .query(`
+        .input("description", description).query(`
             INSERT INTO Complaint (stall_id, customer_id, subject, description, status)
             VALUES (@stallId, @customerId, @subject, @description, 'Open')
         `);
 
-    const result = await pool.request()
+    const result = await pool
+        .request()
         .input("stallId", stallId)
-        .input("customerId", customerId)
-        .query(`
+        .input("customerId", customerId).query(`
             SELECT TOP 1
                 complaint_id,
                 stall_id,
@@ -60,19 +60,22 @@ const deleteComplaint = async (complaintId, customerId) => {
     const pool = await poolPromise;
 
     // Check if complaint exists and belongs to this customer
-    const checkResult = await pool.request()
+    const checkResult = await pool
+        .request()
         .input("complaintId", complaintId)
-        .input("customerId", customerId)
-        .query(`
+        .input("customerId", customerId).query(`
             SELECT complaint_id FROM Complaint 
             WHERE complaint_id = @complaintId AND customer_id = @customerId
         `);
 
     if (checkResult.recordset.length === 0) {
-        throw new Error("Complaint not found or you are not authorized to delete it");
+        throw new Error(
+            "Complaint not found or you are not authorized to delete it",
+        );
     }
 
-    await pool.request()
+    await pool
+        .request()
         .input("complaintId", complaintId)
         .query("DELETE FROM Complaint WHERE complaint_id = @complaintId");
 
@@ -82,5 +85,5 @@ const deleteComplaint = async (complaintId, customerId) => {
 module.exports = {
     getComplaintsByStallId,
     createComplaint,
-    deleteComplaint
+    deleteComplaint,
 };

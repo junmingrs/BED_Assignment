@@ -32,7 +32,7 @@ async function registerUser(e) {
             console.log("ERROR WHILE REGISTERING: " + data.message);
             return;
         } else {
-            localStorage.setItem(LS_KEYS.authToken, data.token);
+            sessionStorage.setItem(SS_KEYS.accessToken, data.token)
             window.location.href = "/customer/";
         }
     } catch (err) {

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful</title>
+
+    <link rel="stylesheet" href="../css/output.css" />
+</head>
+
+<body>
+    <!-- ===== NAVBAR ===== -->
+    <nav class="flex justify-between">
+        <div class="flex gap-5">
+            <a href="/customer" class="text-xl">Home</a>
+            <a href="/customer/hawkers.html" class="text-xl">Browse</a>
+        </div>
+        <div class="flex gap-5">
+            <a href="/customer/cart.html" class="text-xl">Cart</a>
+            <a href="/customer/profile.html" class="text-xl">Profile</a>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="mx-auto max-w-3xl space-y-6 p-8 pb-32">
+        <!-- Success Card -->
+        <div class="rounded-xl border bg-white p-8 shadow-sm text-center">
+            <!-- Icon -->
+            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl">
+                ✅
+            </div>
+
+            <h1 class="text-3xl font-bold text-green-600">Payment Successful!</h1>
+            <p class="mt-2 text-gray-600">Thank you for your order.</p>
+
+            <!-- Order Summary -->
+            <div class="mt-8 text-left border-t pt-6">
+                <h2 class="text-lg font-semibold">Order Summary</h2>
+                <div id="order-items" class="mt-3 space-y-2">
+                    <!-- Dynamically populated -->
+                </div>
+                <div class="mt-4 flex justify-between border-t pt-4 text-lg font-bold">
+                    <span>Total</span>
+                    <span id="order-total">$0.00</span>
+                </div>
+            </div>
+
+            <!-- Order ID -->
+            <p id="order-id" class="mt-4 text-sm text-gray-400">Order ID: Loading...</p>
+
+            <!-- Email notice -->
+            <div class="mt-6 rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
+                📧 A receipt has been sent to your email.
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <a href="/customer" class="rounded-lg bg-black px-6 py-3 font-medium text-white transition hover:bg-gray-800">
+                    Back to Home
+                </a>
+                <a href="/customer/orders.html" class="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50">
+                    View Orders
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="fixed bottom-0 left-0 right-0 border-t bg-white/95 backdrop-blur">
+        <div class="mx-auto flex max-w-5xl items-center justify-between p-5">
+            <p class="text-sm text-gray-500">© 2026 Hawker Centre</p>
+            <p class="text-sm text-gray-500">Enjoy your meal!</p>
+        </div>
+    </footer>
+
+    <script>
+        // Read URL params
+        const params = new URLSearchParams(window.location.search);
+        const orderIds = params.get('orderIds');
+        const total = params.get('total');
+
+        // Display order ID
+        if (orderIds) {
+            document.getElementById('order-id').textContent = `Order ID: ${orderIds}`;
+        }
+
+        // Display total
+        if (total) {
+            document.getElementById('order-total').textContent = `$${parseFloat(total).toFixed(2)}`;
+        }
+
+        // Try to load order summary from sessionStorage
+        const summary = sessionStorage.getItem('orderSummary');
+        if (summary) {
+            try {
+                const data = JSON.parse(summary);
+                const container = document.getElementById('order-items');
+                let html = '';
+                data.items.forEach(item => {
+                    html += `
+                        <div class="flex justify-between text-sm">
+                            <span>${item.name} × ${item.quantity}</span>
+                            <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                if (data.total) {
+                    document.getElementById('order-total').textContent = `$${data.total.toFixed(2)}`;
+                }
+                // Clear after use
+                sessionStorage.removeItem('orderSummary');
+            } catch (e) {
+                console.warn('Could not parse order summary', e);
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

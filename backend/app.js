@@ -3,11 +3,14 @@ const path = require("path");
 const express = require("express");
 const sql = require("mssql");
 const http = require("http");
-const { broadcast, initWebServer } = require("./ws.js");
+const { initWebServer } = require("./ws.js");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
-// TODO: Import Controllers
+// swagger
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger-output.json");
+
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
@@ -17,19 +20,27 @@ const rentalAgreementController = require("./controller/rentalAgreementControlle
 const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
+const analyticsController = require("./controller/analyticsController");
+const inspectionController = require("./controller/inspectionController");
+const hawkerCentreController = require("./controller/hawkerCentreController");
 const { authorise } = require("./middleware/auth");
-const { validateRegister, validateLogin, authenticateToken } = require("./middleware/validate");
-
-// TODO: Import Validations
+const {
+    validateRegister,
+    validateLogin,
+    authenticateToken,
+} = require("./middleware/validate");
 
 // Create Express app
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || process.argv[2];
 
 // create websocket
 const server = http.createServer(app);
 initWebServer(server);
-server.listen(3000);
+server.listen(port);
+
+// swagger documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
@@ -50,7 +61,12 @@ app.get(
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get("/menuitems", authorise("Vendor"), authenticateToken, menuItemController.getAllMenuItems);
+app.get(
+    "/menuitems",
+    authorise("Vendor"),
+    authenticateToken,
+    menuItemController.getAllMenuItems,
+);
 app.get(
     "/menuitemsbystall/:stallId",
     authorise("Vendor"),
@@ -58,7 +74,11 @@ app.get(
 );
 
 app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
-app.get("/order/:orderId", authorise("Customer"), orderController.getOrderById);
+app.get(
+    "/order/:orderId",
+    authorise("Customer", "Vendor"),
+    orderController.getOrderById,
+);
 app.get(
     "/customer/:customerId/orders",
     authorise("Customer"),
@@ -186,6 +206,51 @@ app.delete(
     authorise("Customer"),
     feedbackController.deleteFeedback,
 );
+// GET /stalls/:stallId/inspections - get inspections for a stall
+app.get(
+    "/stalls/:stallId/inspections",
+    authorise("NEA", "Vendor", "Operator"),
+    inspectionController.getInspections,
+);
+
+// POST /stalls/:stallId/inspections - create an inspection (NEA only)
+app.post(
+    "/stalls/:stallId/inspections",
+    authorise("NEA"),
+    inspectionController.createInspection,
+);
+
+// DELETE /inspections/:inspectionId - delete an inspection (NEA only)
+app.delete(
+    "/inspections/:inspectionId",
+    authorise("NEA"),
+    inspectionController.deleteInspection,
+);
+
+// Stall Analytics
+app.get(
+    "/vendor/analytics/kpi/:stallId",
+    authorise("Vendor"),
+    analyticsController.getKPI,
+);
+app.get(
+    "/vendor/analytics/hourly-sales/:stallId",
+    authorise("Vendor"),
+    analyticsController.getHourlySales,
+);
+app.get(
+    "/vendor/analytics/top-items/:stallId",
+    authorise("Vendor"),
+    analyticsController.getTopItems,
+);
+app.get(
+    "/vendor/analytics/ai-summary/:stallId",
+    authorise("Vendor"),
+    analyticsController.getAISummary,
+);
+
+app.get("/hawkercentre", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getAllHawkerCentres);
+app.get("/hawkercentre/:id", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getHawkerCentreById);
 
 // Start server
 app.listen(port, () => {
