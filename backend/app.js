@@ -21,6 +21,7 @@ const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
 const analyticsController = require("./controller/analyticsController");
 const inspectionController = require("./controller/inspectionController");
+const hawkerCentreController = require("./controller/hawkerCentreController");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -229,6 +230,9 @@ app.get(
     authorise("Vendor"),
     analyticsController.getAISummary,
 );
+
+app.get("/hawkercentre", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getAllHawkerCentres);
+app.get("/hawkercentre/:id", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getHawkerCentreById);
 
 // Start server
 app.listen(port, () => {

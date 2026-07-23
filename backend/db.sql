@@ -1,6 +1,7 @@
 USE bed_db;
 GO
 
+-- DROP in reverse dependency order (children before parents)
 DROP TABLE IF EXISTS MenuItemCuisine;
 DROP TABLE IF EXISTS MenuItemLikes;
 DROP TABLE IF EXISTS OrderItem;
@@ -12,8 +13,9 @@ DROP TABLE IF EXISTS Promotion;
 DROP TABLE IF EXISTS Inspection;
 DROP TABLE IF EXISTS MenuItem;
 DROP TABLE IF EXISTS Cuisine;
-DROP TABLE IF EXISTS RefreshToken;
 DROP TABLE IF EXISTS Stall;
+DROP TABLE IF EXISTS HawkerCentre;
+DROP TABLE IF EXISTS RefreshToken;
 DROP TABLE IF EXISTS Customer;
 DROP TABLE IF EXISTS Vendor;
 DROP TABLE IF EXISTS Operator;
@@ -58,10 +60,21 @@ CREATE TABLE RefreshToken
     created_at DATETIME DEFAULT GETDATE(),
 );
 
+-- NEW: HawkerCentre (must be created before Stall)
+CREATE TABLE HawkerCentre
+(
+    hawker_centre_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    centre_name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    operator_id UNIQUEIDENTIFIER NOT NULL REFERENCES Operator(operator_id)
+);
+
+-- UPDATED: Stall now includes hawker_centre_id
 CREATE TABLE Stall
 (
     stall_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
     vendor_id UNIQUEIDENTIFIER NOT NULL REFERENCES Vendor(vendor_id),
+    hawker_centre_id UNIQUEIDENTIFIER NULL REFERENCES HawkerCentre(hawker_centre_id),
     stall_name VARCHAR(255) NOT NULL,
     stall_unit_no CHAR(6) NOT NULL CHECK (stall_unit_no LIKE '#[0-9][0-9]-[0-9][0-9]')
 );
@@ -173,6 +186,7 @@ CREATE TABLE Promotion
     start_date DATE NOT NULL,
     end_date DATE NOT NULL
 );
+
 GO
 
 INSERT INTO Account
@@ -183,7 +197,15 @@ VALUES
     ('33333333-3333-3333-3333-333333333333', 'kim@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
     ('44444444-4444-4444-4444-444444444444', 'sakura@email.com', '$2b$10$oB7LdYYyi5g/XB1thrO0luWRClhaRUTs2ZqFGd18XKb8TXTqnSSvG', 'Vendor'),
     ('55555555-5555-5555-5555-555555555555', 'operator@email.com', '$2b$10$7JAl8APklPKi/49gSRhbe.Pdtf8bLzTSJzZoODzRJztw1I4Ys4YDS', 'Operator'),
-    ('66666666-6666-6666-6666-666666666666', 'nea@email.com', '$2b$10$hG7H9YfRkLmNpQsTuVwXyZ1234567890AbCdEfGhIjKlMnOpQrStU', 'NEA');
+    ('66666666-6666-6666-6666-666666666666', 'nea@email.com', '$2b$10$hG7H9YfRkLmNpQsTuVwXyZ1234567890AbCdEfGhIjKlMnOpQrStU', 'NEA'),
+    -- NEW: 7 additional vendor accounts to own the 7 new stalls (same password hash as kim@email.com for testing convenience)
+    ('A0000001-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'raj@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
+    ('A0000002-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'mei@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
+    ('A0000003-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'ah_seng@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
+    ('A0000004-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'lily@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
+    ('A0000005-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'siti@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
+    ('A0000006-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'ah_hock@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
+    ('A0000007-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'grace@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor');
 -- operator password is hashed_pw5, go up means hashed_pw{number} decrease by 1
 INSERT INTO Customer
     (customer_id, customer_name, loyalty_points)
@@ -195,7 +217,14 @@ INSERT INTO Vendor
     (vendor_id)
 VALUES
     ('33333333-3333-3333-3333-333333333333'),
-    ('44444444-4444-4444-4444-444444444444');
+    ('44444444-4444-4444-4444-444444444444'),
+    ('A0000001-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+    ('A0000002-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+    ('A0000003-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+    ('A0000004-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+    ('A0000005-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+    ('A0000006-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+    ('A0000007-AAAA-AAAA-AAAA-AAAAAAAAAAAA');
 
 INSERT INTO Operator
     (operator_id)
@@ -215,9 +244,26 @@ INSERT INTO RefreshToken (account_id, refresh_token, created_at) VALUES
 ('55555555-5555-5555-5555-555555555555', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiI1NTU1NTU1NS01NTU1LTU1NTUtNTU1NS01NTU1NTU1NTU1NTUiLCJyb2xlIjoiT3BlcmF0b3IiLCJpYXQiOjE3ODQ0MDIzNDd9.3LtXWYSXN0rJkNQb_1WXDi-x5cekiCx4OmN0vvQ5QRM', '2026-07-18 19:19:07.463'),
 ('66666666-6666-6666-6666-666666666666', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiI2NjY2NjY2Ni02NjY2LTY2NjYtNjY2Ni02NjY2NjY2NjY2NjYiLCJyb2xlIjoiTkVBIiwiaWF0IjoxNzg0NDAyNjczfQ.c-Q2Q8_7NPOf8gegBMFJzOi-C6rgJ2h3TZ21zb1K_rQ', '2026-07-18 19:26:12.047');
 
-INSERT INTO Stall (stall_id, vendor_id, stall_name, stall_unit_no) VALUES
-('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '33333333-3333-3333-3333-333333333333', 'Kim Kitchen', '#01-01'),
-('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '44444444-4444-4444-4444-444444444444', 'Sakura Sushi', '#01-02');
+-- NEW: 3 hawker centres, all under operator@email.com for simplicity
+INSERT INTO HawkerCentre (hawker_centre_id, centre_name, address, operator_id) VALUES
+('CCCCCCC1-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Maxwell Food Centre', '1 Kadayanallur St, Singapore 069184', '55555555-5555-5555-5555-555555555555'),
+('CCCCCCC2-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Chinatown Complex', '335 Smith St, Singapore 050335', '55555555-5555-5555-5555-555555555555'),
+('CCCCCCC3-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Tiong Bahru Market', '30 Seng Poh Rd, Singapore 168898', '55555555-5555-5555-5555-555555555555');
+
+-- UPDATED: existing 2 stalls now linked to Maxwell Food Centre, plus 7 new stalls (3 per centre total)
+INSERT INTO Stall (stall_id, vendor_id, hawker_centre_id, stall_name, stall_unit_no) VALUES
+-- Maxwell Food Centre (3 stalls)
+('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '33333333-3333-3333-3333-333333333333', 'CCCCCCC1-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Kim Kitchen', '#01-01'),
+('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '44444444-4444-4444-4444-444444444444', 'CCCCCCC1-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Sakura Sushi', '#01-02'),
+('FFFFFFF1-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000001-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'CCCCCCC1-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Auntie''s Curry', '#01-03'),
+-- Chinatown Complex (3 stalls)
+('FFFFFFF2-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000002-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'CCCCCCC2-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Wanton Noodle House', '#02-01'),
+('FFFFFFF3-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000003-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'CCCCCCC2-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Teochew Porridge', '#02-02'),
+('FFFFFFF4-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000004-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'CCCCCCC2-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Roasted Delights', '#02-03'),
+-- Tiong Bahru Market (3 stalls)
+('FFFFFFF5-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000005-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'CCCCCCC3-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Chwee Kueh Corner', '#03-01'),
+('FFFFFFF6-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000006-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'CCCCCCC3-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Lor Mee Stall', '#03-02'),
+('FFFFFFF7-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000007-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'CCCCCCC3-CCCC-CCCC-CCCC-CCCCCCCCCCCC', 'Fruit Juice Bar', '#03-03');
 
 INSERT INTO Inspection
     (inspection_id, stall_id, nea_id, inspection_date, score, remarks, hygiene_grade)
@@ -314,4 +360,3 @@ INSERT INTO Promotion
 VALUES
     ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '10% off Kimchi Fried Rice', 'Weekday lunch special', '2026-07-14', '2026-07-31'),
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Free Matcha Latte upgrade', 'Order any sushi set and get a free drink upgrade', '2026-07-10', '2026-08-01');
-
