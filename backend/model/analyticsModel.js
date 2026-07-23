@@ -1,8 +1,8 @@
 const { Ollama } = require("ollama");
 const { poolPromise } = require("../db");
+const { getTimeFilter } = require("../helper");
 
-async function getKPI(stallId) {
-    // TODO: filter by week. this is currently for "this week"
+async function getKPI(stallId, timeframe) {
     const query = `
         SELECT 
             ISNULL(SUM(total_amount), 0) AS totalRevenue, 
@@ -10,8 +10,7 @@ async function getKPI(stallId) {
             ISNULL(AVG(total_amount), 0.00) AS averageOrderValue 
         FROM Orders 
         WHERE stall_id = @id 
-          AND order_date >= DATEADD(week, DATEDIFF(week, 0, GETDATE()), 0)
-          AND order_date < DATEADD(week, DATEDIFF(week, 0, GETDATE()) + 1, 0);
+        ${getTimeFilter(timeframe, "order_date")}
         `;
     const pool = await poolPromise;
     const result = await pool.request().input("id", stallId).query(query);
@@ -21,7 +20,6 @@ async function getKPI(stallId) {
 }
 
 async function getHourlySales(stallId) {
-    // TODO: filter by week. this is currently for "this week"
     const query = `
 SELECT 
     DATEPART(hour, order_date AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time') AS sales_hour,
@@ -39,8 +37,7 @@ ORDER BY sales_hour ASC;
     return result.recordset;
 }
 
-async function getTopItems(stallId) {
-    // TODO: filter by week. this is currently for "this week"
+async function getTopItems(stallId, timeframe) {
     const query = `
         SELECT 
             CAST(m.item_desc AS NVARCHAR(255)) AS itemName,
@@ -55,7 +52,7 @@ async function getTopItems(stallId) {
         WHERE 
             o.stall_id = @id
             AND o.status = 'Completed'
-            AND (o.order_date AT TIME ZONE 'UTC' AT TIME ZONE 'Singapore Standard Time') >= DATEADD(day, -7, CAST(SYSDATETIMEOFFSET() AT TIME ZONE 'Singapore Standard Time' AS DATE))
+            ${getTimeFilter(timeframe, "order_date")}
         GROUP BY 
             CAST(m.item_desc AS NVARCHAR(255))
         ORDER BY 
@@ -69,9 +66,6 @@ async function getTopItems(stallId) {
 }
 
 async function getAISummary({ ratings, complaints, feedback, orders }) {
-    // TODO: filter by week. this is currently for "this week"
-    // TODO: update prompt for inspections
-
     const systemPrompt = `
         You are an expert AI Food Stall Operations Consultant. 
         Analyze the provided JSON operational data (orders, ratings, complaints, feedback) for a food stall for this week.

@@ -6,7 +6,8 @@ const { poolPromise } = require("../db");
 const getRatings = async (req, res) => {
     try {
         const { stallId } = req.params;
-        const result = await ratingModel.getRatingsByStallId(stallId);
+        const timeframe = req.query.timeframe || null;
+        const result = await ratingModel.getRatingsByStallId(stallId, timeframe);
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in getRatings:", error);
@@ -30,7 +31,8 @@ const submitRating = async (req, res) => {
         }
 
         const pool = await poolPromise;
-        const stallCheck = await pool.request()
+        const stallCheck = await pool
+            .request()
             .input("stallId", stallId)
             .query("SELECT stall_id FROM Stall WHERE stall_id = @stallId");
 
@@ -47,7 +49,7 @@ const submitRating = async (req, res) => {
             stallId,
             customer.customer_id,
             rating,
-            comment
+            comment,
         );
 
         res.status(201).json(result);
@@ -74,5 +76,5 @@ const deleteRating = async (req, res) => {
 module.exports = {
     getRatings,
     submitRating,
-    deleteRating
+    deleteRating,
 };

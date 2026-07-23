@@ -6,8 +6,9 @@ const complaintModel = require("../model/complaintModel");
 
 async function getKPI(req, res) {
     const { stallId } = req.params;
+    const timeframe = req.query.timeframe || "this_week";
     try {
-        const stats = await analyticsModel.getKPI(stallId);
+        const stats = await analyticsModel.getKPI(stallId, timeframe);
         return res.status(200).json(stats);
     } catch (err) {
         console.error(err);
@@ -16,6 +17,7 @@ async function getKPI(req, res) {
 }
 
 async function getHourlySales(req, res) {
+    // NOTE: only for today
     const { stallId } = req.params;
     try {
         const hourlySales = await analyticsModel.getHourlySales(stallId);
@@ -28,8 +30,9 @@ async function getHourlySales(req, res) {
 
 async function getTopItems(req, res) {
     const { stallId } = req.params;
+    const timeframe = req.query.timeframe || "this_week";
     try {
-        const topItems = await analyticsModel.getTopItems(stallId);
+        const topItems = await analyticsModel.getTopItems(stallId, timeframe);
         return res.status(200).json(topItems);
     } catch (err) {
         console.error(err);
@@ -39,13 +42,13 @@ async function getTopItems(req, res) {
 
 async function getAISummary(req, res) {
     const { stallId } = req.params;
+    const timeframe = req.query.timeframe || "this_week";
     try {
-        // TODO: add inspection
         const [ratings, complaints, feedback, orders] = await Promise.all([
-            ratingModel.getRatingsByStallId(stallId),
-            complaintModel.getComplaintsByStallId(stallId),
-            feedbackModel.getFeedbackByStallId(stallId),
-            orderModel.getOrderByStallId(stallId),
+            ratingModel.getRatingsByStallId(stallId, timeframe),
+            complaintModel.getComplaintsByStallId(stallId, timeframe),
+            feedbackModel.getFeedbackByStallId(stallId, timeframe),
+            orderModel.getOrderByStallId(stallId, timeframe),
         ]);
 
         const summary = await analyticsModel.getAISummary({

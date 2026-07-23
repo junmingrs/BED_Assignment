@@ -19,9 +19,15 @@ const summaryItems = {
 
 const complaintTable = document.getElementById("complaints-table-body");
 const avgRatingText = document.getElementById("avg-rating-text");
+const avgRatingContainer = document.getElementById("avg-rating-container");
 const feedbackContainer = document.getElementById("feedback-feed-container");
 const openComplaintsCount = document.getElementById("open-complaints-badge");
 const maxMenuItemCount = document.getElementById("max-menu-item");
+const timeframeSelect = document.getElementById("timeframe");
+
+let hourlyChartInstance = null;
+let itemsChartInstance = null;
+let currentReqTimeframe = null;
 
 const token = localStorage.getItem(LS_KEYS.authToken);
 const vendorId = await getIdFromToken(token);
@@ -51,13 +57,14 @@ function createSalesChart(hourlySales) {
         data.push(item.totalRevenue.toFixed(2));
     });
 
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.color = "#64748b";
-
     const ctxHourly = document
         .getElementById("hourlySalesChart")
         .getContext("2d");
-    new Chart(ctxHourly, {
+    if (hourlyChartInstance) hourlyChartInstance.destroy();
+
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = "#64748b";
+    hourlyChartInstance = new Chart(ctxHourly, {
         type: "bar",
         data: {
             labels,
@@ -129,7 +136,8 @@ function createTopItemsChart(topItems) {
     });
 
     const ctxTopItems = document.getElementById("topItemsChart").getContext("2d");
-    new Chart(ctxTopItems, {
+    if (itemsChartInstance) itemsChartInstance.destroy();
+    itemsChartInstance = new Chart(ctxTopItems, {
         type: "doughnut",
         data: {
             labels,
@@ -222,8 +230,19 @@ function loadComplaints(complaints) {
         return row;
     });
 
-    complaintTable.innerHTML = complaintRows.join("");
-    openComplaintsCount.textContent = totalPending.toString() + " Pending";
+    if (complaints.length == 0) {
+        complaintTable.innerHTML = `
+            <tr>
+                <td colspan="100%" class="text-center py-4 text-slate-500">
+                    There are no complaints.
+                </td>
+            </tr>
+        `;
+        openComplaintsCount.textContent = "0 Pending";
+    } else {
+        complaintTable.innerHTML = complaintRows.join("");
+        openComplaintsCount.textContent = totalPending.toString() + " Pending";
+    }
 }
 
 function loadFeedbacks(list) {
@@ -276,14 +295,45 @@ function loadFeedbacks(list) {
         }
         return row;
     });
-    feedbackContainer.innerHTML = content.join("");
-    const averageRating = (totalRatings / ratingCount).toFixed(1);
-    avgRatingText.textContent = ratingCount > 0 ? `${averageRating}/5.0` : "";
+    if (ratingCount > 0) {
+        avgRatingContainer.classList.remove("hidden");
+        const averageRating = (totalRatings / ratingCount).toFixed(1);
+        avgRatingText.textContent = `${averageRating}/5.0`;
+    } else {
+        avgRatingContainer.classList.add("hidden");
+    }
+
+    if (list.length == 0) {
+        feedbackContainer.innerHTML = `
+            <div class="flex flex-col items-center justify-center p-8 text-center text-slate-500 rounded-lg border border-dashed border-slate-200">
+                <p class="text-sm ">There are no feedbacks or ratings so far.</p>
+            </div>
+        `;
+    } else {
+        feedbackContainer.innerHTML = content.join("");
+    }
+
     lucide.createIcons();
 }
 
-async function loadUI() {
-    const kpiData = await fetchAPI(`/vendor/analytics/kpi/${stallId}`);
+function handleTimeChange(timeframe) {
+    switch (timeframe) {
+        case "today":
+            break;
+        case "this_week":
+            break;
+        case "this_month":
+            break;
+    }
+    loadUI(timeframe);
+}
+
+async function loadUI(timeframe = "this_week") {
+    currentReqTimeframe = timeframe;
+
+    const kpiData = await fetchAPI(
+        `/vendor/analytics/kpi/${stallId}?timeframe=${timeframe}`,
+    );
     loadKPI(kpiData);
 
     const hourlySales = await fetchAPI(
@@ -291,19 +341,36 @@ async function loadUI() {
     );
     createSalesChart(hourlySales ?? []);
 
-    const topItems = await fetchAPI(`/vendor/analytics/top-items/${stallId}`);
+    const topItems = await fetchAPI(
+        `/vendor/analytics/top-items/${stallId}?timeframe=${timeframe}`,
+    );
     createTopItemsChart(topItems ?? []);
 
+    // reset ai summary text
+    for (const [_, container] of Object.entries(summaryItems)) {
+        container.textContent = "Loading...";
+    }
+
     // so that the rest is not stuck behind this async
-    fetchAPI(`/vendor/analytics/ai-summary/${stallId}`).then((summary) => {
-        loadAISummary(summary);
+    fetchAPI(
+        `/vendor/analytics/ai-summary/${stallId}?timeframe=${timeframe}`,
+    ).then((summary) => {
+        if (currentReqTimeframe == timeframe) {
+            loadAISummary(summary);
+        }
     });
 
-    const complaints = await fetchAPI(`/stalls/${stallId}/complaints`);
+    const complaints = await fetchAPI(
+        `/stalls/${stallId}/complaints?timeframe=${timeframe}`,
+    );
     loadComplaints(complaints);
 
-    const feedback = await fetchAPI(`/stalls/${stallId}/feedback`);
-    const ratings = await fetchAPI(`/stalls/${stallId}/ratings`);
+    const feedback = await fetchAPI(
+        `/stalls/${stallId}/feedback?timeframe=${timeframe}`,
+    );
+    const ratings = await fetchAPI(
+        `/stalls/${stallId}/ratings?timeframe=${timeframe}`,
+    );
     const taggedFeedback = feedback.map((item) => ({
         ...item,
         type: "feedback",
@@ -315,4 +382,8 @@ async function loadUI() {
     loadFeedbacks(combinedList);
 }
 
+timeframeSelect.addEventListener("change", (event) => {
+    const selectedVal = event.target.value;
+    handleTimeChange(selectedVal);
+});
 document.onload = loadUI();
