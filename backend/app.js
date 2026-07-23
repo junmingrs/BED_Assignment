@@ -4,8 +4,19 @@ const express = require("express");
 const sql = require("mssql");
 const http = require("http");
 const { broadcast, initWebServer } = require("./ws.js");
+// const { initializeApp } = require("firebase/app");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+
+// const firebaseConfig = {
+//   apiKey: process.env.FIREBASE_APIKEY,
+//   authDomain: process.env.FIREBASE_AUTHDOMAIN,
+//   projectId: process.env.FIREBASE_PROJECTID,
+//   storageBucket: process.env.FIREBASE_STORAGEBUCKET,
+//   messagingSenderId: process.env.FIREBASE_SENDERID,
+//   appId: process.env.FIREBASE_APPID,
+// };
+// initializeApp(firebaseConfig);
 
 // TODO: Import Controllers
 const accountController = require("./controller/accountController");

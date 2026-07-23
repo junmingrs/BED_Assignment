@@ -10,6 +10,10 @@ const addPriceInputRef = document.getElementById("addPriceInput");
 const addCategoryInputRef = document.getElementById("addCategorySelect");
 const addCancelBtnRef = document.getElementById("addCancelBtn");
 const addMsgRef = document.getElementById("addMsg");
+const addCuisineInputRef = document.getElementById("addCuisineInput");
+const addCuisineBtnRef = document.getElementById("addCuisineBtn");
+const addCuisineInputContainerRef = document.getElementById("addCuisineInputContainer");
+const addCuisineInputFieldRef = document.getElementById("addCuisineInputField");
 const cardContainerRef = document.getElementById("card-container");
 const editDialogRef = document.getElementById("editDialog");
 const deleteDialogRef = document.getElementById("deleteDialog");
@@ -204,6 +208,9 @@ async function setup() {
         addNameInputRef.value = "";
         addPriceInputRef.value = null;
         addCategoryInputRef.value = "";
+        const cuisineInputField = addCuisineInputFieldRef.cloneNode(true); 
+        addCuisineInputContainerRef.replaceChildren();
+        addCuisineInputContainerRef.appendChild(cuisineInputField);
     });
     addFormRef.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -216,7 +223,6 @@ async function setup() {
         if (isValid != true) {
             addMsgRef.innerText = isValid;
             addMsgRef.className = "text-red-600";
-            // addMsgRef.classList.remove("hidden");
             return;
         }
         const item = {
@@ -225,6 +231,7 @@ async function setup() {
             item_price: parseFloat(addPriceInputRef.valueAsNumber),
             item_category: addCategoryInputRef.value,
         }
+        // TODO: HERE
         const data = await createItem(item);
         if (data) {
             addMsgRef.classList = "text-green-600";
@@ -236,6 +243,10 @@ async function setup() {
         addMsgRef.classList.add("hidden");
         addDialogRef.classList.add("hidden");
     });
+    addCuisineBtnRef.addEventListener("click", () => {
+        const a = addCuisineInputFieldRef.cloneNode(true); 
+        addCuisineInputContainerRef.appendChild(a);
+    })
 }
 
 async function loadMenuItems() {
@@ -260,5 +271,6 @@ function validateMenuItem(fields) {
     }
     return true;
 }
+
 
 await setup();

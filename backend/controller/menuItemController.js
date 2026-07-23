@@ -42,7 +42,14 @@ async function getMenuItemsByStallIdAndItemCode(req, res) {
 
 async function createMenuItem(req, res) {
     try {
-        const newMenuItem = await menuItemModel.createMenuItem(req.body);
+        const { menuItem, cuisines } = req.body
+        const existingCuisines = await menuItemModel.getAllCuisines();
+        cuisines.forEach(cuisine => {
+            if (!existingCuisines.includes(cuisine)) {
+                menuItemModel.createCuisine(cuisine)
+            }
+        });
+        const newMenuItem = await menuItemModel.createMenuItem(menuItem, cuisines);
         return res.status(201).json(newMenuItem);
     } catch (error) {
         console.error("Controller error:", error);
@@ -76,6 +83,17 @@ async function deleteMenuItem(req, res) {
     }
 }
 
+async function getMenuItemCuisine(req, res) {
+    try {
+        const { stallId, itemCode } = req.body;
+        const cuisines = await menuItemModel.getMenuItemCuisine(stallId, itemCode);
+        return res.status(201).json({ cuisines });
+    } catch (error) {
+        console.error("Controller error:", error);
+        return res.status(500).json({ message: "Error getting cuisines for menu item" });
+    }
+}
+
 module.exports = {
     getAllMenuItems,
     getMenuItemsByStallId,
@@ -83,4 +101,5 @@ module.exports = {
     createMenuItem,
     updateMenuItem,
     deleteMenuItem,
+    getMenuItemCuisine,
 };
