@@ -1,11 +1,9 @@
-import { LS_KEYS } from "./const.js";
-import { getCustomerIdFromToken } from "./helper.js";
+import { getIdFromToken } from "./helper.js";
 const cartContainer = document.getElementById("container");
 const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
-const main = document.getElementsByTagName("main");
 
 const token = localStorage.getItem(LS_KEYS.authToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
@@ -34,11 +32,13 @@ async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
 
-    cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "[]");
+    cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
     let totalAmount = 0;
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
             const stallItems = cartMap[stallId].items;
+            const isEco = cartMap[stallId].isEco === true;
+            if (isEco) totalAmount += 0.3;
             const itemCards = await Promise.all(
                 stallItems.map(async (item) => {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
@@ -86,12 +86,13 @@ async function renderCartItems() {
             <section class="space-y-4">
                 <h2 class="text-2xl font-semibold">Stall Name (TODO)</h2>
                 ${itemCards.join("")}
-                <div class="mt-2">
+                <div class="mt-2 flex justify-between items-center">
                     <label class="flex cursor-pointer items-center gap-3">
                         <input
                             type="checkbox"
                             class="eco-checkbox size-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black"
                             data-stall-id="${stallId}"
+                            ${isEco ? "checked" : ""}
                         />
                         <div>
                             <p class="text-sm font-medium leading-none">
@@ -102,6 +103,9 @@ async function renderCartItems() {
                             </p>
                         </div>
                     </label>
+                    <p class="text-sm font-semibold text-gray-900">
+                        +$0.30
+                    </p>
                 </div>
             </section>
         `;
@@ -121,7 +125,7 @@ async function renderCartItems() {
 }
 
 async function checkout() {
-    const customerId = getCustomerIdFromToken(token);
+    const customerId = getIdFromToken(token);
     try {
         const response = await fetch(`/checkout`, {
             method: "POST",
@@ -164,7 +168,14 @@ function deleteItem(stallId, itemCode) {
 }
 
 function setEcoOption(stallId, checked) {
+    let currentTotal = parseFloat(cartTotal.textContent.split("$")[1]);
+    if (checked) {
+        currentTotal += 0.3;
+    } else {
+        currentTotal -= 0.3;
+    }
     cartMap[stallId].isEco = checked;
+    cartTotal.textContent = "$" + currentTotal.toFixed(2);
 }
 
 checkoutBtn.addEventListener("click", checkout);
@@ -187,7 +198,10 @@ cartContainer.addEventListener("click", async (e) => {
         deleteItem(stallId, itemCode);
     }
 
-    localStorage.setItem(LS_KEYS.cart, JSON.stringify(cartMap));
+    localStorage.setItem(
+        LS_KEYS.cart,
+        JSON.stringify(Object.keys(cartMap).length == 0 ? {} : cartMap),
+    );
     await renderCartItems();
 });
 

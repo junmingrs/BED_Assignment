@@ -14,12 +14,54 @@
         <a href="/vendor" class="text-xl">Home</a>
         <a href="/vendor/orders.html" class="text-xl">Orders</a>
         <a href="/vendor/stall.html" class="text-xl ml-auto">Stall</a>
+        <a href="/vendor/menuitem.html" class="text-xl ml-auto">MenuItem</a>
     </nav>
 
     <section>
-        <h1 class="text-3xl">Homepage</h1>
-        <p>Todo</p>
+        <h1 class="text-3xl">Dashboard</h1>
     </section>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <!-- Pending -->
+        <div class="rounded-lg border border-slate-200 bg-slate-50">
+            <header class="flex items-center justify-between border-b px-5 py-4">
+                <h2 class="font-semibold text-amber-700">Pending</h2>
+
+                <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700" id="pending-count">
+                </span>
+            </header>
+
+            <div id="pending-container" class="divide-y divide-slate-200"></div>
+        </div>
+
+        <!-- Preparing -->
+        <div class="rounded-lg border border-slate-200 bg-slate-50">
+            <header class="flex items-center justify-between border-b px-5 py-4">
+                <h2 class="font-semibold text-blue-700">Preparing</h2>
+
+                <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+                    id="preparing-count"></span>
+            </header>
+
+            <div class="divide-y divide-slate-200" id="preparing-container"></div>
+        </div>
+
+        <!-- Ready -->
+        <div class="rounded-lg border border-slate-200 bg-slate-50">
+            <header class="flex items-center justify-between border-b px-5 py-4">
+                <h2 class="font-semibold text-emerald-700">Ready</h2>
+
+                <span class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700"
+                    id="ready-count"></span>
+            </header>
+
+            <div class="divide-y divide-slate-200" id="ready-container"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/js/const.js"></script>
+    <script type="module" src="/js/vendor-index.js"></script>
 </body>
 
 </html>

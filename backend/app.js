@@ -2,6 +2,8 @@
 const path = require("path");
 const express = require("express");
 const sql = require("mssql");
+const http = require("http");
+const { broadcast, initWebServer } = require("./ws.js");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -16,13 +18,18 @@ const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
 const { authorise } = require("./middleware/auth");
-const { validateRegister, validateLogin } = require("./middleware/validate");
+const { validateRegister, validateLogin, authenticateToken } = require("./middleware/validate");
 
 // TODO: Import Validations
 
 // Create Express app
 const app = express();
 const port = process.env.PORT || 3000;
+
+// create websocket
+const server = http.createServer(app);
+initWebServer(server);
+server.listen(3000);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
@@ -32,6 +39,9 @@ app.use(express.static(path.join("public")));
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 
+// refresh token
+app.post("/refresh", accountController.refreshJWTToken);
+
 app.post("/menuitem", authorise("Vendor"), menuItemController.createMenuItem);
 app.put("/menuitem", authorise("Vendor"), menuItemController.updateMenuItem);
 app.delete("/menuitem", authorise("Vendor"), menuItemController.deleteMenuItem);
@@ -40,9 +50,9 @@ app.get(
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
+app.get("/menuitems", authorise("Vendor"), authenticateToken, menuItemController.getAllMenuItems);
 app.get(
-    "/menuitemsbystall",
+    "/menuitemsbystall/:stallId",
     authorise("Vendor"),
     menuItemController.getMenuItemsByStallId,
 );
@@ -56,7 +66,7 @@ app.get(
 );
 app.patch(
     "/orders/:orderId/:status",
-    authorise("Vendor"),
+    authorise("Vendor", "Customer"),
     orderController.updateOrderStatus,
 );
 app.get(
@@ -69,7 +79,6 @@ app.get(
     authorise("Vendor", "Operator"),
     stallController.getStallInfo,
 );
-
 app.post(
     "/promotion",
     authorise("Vendor"),
@@ -92,17 +101,6 @@ app.get(
     authorise("Vendor", "Customer", "Operator"),
     stallController.getAllStalls,
 );
-app.get(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.getStallInfo,
-);
-// PUT /stalls/:stallId - update stall info
-app.put(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.updateStall,
-);
 
 app.get(
     "/rentalagreement",
@@ -123,6 +121,12 @@ app.put(
     "/rentalagreement",
     authorise("Vendor", "Operator"),
     rentalAgreementController.updateRentalAgreement,
+);
+
+app.get(
+    "/vendors/:vendorId/stall",
+    authorise("Vendor"),
+    stallController.getStallIdByVendorId,
 );
 
 // GET /stalls/:stallId/ratings - get ratings for a stall

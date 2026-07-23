@@ -28,7 +28,8 @@
         "lucide": "^1.24.0",
         "mssql": "^12.7.0",
         "nodemon": "^3.1.14",
-        "swagger-ui-express": "^5.0.1"
+        "swagger-ui-express": "^5.0.1",
+        "ws": "^8.21.1"
     },
     "devDependencies": {
         "@tailwindcss/cli": "^4.3.3",

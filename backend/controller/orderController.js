@@ -1,4 +1,6 @@
+const { wsMessages } = require("../../public/js/const.js");
 const orderModel = require("../model/orderModel");
+const { broadcast } = require("../ws");
 
 async function getOrderById(req, res) {
     const { orderId } = req.params;
@@ -46,6 +48,14 @@ async function updateOrderStatus(req, res) {
         if (!updated) {
             return res.status(404).json({ message: "Order not found" });
         }
+        const newOrder = await orderModel.getOrderById(orderId);
+
+        broadcast({
+            type: wsMessages.updateOrder,
+            customerId: newOrder.customer_id,
+            stallId: newOrder.stall_id,
+        });
+
         return res
             .status(200)
             .json({ message: "Order status updated successfully." });
@@ -63,8 +73,9 @@ async function checkoutCart(req, res) {
         const orderPromises = Object.keys(cartMap).map(async (stallId) => {
             const orderId = crypto.randomUUID();
             const items = cartMap[stallId].items; // []
-            const total = await orderModel.getTotalAmount(stallId, items);
             const isEco = cartMap[stallId].isEco || false;
+            let total = await orderModel.getTotalAmount(stallId, items);
+            if (isEco) total += 0.3; // extra fee for eco friendly packaging
 
             await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
 
@@ -82,6 +93,13 @@ async function checkoutCart(req, res) {
         // {stallId: orderId}
         const ordersMap = createdOrders.reduce((map, current) => {
             map[current.stallId] = current.orderId;
+
+            // broadcast to web socket
+            broadcast({
+                type: wsMessages.newOrder,
+                stallId: current.stallId,
+            });
+
             return map;
         }, {});
 

@@ -1,5 +1,3 @@
-import { LS_KEYS } from "./const.js";
-
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const confirmInput = document.getElementById("confirm");
@@ -7,12 +5,11 @@ const nameInput = document.getElementById("name");
 const form = document.getElementById("registerForm");
 
 async function registerUser(e) {
+    e.preventDefault();
     if (passwordInput.value != confirmInput.value) {
         alert("Password and confirm password are different");
         return;
     }
-
-    e.preventDefault();
     try {
         const body = {
             name: nameInput.value,
@@ -32,7 +29,7 @@ async function registerUser(e) {
         const data = await response.json();
         alert(data.message);
         if (!response.ok) {
-            console.log("ERROR WHILE REGISTERING: " + data.error);
+            console.log("ERROR WHILE REGISTERING: " + data.message);
             return;
         } else {
             localStorage.setItem(LS_KEYS.authToken, data.token);
