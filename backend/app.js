@@ -16,9 +16,14 @@ const promotionController = require("./controller/promotionController");
 const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
+const analyticsController = require("./controller/analyticsController");
 const inspectionController = require("./controller/inspectionController");
 const { authorise } = require("./middleware/auth");
-const { validateRegister, validateLogin, authenticateToken } = require("./middleware/validate");
+const {
+    validateRegister,
+    validateLogin,
+    authenticateToken,
+} = require("./middleware/validate");
 
 // TODO: Import Validations
 
@@ -50,7 +55,12 @@ app.get(
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get("/menuitems", authorise("Vendor"), authenticateToken, menuItemController.getAllMenuItems);
+app.get(
+    "/menuitems",
+    authorise("Vendor"),
+    authenticateToken,
+    menuItemController.getAllMenuItems,
+);
 app.get(
     "/menuitemsbystall/:stallId",
     authorise("Vendor"),
@@ -173,21 +183,43 @@ app.delete(
 app.get(
     "/stalls/:stallId/inspections",
     authorise("NEA", "Vendor", "Operator"),
-    inspectionController.getInspections
+    inspectionController.getInspections,
 );
 
 // POST /stalls/:stallId/inspections - create an inspection (NEA only)
 app.post(
     "/stalls/:stallId/inspections",
     authorise("NEA"),
-    inspectionController.createInspection
+    inspectionController.createInspection,
 );
 
 // DELETE /inspections/:inspectionId - delete an inspection (NEA only)
 app.delete(
     "/inspections/:inspectionId",
     authorise("NEA"),
-    inspectionController.deleteInspection
+    inspectionController.deleteInspection,
+);
+
+// Stall Analytics
+app.get(
+    "/vendor/analytics/kpi/:stallId",
+    authorise("Vendor"),
+    analyticsController.getKPI,
+);
+app.get(
+    "/vendor/analytics/hourly-sales/:stallId",
+    authorise("Vendor"),
+    analyticsController.getHourlySales,
+);
+app.get(
+    "/vendor/analytics/top-items/:stallId",
+    authorise("Vendor"),
+    analyticsController.getTopItems,
+);
+app.get(
+    "/vendor/analytics/ai-summary/:stallId",
+    authorise("Vendor"),
+    analyticsController.getAISummary,
 );
 
 // Start server

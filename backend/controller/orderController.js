@@ -32,8 +32,9 @@ async function getOrdersByCustomer(req, res) {
 
 async function getOrderByStallId(req, res) {
     const { stallId } = req.params;
+    const timeframe = req.query.timeframe || null;
     try {
-        const orders = await orderModel.getOrderByStallId(stallId);
+        const orders = await orderModel.getOrderByStallId(stallId, timeframe);
         return res.status(200).json(orders);
     } catch (err) {
         console.error(err);
