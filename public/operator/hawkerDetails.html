@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rental Agreement Details</title>
+    <link rel="stylesheet" href="../css/output.css" />
+    <link rel="stylesheet" href="/css/hawkers.css" />
+  </head>
+
+  <body>
+    <nav class="flex gap-8">
+      <a href="/operator" class="text-xl">Home</a>
+      <a href="/operator/hawkers.html" class="text-xl">Hawker Centres</a>
+    </nav>
+
+    <section>
+      <div class="card" id="detailsCard" style="display: none">
+        <div class="card-header">
+          <h1 id="stallLabel">Stall</h1>
+          <span class="status" id="statusBadge"></span>
+        </div>
+        <table>
+          <tr>
+            <td class="label">Start date</td>
+            <td class="value" id="startDate"></td>
+          </tr>
+          <tr>
+            <td class="label">End date</td>
+            <td class="value" id="endDate"></td>
+          </tr>
+          <tr>
+            <td class="label">Rental fee</td>
+            <td class="value" id="rentalFee"></td>
+          </tr>
+          <tr>
+            <td class="label">Operator ID</td>
+            <td class="value" id="operatorId"></td>
+          </tr>
+        </table>
+        <div class="actions">
+          <button onclick="window.location.href = 'hawkers.html'">
+            Back to table
+          </button>
+        </div>
+      </div>
+      <p id="message"></p>
+    </section>
+
+    <script type="module" src="../js/hawkerDetails.js"></script>
+  </body>
+</html>

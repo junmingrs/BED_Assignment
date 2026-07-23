@@ -1,24 +1,45 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Operator Dashboard</title>
 
     <link rel="stylesheet" href="../css/output.css" />
-</head>
+    <link rel="stylesheet" href="/css/hawkers.css" />
+  </head>
 
-<body>
-    <nav class="flex gap-5">
-        <a href="/operator" class="text-xl">Home</a>
-        <a href="/operator/hawkers.html" class="text-xl ml-auto">Hawker Centres</a>
+  <body>
+    <nav class="flex gap-8">
+      <a href="/operator" class="text-xl">Home</a>
+      <a href="/operator/hawkers.html" class="text-xl">Hawker Centres</a>
     </nav>
 
     <section>
+      <div class="header-row">
         <h1 class="text-3xl">Hawker Centres</h1>
-        <p>TODO</p>
+        <select id="stallSelect">
+          <option value="">Select a stall...</option>
+        </select>
+      </div>
     </section>
-</body>
+    <section>
+      <table>
+        <thead>
+          <tr>
+            <th>Stall ID</th>
+            <th>Start date</th>
+            <th>End date</th>
+            <th>Rental fee</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="agreementTableBody"></tbody>
+      </table>
+      <p id="message"></p>
+    </section>
 
+    <script type="module" src="../js/hawkers.js"></script>
+  </body>
 </html>
