@@ -6,10 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vendor Analytics</title>
     <link rel="stylesheet" href="../css/output.css" />
-    <!-- charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- render markdown for ai generated summary -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -165,7 +161,6 @@
                     </div>
                     <span id="open-complaints-badge"
                         class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
-                        1 Pending
                     </span>
                 </div>
                 <p class="text-xs text-slate-500">
@@ -188,45 +183,7 @@
                                 </th>
                             </tr>
                         </thead>
-                        <tbody id="complaints-table-body" class="divide-y divide-slate-100">
-                            <tr class="transition-colors hover:bg-slate-50/50">
-                                <td class="p-2 align-middle">
-                                    <div class="font-medium text-slate-900">
-                                        Hair found in food
-                                    </div>
-                                    <p class="text-xs text-slate-600 line-clamp-1 mt-0.5">
-                                        Found a strand of hair in my Bibimbap order today.
-                                    </p>
-                                    <div class="text-[11px] text-slate-400 mt-1">
-                                        Today, 1:15 PM
-                                    </div>
-                                </td>
-                                <td class="p-2 align-middle text-right">
-                                    <span
-                                        class="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
-                                        Investigating
-                                    </span>
-                                </td>
-                            </tr>
-
-                            <tr class="transition-colors hover:bg-slate-50/50">
-                                <td class="p-2 align-middle">
-                                    <div class="font-medium text-slate-900">Staff was rude</div>
-                                    <p class="text-xs text-slate-600 line-clamp-1 mt-0.5">
-                                        Counter staff was impatient when taking order.
-                                    </p>
-                                    <div class="text-[11px] text-slate-400 mt-1">
-                                        Yesterday, 4:20 PM
-                                    </div>
-                                </td>
-                                <td class="p-2 align-middle text-right">
-                                    <span
-                                        class="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                                        Resolved
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="complaints-table-body" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -251,47 +208,22 @@
                 </p>
             </div>
 
-            <div id="feedback-feed-container" class="p-6 pt-0 space-y-3">
-                <div class="rounded-lg border border-slate-100 bg-slate-50/50 p-3 space-y-1.5">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-1">
-                            <i data-lucide="star" class="size-3.5 fill-amber-400 text-amber-400"></i>
-                            <i data-lucide="star" class="size-3.5 fill-amber-400 text-amber-400"></i>
-                            <i data-lucide="star" class="size-3.5 fill-amber-400 text-amber-400"></i>
-                            <i data-lucide="star" class="size-3.5 text-slate-300"></i>
-                            <i data-lucide="star" class="size-3.5 text-slate-300"></i>
-                            <span class="text-xs font-medium text-slate-700 ml-1.5">3/5 Rating</span>
-                        </div>
-                        <span class="text-[11px] text-slate-400">2 hours ago</span>
-                    </div>
-                    <p class="text-xs text-slate-700 leading-normal">
-                        "Portion size for Kimchi Fried Rice was smaller than usual today,
-                        but flavor was still great."
-                    </p>
-                </div>
-
-                <div class="rounded-lg border border-slate-100 bg-slate-50/50 p-3 space-y-1.5">
-                    <div class="flex items-center justify-between">
-                        <span
-                            class="inline-flex items-center rounded bg-slate-200/60 px-1.5 py-0.5 text-[10px] font-medium text-slate-700">
-                            General Feedback
-                        </span>
-                        <span class="text-[11px] text-slate-400">Yesterday</span>
-                    </div>
-                    <p class="text-xs text-slate-700 leading-normal">
-                        "Would love it if you could add a non-spicy Bibimbap sauce option
-                        on the ordering kiosk!"
-                    </p>
-                </div>
-            </div>
+            <div id="feedback-feed-container" class="p-6 pt-0 space-y-3"></div>
         </div>
     </section>
+    <!-- charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- render markdown for ai generated summary -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script src="/js/const.js"></script>
+    <script type="module" src="/js/analytics.js"></script>
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         lucide.createIcons();
     </script>
-    <script src="/js/const.js"></script>
-    <script type="module" src="/js/analytics.js"></script>
 </body>
 
 </html>
