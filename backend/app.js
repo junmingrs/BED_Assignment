@@ -3,11 +3,14 @@ const path = require("path");
 const express = require("express");
 const sql = require("mssql");
 const http = require("http");
-const { broadcast, initWebServer } = require("./ws.js");
+const { initWebServer } = require("./ws.js");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
-// TODO: Import Controllers
+// swagger
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger-output.json");
+
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
@@ -26,8 +29,6 @@ const {
     authenticateToken,
 } = require("./middleware/validate");
 
-// TODO: Import Validations
-
 // Create Express app
 const app = express();
 const port = process.env.PORT || process.argv[2];
@@ -36,6 +37,9 @@ const port = process.env.PORT || process.argv[2];
 const server = http.createServer(app);
 initWebServer(server);
 server.listen(port);
+
+// swagger documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
@@ -69,7 +73,11 @@ app.get(
 );
 
 app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
-app.get("/order/:orderId", authorise("Customer", "Vendor"), orderController.getOrderById);
+app.get(
+    "/order/:orderId",
+    authorise("Customer", "Vendor"),
+    orderController.getOrderById,
+);
 app.get(
     "/customer/:customerId/orders",
     authorise("Customer"),

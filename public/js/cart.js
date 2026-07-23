@@ -143,11 +143,24 @@ async function checkout() {
         const data = await response.json();
         alert(data.message);
         if (response.ok) {
-            sessionStorage.setItem(
-                LS_KEYS.createdOrderIds,
-                JSON.stringify(data.orderIds),
-            );
-            window.location.href = "/customer/order-status.html?success=true";
+            // 存订单摘要
+            const items = [];
+            Object.keys(cartMap).forEach(stallId => {
+                cartMap[stallId].items.forEach(item => {
+                    items.push({
+                        name: item.item_desc || 'Item',
+                        quantity: item.quantity,
+                        price: item.item_price || 0
+                    });
+                });
+            });
+            const total = cartTotal.textContent.replace('$', '');
+            sessionStorage.setItem('orderSummary', JSON.stringify({ items, total: parseFloat(total) }));
+
+            // 跳转到支付成功页
+            const orderIds = Object.values(data.orderIds).join(', ');
+            window.location.href = `/customer/payment-success.html?orderIds=${orderIds}&total=${total}`;
+            
             localStorage.setItem(LS_KEYS.cart, "{}");
         } else {
             console.error(data);
