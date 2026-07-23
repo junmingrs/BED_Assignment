@@ -55,6 +55,7 @@ async function updateOrderStatus(req, res) {
             type: wsMessages.updateOrder,
             customerId: newOrder.customer_id,
             stallId: newOrder.stall_id,
+            orderId: newOrder.order_id,
         });
 
         return res
@@ -99,6 +100,7 @@ async function checkoutCart(req, res) {
             broadcast({
                 type: wsMessages.newOrder,
                 stallId: current.stallId,
+                orderId: current.orderId,
             });
 
             return map;
