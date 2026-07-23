@@ -42,41 +42,48 @@ async function renderCartItems() {
             const itemCards = await Promise.all(
                 stallItems.map(async (item) => {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
+                    // TODO: add cuisines for the menu items
+                    const cuisine = "Korean";
                     totalAmount += menuItem.item_price * item.quantity;
 
                     return `
-                <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <img
-                    src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
-                    alt="${menuItem.item_desc}"
-                    class="size-24 rounded-lg object-cover"
-                  />
+                        <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                          <img
+                            src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
+                            alt="${menuItem.item_desc}"
+                            class="size-24 rounded-lg object-cover"
+                          />
 
-                  <div class="flex-1">
-                    <span class="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
-                      ${menuItem.item_category}
-                    </span>
+                          <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                              <span class="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+                                ${menuItem.item_category}
+                              </span>
+                              
+                              <span class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-600">
+                                ${cuisine}
+                              </span>
+                            </div>
 
-                    <h2 class="mt-2 text-lg font-semibold">
-                      ${menuItem.item_desc}
-                    </h2>
+                            <h2 class="mt-2 text-lg font-semibold">
+                              ${menuItem.item_desc}
+                            </h2>
 
-                    <p class="mt-3 text-lg font-bold text-green-600">
-                      $${menuItem.item_price.toFixed(2)}
-                    </p>
-                  </div>
+                            <p class="mt-3 text-lg font-bold text-green-600">
+                              $${menuItem.item_price.toFixed(2)}
+                            </p>
+                          </div>
 
-                  <div class="flex items-center gap-4">
-                    <button class="minus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">−</button>
-                    <span>${item.quantity}</span>
-                    <button class="plus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">+</button>
-                  </div>
+                          <div class="flex items-center gap-4">
+                            <button class="minus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">−</button>
+                            <span>${item.quantity}</span>
+                            <button class="plus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">+</button>
+                          </div>
 
-                  <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}" >
-                    Delete
-                  </button>
-                </div>
-                `;
+                          <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">
+                            Delete
+                          </button>
+                        </div>                `;
                 }),
             );
 
