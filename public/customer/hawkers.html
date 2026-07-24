@@ -1,64 +1,61 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <title>Hawker Centres</title>
     <link rel="stylesheet" href="/css/output.css" />
-  </head>
-  <body class="bg-white text-slate-900">
-    <nav
-      class="flex items-center justify-between px-12 py-6 border-b border-slate-100"
-    >
-      <div class="flex items-center gap-8">
-        <a href="index.html" class="text-base text-slate-700 hover:text-slate-900"
-          >Home</a
-        >
-        <a href="hawkers.html" class="text-base text-slate-900 font-medium"
-          >Hawker Centres</a
-        >
-      </div>
+</head>
+
+<body class="bg-white text-slate-900">
+    <nav class="flex justify-between">
+        <div class="flex gap-5">
+            <a href="/customer" class="text-xl">Home</a>
+            <a href="/customer/hawkers.html" class="text-xl">Browse</a>
+        </div>
+        <div class="flex gap-5">
+            <a href="/customer/cart.html" class="text-xl">Cart</a>
+            <a href="/customer/profile.html" class="text-xl">Profile</a>
+        </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-12 py-12">
-      <h1 class="text-4xl font-medium mb-2">Hawker Centres</h1>
-      <p id="message" class="text-red-600 text-base mt-3"></p>
-      <div
-        id="centreGrid"
-        class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
-      ></div>
-    </main>
+    <section class="max-w-7xl mx-auto">
+        <h1 class="text-4xl font-medium mb-2">Hawker Centres</h1>
+        <p id="message" class="text-red-600 text-base mt-3"></p>
+        <div id="centreGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"></div>
+    </section>
     <script src="/js/const.js"></script>
     <script type="module">
-      const centreGrid = document.getElementById("centreGrid");
-      const messageEl = document.getElementById("message");
+        const centreGrid = document.getElementById("centreGrid");
+        const messageEl = document.getElementById("message");
 
-      async function loadHawkerCentres() {
-        try {
-          const token = sessionStorage.getItem(SS_KEYS.accessToken);
-          const response = await fetch("/hawkercentre", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
+        async function loadHawkerCentres() {
+            try {
+                const token = sessionStorage.getItem(SS_KEYS.accessToken);
+                const response = await fetch("/hawkercentre", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-          const data = await response.json();
+                const data = await response.json();
 
-          if (!response.ok) {
-            messageEl.textContent =
-              data.error || "Failed to load hawker centres";
-            return;
-          }
+                if (!response.ok) {
+                    messageEl.textContent =
+                        data.error || "Failed to load hawker centres";
+                    return;
+                }
 
-          if (data.length === 0) {
-            messageEl.textContent = "No hawker centres found.";
-            return;
-          }
+                if (data.length === 0) {
+                    messageEl.textContent = "No hawker centres found.";
+                    return;
+                }
 
-          centreGrid.innerHTML = data
-            .map(
-              (centre) => `
+                centreGrid.innerHTML = data
+                    .map(
+                        (centre) => `
         <div class="border border-gray-200 rounded-xl p-8 cursor-pointer hover:bg-gray-50 transition-colors"
              onclick="window.location.href='hawker.html?id=${centre.hawker_centre_id}'">
           <h2 class="text-xl font-semibold">${centre.centre_name}</h2>
@@ -66,16 +63,17 @@
           <span class="inline-block mt-6 text-base text-slate-700 font-medium">View stalls &rarr;</span>
         </div>
       `,
-            )
-            .join("");
-        } catch (err) {
-          console.error(err);
-          messageEl.textContent =
-            "Something went wrong while loading hawker centres.";
+                    )
+                    .join("");
+            } catch (err) {
+                console.error(err);
+                messageEl.textContent =
+                    "Something went wrong while loading hawker centres.";
+            }
         }
-      }
 
-      loadHawkerCentres();
+        loadHawkerCentres();
     </script>
-  </body>
+</body>
+
 </html>
