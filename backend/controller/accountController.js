@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const accountModel = require("../model/accountModel");
 
 function generateToken(id, role) {
@@ -44,14 +45,21 @@ async function registerUser(req, res) {
         }
 
         const token = generateToken(accountId, role);
-        const refreshToken = jwt.sign({ accountId, role }, process.env.REFRESH_TOKEN_SECRET_KEY, {
-            expiresIn: "604,800" // 7 days in seconds
-        });
+        const refreshToken = jwt.sign(
+            { accountId, role },
+            process.env.REFRESH_TOKEN_SECRET_KEY,
+            {
+                expiresIn: "604,800", // 7 days in seconds
+            },
+        );
         await accountModel.createRefreshToken(accountId, refreshToken);
 
-        return res
-            .status(201)
-            .json({ token, refreshToken, role, message: "Account created successfully" });
+        return res.status(201).json({
+            token,
+            refreshToken,
+            role,
+            message: "Account created successfully",
+        });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Internal server error" });
@@ -74,13 +82,16 @@ async function loginUser(req, res) {
                 .json({ message: "The username or password is incorrect." });
 
         const token = generateToken(user.account_id, user.role);
-        const refreshToken = jwt.sign({ accountId: user.account_id, role: user.role }, process.env.REFRESH_TOKEN_SECRET_KEY);
+        const refreshToken = jwt.sign(
+            { accountId: user.account_id, role: user.role },
+            process.env.REFRESH_TOKEN_SECRET_KEY,
+        );
         await accountModel.updateRefreshToken(user.account_id, refreshToken);
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: true,
             sameSite: "strict",
-        })
+        });
         const role = user.role;
         return res
             .status(200)
@@ -91,16 +102,57 @@ async function loginUser(req, res) {
     }
 }
 
+async function loginGuest(_, res) {
+    try {
+        const guestId = crypto.randomUUID().slice(0, 8);
+        const name = `Guest_${guestId}`;
+        const email = `guest_${Date.now()}_${guestId}@guest.local`;
+        const role = "Customer";
+
+        const dummyPassword = crypto.randomBytes(16).toString("hex");
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(dummyPassword, salt);
+
+        const accountId = await accountModel.createAccount({
+            name,
+            email,
+            passwordHash: hashedPassword,
+            role,
+            isGuest: true,
+        });
+        await accountModel.createCustomer(accountId, name);
+
+        const token = generateToken(accountId, role, { isGuest: true });
+        const refreshToken = jwt.sign(
+            { accountId, role, isGuest: true },
+            process.env.REFRESH_TOKEN_SECRET_KEY,
+            { expiresIn: 604800 },
+        );
+
+        await accountModel.createRefreshToken(accountId, refreshToken);
+
+        return res.status(201).json({
+            token,
+            refreshToken,
+            role,
+            isGuest: true,
+            message: "Logged in as guest",
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 function parseCookie(header) {
-    return header.split(';').reduce((acc, pair) => {
-        const [key, ...v] = pair.trim().split('=');
-        if (key) acc[key] = decodeURIComponent(v.join('='));
+    return header.split(";").reduce((acc, pair) => {
+        const [key, ...v] = pair.trim().split("=");
+        if (key) acc[key] = decodeURIComponent(v.join("="));
         return acc;
     }, {});
 }
 
 async function refreshJWTToken(cookie) {
-
     const refreshToken = parseCookie(cookie).refreshToken;
     try {
         const exists = await accountModel.findRefreshToken(refreshToken);
@@ -109,16 +161,20 @@ async function refreshJWTToken(cookie) {
             return null;
         }
         const user = await new Promise((resolve, reject) => {
-            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY, (err, user) => {
-                if (err) return reject(err);
-                return resolve(user);
-            });
+            jwt.verify(
+                refreshToken,
+                process.env.REFRESH_TOKEN_SECRET_KEY,
+                (err, user) => {
+                    if (err) return reject(err);
+                    return resolve(user);
+                },
+            );
         });
         return generateToken(user.account_id, user.role);
     } catch (err) {
-        console.log(err)
+        console.log(err);
         return null;
     }
 }
 
-module.exports = { registerUser, loginUser, refreshJWTToken };
+module.exports = { registerUser, loginUser, refreshJWTToken, loginGuest };
