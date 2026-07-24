@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const accountModel = require("../model/accountModel");
 
-function generateToken(id, role) {
-    return jwt.sign({ id, role }, process.env.JWT_SECRET_KEY, {
+function generateToken(id, role, isGuest = false) {
+    return jwt.sign({ id, role, isGuest }, process.env.JWT_SECRET_KEY, {
         expiresIn: "3600s",
     });
 }
@@ -27,6 +27,7 @@ async function registerUser(req, res) {
             email,
             passwordHash: hashedPassword,
             role,
+            isGuest: false,
         });
 
         switch (role) {
@@ -122,7 +123,7 @@ async function loginGuest(_, res) {
         });
         await accountModel.createCustomer(accountId, name);
 
-        const token = generateToken(accountId, role, { isGuest: true });
+        const token = generateToken(accountId, role, true);
         const refreshToken = jwt.sign(
             { accountId, role, isGuest: true },
             process.env.REFRESH_TOKEN_SECRET_KEY,
@@ -170,7 +171,7 @@ async function refreshJWTToken(cookie) {
                 },
             );
         });
-        return generateToken(user.account_id, user.role);
+        return generateToken(user.account_id, user.role, user.isGuest ?? false);
     } catch (err) {
         console.log(err);
         return null;
