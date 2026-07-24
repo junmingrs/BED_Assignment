@@ -28,6 +28,22 @@ async function getItemById(stallId, itemCode) {
     }
 }
 
+async function getStallInfo(stallId) {
+    try {
+        const response = await fetch(`/stalls/${stallId}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return await response.json();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
@@ -36,6 +52,9 @@ async function renderCartItems() {
     let totalAmount = 0;
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
+            const stallInfo = await getStallInfo(stallId);
+            const stallName = stallInfo.stall.stall_name;
+
             const stallItems = cartMap[stallId].items;
             const isEco = cartMap[stallId].isEco === true;
             if (isEco) totalAmount += 0.3;
@@ -87,11 +106,9 @@ async function renderCartItems() {
                 }),
             );
 
-            // TODO: get stall name by id
-
             return `
             <section class="space-y-4">
-                <h2 class="text-2xl font-semibold">Stall Name (TODO)</h2>
+                <h2 class="text-2xl font-semibold">${stallName}</h2>
                 ${itemCards.join("")}
                 <div class="mt-2 flex justify-between items-center">
                     <label class="flex cursor-pointer items-center gap-3">
@@ -152,22 +169,25 @@ async function checkout() {
         if (response.ok) {
             // 存订单摘要
             const items = [];
-            Object.keys(cartMap).forEach(stallId => {
-                cartMap[stallId].items.forEach(item => {
+            Object.keys(cartMap).forEach((stallId) => {
+                cartMap[stallId].items.forEach((item) => {
                     items.push({
-                        name: item.item_desc || 'Item',
+                        name: item.item_desc || "Item",
                         quantity: item.quantity,
-                        price: item.item_price || 0
+                        price: item.item_price || 0,
                     });
                 });
             });
-            const total = cartTotal.textContent.replace('$', '');
-            sessionStorage.setItem('orderSummary', JSON.stringify({ items, total: parseFloat(total) }));
+            const total = cartTotal.textContent.replace("$", "");
+            sessionStorage.setItem(
+                "orderSummary",
+                JSON.stringify({ items, total: parseFloat(total) }),
+            );
 
             // 跳转到支付成功页
-            const orderIds = Object.values(data.orderIds).join(', ');
+            const orderIds = Object.values(data.orderIds).join(", ");
             window.location.href = `/customer/payment-success.html?orderIds=${orderIds}&total=${total}`;
-            
+
             localStorage.setItem(LS_KEYS.cart, "{}");
         } else {
             console.error(data);
