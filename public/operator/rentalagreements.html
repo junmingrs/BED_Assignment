@@ -1,42 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Rental Agreements</title>
-<link rel="stylesheet" href="../css/rentalAgreement.css" />
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Operator Dashboard - Rental Agreements</title>
 
-<nav>
-  <a href="index.html">Home</a>
-  <a href="rentalAgreements.html" class="active">Rental Agreements</a>
-  <a href="Hawkers.html">Hawker Centres</a>
-</nav>
+    <link rel="stylesheet" href="../css/output.css" />
+  </head>
 
-<main>
-  <div class="header-row">
-    <h1>Rental Agreements</h1>
-    <select id="stallSelect">
-      <option value="">Select a stall...</option>
-    </select>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Stall ID</th>
-        <th>Start date</th>
-        <th>End date</th>
-        <th>Rental fee</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="agreementTableBody"></tbody>
-  </table>
-  <p id="message"></p>
-</main>
+  <body class="bg-white text-slate-900">
+    <nav class="flex items-center justify-between px-12 py-6 border-b border-slate-100">
+      <div class="flex items-center gap-8">
+        <a href="/operator" class="text-base text-slate-700 hover:text-slate-900">Home</a>
+        <a href="/operator/rentalAgreements.html" class="text-base text-slate-900 font-medium">Rental Agreements</a>
+        <a href="/operator/hawkers.html" class="text-base text-slate-700 hover:text-slate-900">Hawker Centres</a>
+      </div>
+    </nav>
 
-<script type="module" src="../js/rentalagreement.js"></script>
+    <main class="max-w-7xl mx-auto px-12 py-12">
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-4xl font-medium">Rental Agreements</h1>
+        <h2 id="stallNameHeading" class="text-xl font-semibold hidden"></h2>
+        <select id="stallSelect" class="border border-slate-300 rounded-lg px-4 py-2 text-base">
+          <option value="">Select a stall...</option>
+        </select>
+      </div>
 
-</body>
+      <p id="message" class="text-red-600 text-base mb-4"></p>
+
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 text-left text-sm text-slate-500">
+            <th class="py-3 pr-4">Stall ID</th>
+            <th class="py-3 pr-4">Start date</th>
+            <th class="py-3 pr-4">End date</th>
+            <th class="py-3 pr-4">Rental fee</th>
+            <th class="py-3 pr-4">Status</th>
+          </tr>
+        </thead>
+        <tbody id="agreementTableBody"></tbody>
+      </table>
+    </main>
+
+    <script src="../js/const.js"></script>
+    <script type="module" src="../js/rentalagreements.js"></script>
+  </body>
 </html>

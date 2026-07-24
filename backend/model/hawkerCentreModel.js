@@ -29,8 +29,18 @@ async function getStallsByHawkerCentreId(hawkerCentreId) {
   return result.recordset;
 }
 
+async function getHawkerCentresByOperatorId(operatorId) {
+  const query = "SELECT * FROM HawkerCentre WHERE operator_id = @operator_id";
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input("operator_id", operatorId)
+    .query(query);
+  return result.recordset;
+}
+
 module.exports = {
   getAllHawkerCentres,
   getHawkerCentreById,
   getStallsByHawkerCentreId,
+  getHawkerCentresByOperatorId,
 };
