@@ -5,7 +5,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stall</title>
-
     <link rel="stylesheet" href="../css/output.css" />
 </head>
 
@@ -21,24 +20,29 @@
         </div>
     </nav>
 
-    <section>
-        <h1 class="text-3xl">Stall 1</h1>
-        <p>details</p>
+    <section class="space-y-1">
+        <div class="flex items-center gap-3">
+            <h1 id="stallName" class="text-3xl font-bold">Stall 1</h1>
+            <span id="stallUnitNo"
+                class="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
+                #01-23
+            </span>
+        </div>
+        <p id="hawkerCentre" class="text-sm text-slate-500">
+            Maxwell Food Centre
+        </p>
     </section>
 
-    <!-- PLACEHOLDER, TO UPDATE THE CSS. NOTE DON'T REMOVE THE LOGIC FOR THE ADD TO CART THOUGH-->
-    <section class="grid grid-cols-3 gap-5">
-        <div class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center">
-            Pizza
-            <button class="addToCartBtn font-bold">Add to Cart</button>
-        </div>
-        <div class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center">
-            Matcha
-        </div>
-        <div class="bg-blue-200 h-40 border rounded grid items-center justify-center text-center">
-            Sushi
-        </div>
+    <hr class="border-slate-200" />
+
+    <section class="space-y-6">
+        <h2 class="text-2xl font-bold tracking-tight text-slate-900">
+            Menu Items
+        </h2>
+
+        <div id="menuContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
+
     <script src="/js/const.js"></script>
     <script type="module" src="/js/stall.js"></script>
 </body>
