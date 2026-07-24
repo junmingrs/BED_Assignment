@@ -224,4 +224,3 @@ cartContainer.addEventListener("change", (e) => {
 
     setEcoOption(checkbox.dataset.stallId, checkbox.checked);
 });
-
