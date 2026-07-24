@@ -69,7 +69,7 @@ app.get(
 );
 app.get(
     "/menuitemsbystall/:stallId",
-    authorise("Vendor"),
+    authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallId,
 );
 
@@ -96,7 +96,7 @@ app.get(
 );
 app.get(
     "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
+    authorise("Vendor", "Operator", "Customer"),
     stallController.getStallInfo,
 );
 app.post(

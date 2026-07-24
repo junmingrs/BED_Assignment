@@ -1,92 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<title>Hawker Centre Details</title>
-<link rel="stylesheet" href="/css/output.css" />
+    <meta charset="UTF-8" />
+    <title>Hawker Centre Details</title>
+    <link rel="stylesheet" href="/css/output.css" />
 </head>
+
 <body class="bg-white text-slate-900">
+    <nav class="flex justify-between">
+        <div class="flex gap-5">
+            <a href="/customer" class="text-xl">Home</a>
+            <a href="/customer/hawkers.html" class="text-xl">Browse</a>
+        </div>
+        <div class="flex gap-5">
+            <a href="/customer/cart.html" class="text-xl">Cart</a>
+            <a href="/customer/profile.html" class="text-xl">Profile</a>
+        </div>
+    </nav>
 
-<nav class="flex items-center justify-between px-12 py-6 border-b border-slate-100">
-  <div class="flex items-center gap-8">
-    <a href="index.html" class="text-base text-slate-700 hover:text-slate-900">Home</a>
-    <a href="hawkers.html" class="text-base text-slate-700 hover:text-slate-900">Hawker Centres</a>
-  </div>
-</nav>
+    <section class="max-w-7xl mx-auto">
+        <div id="detailsCard" class="hidden">
+            <h1 id="centreName" class="text-4xl font-medium"></h1>
+            <p id="centreAddress" class="text-base text-slate-500 mt-2"></p>
 
-<main class="max-w-7xl mx-auto px-12 py-12">
-  <div id="detailsCard" class="hidden">
-    <h1 id="centreName" class="text-4xl font-medium"></h1>
-    <p id="centreAddress" class="text-base text-slate-500 mt-2"></p>
+            <h2 class="text-base font-medium text-slate-500 mt-12 mb-4">Stalls</h2>
+            <div id="stallGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
-    <h2 class="text-base font-medium text-slate-500 mt-12 mb-4">Stalls</h2>
-    <div id="stallGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            <a href="hawkers.html" class="inline-block mt-12 text-base text-slate-700 font-medium">&larr; Back to all
+                hawker centres</a>
+        </div>
+        <p id="message" class="text-red-600 text-base mt-3"></p>
+    </section>
+    <script src="/js/const.js"></script>
+    <script type="module">
+        const params = new URLSearchParams(window.location.search);
+        const hawkerCentreId = params.get("id");
 
-    <a href="hawkers.html" class="inline-block mt-12 text-base text-slate-700 font-medium">&larr; Back to all hawker centres</a>
-  </div>
-  <p id="message" class="text-red-600 text-base mt-3"></p>
-</main>
-<script src="/js/const.js"></script>
-<script type="module">
+        const messageEl = document.getElementById("message");
+        const card = document.getElementById("detailsCard");
 
+        async function loadHawkerCentreDetails() {
+            if (!hawkerCentreId) {
+                messageEl.textContent =
+                    "No hawker centre id provided in the URL (e.g. ?id=...)";
+                return;
+            }
 
-const params = new URLSearchParams(window.location.search);
-const hawkerCentreId = params.get("id");
+            try {
+                const token = sessionStorage.getItem(SS_KEYS.accessToken);
+                const response = await fetch(`/hawkercentre/${hawkerCentreId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-const messageEl = document.getElementById("message");
-const card = document.getElementById("detailsCard");
+                const data = await response.json();
 
-async function loadHawkerCentreDetails() {
-  if (!hawkerCentreId) {
-    messageEl.textContent = "No hawker centre id provided in the URL (e.g. ?id=...)";
-    return;
-  }
+                if (!response.ok) {
+                    messageEl.textContent =
+                        data.error || "Failed to load hawker centre";
+                    return;
+                }
 
-  try {
-    const token = sessionStorage.getItem(SS_KEYS.accessToken);
-    const response = await fetch(`/hawkercentre/${hawkerCentreId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+                document.getElementById("centreName").textContent = data.centre_name;
+                document.getElementById("centreAddress").textContent = data.address;
 
-    const data = await response.json();
+                const stallGrid = document.getElementById("stallGrid");
+                if (data.stalls.length === 0) {
+                    stallGrid.innerHTML = `<p class="text-base text-gray-500">No stalls found for this hawker centre.</p>`;
+                } else {
+                    stallGrid.innerHTML = data.stalls
+                        .map(
+                            (stall) => `
+<a class="border border-gray-200 rounded-xl p-6" href="/customer/stall.html?stallId=${stall.stall_id}"}>
+                  <h3 class="text-base font-semibold">${stall.stall_name}</h3>
+                  <p class="text-sm text-slate-500 mt-2">Unit ${stall.stall_unit_no}</p>
+                </a>
+              `,
+                        )
+                        .join("");
+                }
 
-    if (!response.ok) {
-      messageEl.textContent = data.error || "Failed to load hawker centre";
-      return;
-    }
+                card.classList.remove("hidden");
+            } catch (err) {
+                console.error(err);
+                messageEl.textContent =
+                    "Something went wrong while loading the hawker centre.";
+            }
+        }
 
-    document.getElementById("centreName").textContent = data.centre_name;
-    document.getElementById("centreAddress").textContent = data.address;
-
-    const stallGrid = document.getElementById("stallGrid");
-    if (data.stalls.length === 0) {
-      stallGrid.innerHTML = `<p class="text-base text-gray-500">No stalls found for this hawker centre.</p>`;
-    } else {
-      stallGrid.innerHTML = data.stalls
-        .map(
-          (stall) => `
-          <div class="border border-gray-200 rounded-xl p-6">
-            <h3 class="text-base font-semibold">${stall.stall_name}</h3>
-            <p class="text-sm text-slate-500 mt-2">Unit ${stall.stall_unit_no}</p>
-          </div>
-        `
-        )
-        .join("");
-    }
-
-    card.classList.remove("hidden");
-  } catch (err) {
-    console.error(err);
-    messageEl.textContent = "Something went wrong while loading the hawker centre.";
-  }
-}
-
-loadHawkerCentreDetails();
-</script>
-
+        loadHawkerCentreDetails();
+    </script>
 </body>
+
 </html>

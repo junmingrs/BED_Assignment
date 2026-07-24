@@ -28,6 +28,22 @@ async function getItemById(stallId, itemCode) {
     }
 }
 
+async function getStallInfo(stallId) {
+    try {
+        const response = await fetch(`/stalls/${stallId}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return await response.json();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
@@ -36,55 +52,63 @@ async function renderCartItems() {
     let totalAmount = 0;
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
+            const stallInfo = await getStallInfo(stallId);
+            const stallName = stallInfo.stall.stall_name;
+
             const stallItems = cartMap[stallId].items;
             const isEco = cartMap[stallId].isEco === true;
             if (isEco) totalAmount += 0.3;
             const itemCards = await Promise.all(
                 stallItems.map(async (item) => {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
+                    // TODO: add cuisines for the menu items
+                    const cuisine = "Korean";
                     totalAmount += menuItem.item_price * item.quantity;
 
                     return `
-                <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <img
-                    src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
-                    alt="${menuItem.item_desc}"
-                    class="size-24 rounded-lg object-cover"
-                  />
+                        <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                          <img
+                            src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
+                            alt="${menuItem.item_desc}"
+                            class="size-24 rounded-lg object-cover"
+                          />
 
-                  <div class="flex-1">
-                    <span class="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
-                      ${menuItem.item_category}
-                    </span>
+                          <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                              <span class="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+                                ${menuItem.item_category}
+                              </span>
+                              
+                              <span class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-600">
+                                ${cuisine}
+                              </span>
+                            </div>
 
-                    <h2 class="mt-2 text-lg font-semibold">
-                      ${menuItem.item_desc}
-                    </h2>
+                            <h2 class="mt-2 text-lg font-semibold">
+                              ${menuItem.item_desc}
+                            </h2>
 
-                    <p class="mt-3 text-lg font-bold text-green-600">
-                      $${menuItem.item_price.toFixed(2)}
-                    </p>
-                  </div>
+                            <p class="mt-3 text-lg font-bold text-green-600">
+                              $${menuItem.item_price.toFixed(2)}
+                            </p>
+                          </div>
 
-                  <div class="flex items-center gap-4">
-                    <button class="minus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">−</button>
-                    <span>${item.quantity}</span>
-                    <button class="plus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">+</button>
-                  </div>
+                          <div class="flex items-center gap-4">
+                            <button class="minus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">−</button>
+                            <span>${item.quantity}</span>
+                            <button class="plus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">+</button>
+                          </div>
 
-                  <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}" >
-                    Delete
-                  </button>
-                </div>
-                `;
+                          <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">
+                            Delete
+                          </button>
+                        </div>                `;
                 }),
             );
 
-            // TODO: get stall name by id
-
             return `
             <section class="space-y-4">
-                <h2 class="text-2xl font-semibold">Stall Name (TODO)</h2>
+                <h2 class="text-2xl font-semibold">${stallName}</h2>
                 ${itemCards.join("")}
                 <div class="mt-2 flex justify-between items-center">
                     <label class="flex cursor-pointer items-center gap-3">
@@ -145,22 +169,25 @@ async function checkout() {
         if (response.ok) {
             // 存订单摘要
             const items = [];
-            Object.keys(cartMap).forEach(stallId => {
-                cartMap[stallId].items.forEach(item => {
+            Object.keys(cartMap).forEach((stallId) => {
+                cartMap[stallId].items.forEach((item) => {
                     items.push({
-                        name: item.item_desc || 'Item',
+                        name: item.item_desc || "Item",
                         quantity: item.quantity,
-                        price: item.item_price || 0
+                        price: item.item_price || 0,
                     });
                 });
             });
-            const total = cartTotal.textContent.replace('$', '');
-            sessionStorage.setItem('orderSummary', JSON.stringify({ items, total: parseFloat(total) }));
+            const total = cartTotal.textContent.replace("$", "");
+            sessionStorage.setItem(
+                "orderSummary",
+                JSON.stringify({ items, total: parseFloat(total) }),
+            );
 
             // 跳转到支付成功页
-            const orderIds = Object.values(data.orderIds).join(', ');
+            const orderIds = Object.values(data.orderIds).join(", ");
             window.location.href = `/customer/payment-success.html?orderIds=${orderIds}&total=${total}`;
-            
+
             localStorage.setItem(LS_KEYS.cart, "{}");
         } else {
             console.error(data);
@@ -224,4 +251,3 @@ cartContainer.addEventListener("change", (e) => {
 
     setEcoOption(checkbox.dataset.stallId, checkbox.checked);
 });
-
