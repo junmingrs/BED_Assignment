@@ -233,6 +233,12 @@ app.get(
     analyticsController.getAISummary,
 );
 
+app.get(
+    "/menuItemCuisine/:stallId/:itemCode",
+    authorise("Vendor"),
+    menuItemController.getMenuItemCuisine,
+);
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

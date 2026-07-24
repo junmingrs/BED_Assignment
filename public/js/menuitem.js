@@ -13,7 +13,7 @@ const addMsgRef = document.getElementById("addMsg");
 const addCuisineInputRef = document.getElementById("addCuisineInput");
 const addCuisineBtnRef = document.getElementById("addCuisineBtn");
 const addCuisineInputContainerRef = document.getElementById("addCuisineInputContainer");
-const addCuisineInputFieldRef = document.getElementById("addCuisineInputField");
+const addCuisineInputFieldRef = document.querySelectorAll(".addCuisineInputField");
 const cardContainerRef = document.getElementById("card-container");
 const editDialogRef = document.getElementById("editDialog");
 const deleteDialogRef = document.getElementById("deleteDialog");
@@ -22,6 +22,10 @@ const editPriceInputRef = document.getElementById("editPriceInput");
 const editFormRef = document.getElementById("editForm");
 const editCancelBtnRef = document.getElementById("editCancelBtn");
 const editMsgRef = document.getElementById("editMsg");
+const editCuisineInputRef = document.getElementById("addCuisineInput");
+const editCuisineBtnRef = document.getElementById("addCuisineBtn");
+const editCuisineInputContainerRef = document.getElementById("addCuisineInputContainer");
+const editCuisineInputFieldRef = document.querySelectorAll(".addCuisineInputField");
 const deleteNameRef = document.getElementById("deleteName");
 const deletePriceRef = document.getElementById("deletePrice");
 const deleteConfirmBtnRef = document.getElementById("deleteConfirmBtn");
@@ -68,7 +72,23 @@ async function fetchItems() {
     }
 }
 
-async function createItem(payload) {
+async function fetchItemCuisine(stallId, itemCode) {
+    try {
+        const response = await fetch(`/menuItemCuisine/${stallId}/${itemCode}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        let data = await response.json();
+        return data;
+    } catch (e) {
+        alert("FETCH ERROR: ", e);
+    }
+}
+
+async function createItem(menuItem, cuisines) {
     try {
         const response = await fetch(`/menuitem`, {
             method: "POST",
@@ -77,7 +97,7 @@ async function createItem(payload) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ menuItem, cuisines }),
         });
         let data = response.json();
         return data;
@@ -86,7 +106,7 @@ async function createItem(payload) {
     }
 }
 
-async function updateItem(payload) {
+async function updateItem(menuItem, cuisines) {
     try {
         const response = await fetch(`/menuitem`, {
             method: "PUT",
@@ -95,7 +115,7 @@ async function updateItem(payload) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ menuItem, cuisines }),
         });
         let data = response.json();
         return data;
@@ -127,29 +147,92 @@ async function deleteItemRequest(stallId, itemCode) {
 
 stallUnitNoRef.innerText = stallInfo.stall.stall_unit_no;
 
-const displayEditDialog = (item) => {
+const displayEditDialog = async (item) => {
     editDialogRef.className =
         "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
     editNameInputRef.value = item.item_desc;
     editPriceInputRef.value = item.item_price.toFixed(2);
     editMsgRef.classList.add("hidden");
 
+    const editCuisineInputContainerRef = document.getElementById("editCuisineInputContainer");
+    editCuisineInputContainerRef.innerHTML = `
+        <div class="editCuisineInputField flex gap-2 border-2 border-black p-1">
+            <span>Cuisine:</span>
+            <input id="editCuisineInput" type="text" class="pl-2 w-full focus:outline-none"
+                placeholder="Cuisine Name" />
+        </div>
+    `;
+
+    const menuItemCuisines = await fetchItemCuisine(stallId, item.item_code);
+
+    if (menuItemCuisines && menuItemCuisines.cuisines.length > 0) {
+        const firstInput = editCuisineInputContainerRef.querySelector("input");
+        firstInput.value = menuItemCuisines.cuisines[0].cuisine_name;
+        firstInput.removeAttribute("id");
+
+        for (let i = 1; i < menuItemCuisines.length; i++) {
+            const newField = editCuisineInputContainerRef.querySelector(".editCuisineInputField").cloneNode(true);
+            const input = newField.querySelector("input");
+            input.value = menuItemCuisines[i].cuisine_name;
+            input.removeAttribute("id");
+            newField.removeAttribute("id");
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.innerText = "x";
+            removeBtn.className = "w-1/5 justify-center items-center border-2 border-black";
+            removeBtn.onclick = () => newField.remove();
+            newField.appendChild(removeBtn);
+
+            editCuisineInputContainerRef.appendChild(newField);
+        }
+    }
+
+    const editCuisineBtnRef = document.getElementById("editCuisineBtn");
+    editCuisineBtnRef.onclick = () => {
+        const newField = editCuisineInputContainerRef.querySelector(".editCuisineInputField").cloneNode(true);
+        const input = newField.querySelector("input");
+        input.value = "";
+        input.removeAttribute("id");
+        newField.removeAttribute("id");
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.innerText = "x";
+        removeBtn.className = "w-1/5 justify-center items-center border-2 border-black";
+        removeBtn.onclick = () => newField.remove();
+        newField.appendChild(removeBtn);
+
+        editCuisineInputContainerRef.appendChild(newField);
+    };
+
     editFormRef.onsubmit = async (e) => {
         e.preventDefault();
         item.item_desc = editNameInputRef.value;
         item.item_price = parseFloat(editPriceInputRef.value);
-        const data = await updateItem(item);
+
+        // Collect cuisines from all fields
+        const editCuisineInputFieldRefs = document.querySelectorAll(".editCuisineInputField");
+        const cuisines = [];
+        editCuisineInputFieldRefs.forEach(field => {
+            const input = field.querySelector("input");
+            if (input && input.value.trim() !== "") {
+                cuisines.push(input.value.trim());
+            }
+        });
+
+        const data = await updateItem(item, cuisines);
         if (data) {
             editMsgRef.classList.remove("hidden");
         }
         loadMenuItems();
     };
+
     editCancelBtnRef.onclick = () => {
         editMsgRef.classList.add("hidden");
         editDialogRef.classList.add("hidden");
     };
 };
-
 const displayDeleteDialog = (item) => {
     // TODO: needs testing
     deleteDialogRef.className =
@@ -208,7 +291,7 @@ async function setup() {
         addNameInputRef.value = "";
         addPriceInputRef.value = null;
         addCategoryInputRef.value = "";
-        const cuisineInputField = addCuisineInputFieldRef.cloneNode(true); 
+        const cuisineInputField = addCuisineInputFieldRef[0].cloneNode(true);
         addCuisineInputContainerRef.replaceChildren();
         addCuisineInputContainerRef.appendChild(cuisineInputField);
     });
@@ -225,14 +308,19 @@ async function setup() {
             addMsgRef.className = "text-red-600";
             return;
         }
+        const addCuisineInputFieldRef = document.querySelectorAll(".addCuisineInputField");
         const item = {
             stall_id: stallId,
             item_desc: addNameInputRef.value,
             item_price: parseFloat(addPriceInputRef.valueAsNumber),
             item_category: addCategoryInputRef.value,
         }
-        // TODO: HERE
-        const data = await createItem(item);
+        let cuisines = [];
+        addCuisineInputFieldRef.forEach(field => {
+            const input = field.querySelector("input");
+            cuisines.push(input.value);
+        });
+        const data = await createItem(item, cuisines);
         if (data) {
             addMsgRef.classList = "text-green-600";
         }
@@ -244,8 +332,17 @@ async function setup() {
         addDialogRef.classList.add("hidden");
     });
     addCuisineBtnRef.addEventListener("click", () => {
-        const a = addCuisineInputFieldRef.cloneNode(true); 
-        addCuisineInputContainerRef.appendChild(a);
+        const cuisineInputField = addCuisineInputFieldRef[0].cloneNode(true);
+        cuisineInputField.lastChild.value = ""
+        const removeCuisineField = document.createElement("button");
+        removeCuisineField.type = "button";
+        removeCuisineField.innerText = "x";
+        removeCuisineField.className = "w-1/5 justify-center items-center border-2 border-black"
+        removeCuisineField.addEventListener("click", () => {
+            addCuisineInputContainerRef.removeChild(cuisineInputField);
+        });
+        cuisineInputField.appendChild(removeCuisineField);
+        addCuisineInputContainerRef.appendChild(cuisineInputField);
     })
 }
 
@@ -269,7 +366,15 @@ function validateMenuItem(fields) {
     if (fields.category == null || fields.category == "") {
         return "Category cannot be empty";
     }
-    return true;
+    const addCuisineInputFieldRef = document.querySelectorAll(".addCuisineInputField");
+    let validatedCuisine = true;
+    addCuisineInputFieldRef.forEach(field => {
+        const input = field.querySelector('input');
+        if (!input || input.value.trim() === "") {
+            validatedCuisine = false;
+        }
+    });
+    return validatedCuisine ? true : "Cuisine name cannot be empty";
 }
 
 

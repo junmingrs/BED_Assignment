@@ -42,12 +42,12 @@ async function createMenuItem(menuItem, cuisines) {
     result.menuItem = res.recordset[0];
 
     cuisines.forEach(async (cuisine) => {
-        const query = "INSERT INTO MenuItemCuisine OUTPUT inserted.stall_id, inserted.item_code, inserted.cuisine  VALUES (@stallId, @itemCode, @cuisine)";
+        const query = "INSERT INTO MenuItemCuisine OUTPUT inserted.stall_id, inserted.item_code, inserted.cuisine_name  VALUES (@stallId, @itemCode, @cuisineName)";
         const res = await pool
             .request()
-            .input("stallId", stallId)
-            .input("itemCode", itemCode)
-            .input("cuisine", cuisine)
+            .input("stallId", menuItem.stall_id)
+            .input("itemCode", result.menuItem.item_code)
+            .input("cuisineName", cuisine)
             .query(query);
         result.cuisines.push(res.recordset[0])
     });
@@ -91,14 +91,14 @@ async function getMenuItemCuisine(stallId, itemCode) {
     const pool = await poolPromise;
     const result = await pool.request().input("stallId", stallId).input("itemCode", itemCode).query(query);
 
-    return result.recordset[0];
+    return result.recordset;
 }
 
 async function getAllCuisines() {
     const query = "SELECT * FROM Cuisine";
     const pool = await poolPromise;
     const result = await pool.request().query(query);
-    return result.recordset[0];
+    return result.recordsets[0];
 }
 
 async function createCuisine(cuisineName) {
@@ -106,6 +106,31 @@ async function createCuisine(cuisineName) {
     const pool = await poolPromise;
     const result = await pool.request().input("cuisineName", cuisineName).query(query);
     return result.recordset[0];
+}
+
+async function createMenuItemCuisine(stallId, itemCode, cuisineName) {
+    const query = 
+        "INSERT INTO MenuItemCuisine OUTPUT inserted.stall_id, inserted.item_code, inserted.cuisine_name VALUES (@stallId, @itemCode, @cuisineName)"
+    const pool = await poolPromise;
+    const result = await pool
+        .request()
+        .input("stallId", stallId)
+        .input("itemCode", itemCode)
+        .input("cuisineName", cuisineName)
+        .query(query);
+    return result.recordset[0];
+}
+
+async function deleteMenuItemCuisine(stallId, itemCode, cuisineName) {
+    const query =
+        "DELETE FROM MenuItemCuisine WHERE stall_id = @stallId AND item_code = @itemCode AND cuisine_name = @cuisineName";
+    const pool = await poolPromise;
+    await pool
+        .request()
+        .input("stallId", stallId)
+        .input("itemCode", itemCode)
+        .input("cuisineName", cuisineName)
+        .query(query);
 }
 
 module.exports = {
@@ -118,5 +143,7 @@ module.exports = {
     getMenuItemCuisine,
     getAllCuisines,
     createCuisine,
+    createMenuItemCuisine,
+    deleteMenuItemCuisine,
 };
 
