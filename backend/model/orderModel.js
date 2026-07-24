@@ -1,5 +1,6 @@
 const { poolPromise } = require("../db");
 const menuItemModel = require("./menuItemModel");
+const { getTimeFilter } = require("../helper");
 
 async function getTotalAmount(stallId, items) {
     const pricePromises = items.map(async (item) => {
@@ -80,8 +81,9 @@ async function getOrdersByCustomer(customerId, statuses = []) {
     return orders;
 }
 
-async function getOrderByStallId(stallId) {
-    const query = `SELECT * FROM Orders WHERE stall_id= @id ORDER BY queue_number ASC`;
+async function getOrderByStallId(stallId, timeframe = null) {
+    const timeFilter = getTimeFilter(timeframe, "order_date");
+    const query = `SELECT * FROM Orders WHERE stall_id=@id ${timeFilter} ORDER BY queue_number ASC`;
     const pool = await poolPromise;
     const result = await pool.request().input("id", stallId).query(query);
 

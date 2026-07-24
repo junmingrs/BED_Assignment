@@ -1,4 +1,4 @@
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const vendor_id = JSON.parse(atob(token.split(".")[1])).id;
 
 const stallUnitNoRef = document.getElementById("stallUnitNo");
@@ -156,8 +156,9 @@ const displayDeleteDialog = (item) => {
         const data = await deleteItemRequest(item.stall_id, item.item_code);
         if (!data) {
             deleteErrorMsgRef.classList.remove("hidden");
+        } else {
+            deleteDialogRef.classList.add("hidden");
         }
-        deleteDialogRef.classList.add("hidden");
         loadMenuItems();
     };
     deleteCancelBtnRef.onclick = () => {
@@ -200,27 +201,40 @@ async function setup() {
         addDialogRef.className =
             "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs shadow-xl";
         addMsgRef.classList.add("hidden");
-
-        addFormRef.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const item = {
-                stall_id: stallId,
-                item_desc: addNameInputRef.value,
-                item_price: parseFloat(addPriceInputRef.value),
-                item_category: addCategoryInputRef.value,
-            };
-            const data = await createItem(item);
-            console.log(data);
-            if (data) {
-                addMsgRef.classList.remove("hidden");
-            }
-            addDialogRef.classList.add("hidden");
-            loadMenuItems();
-        });
-        addCancelBtnRef.onclick = () => {
-            addMsgRef.classList.add("hidden");
-            addDialogRef.classList.add("hidden");
-        };
+        addNameInputRef.value = "";
+        addPriceInputRef.value = null;
+        addCategoryInputRef.value = "";
+    });
+    addFormRef.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fields = {
+            name: addNameInputRef.value,
+            price: addPriceInputRef.valueAsNumber,
+            category: addCategoryInputRef.value
+        }
+        const isValid = validateMenuItem(fields);
+        if (isValid != true) {
+            addMsgRef.innerText = isValid;
+            addMsgRef.className = "text-red-600";
+            // addMsgRef.classList.remove("hidden");
+            return;
+        }
+        const item = {
+            stall_id: stallId,
+            item_desc: addNameInputRef.value,
+            item_price: parseFloat(addPriceInputRef.valueAsNumber),
+            item_category: addCategoryInputRef.value,
+        }
+        const data = await createItem(item);
+        if (data) {
+            addMsgRef.classList = "text-green-600";
+        }
+        addDialogRef.classList.add("hidden");
+        loadMenuItems();
+    });
+    addCancelBtnRef.addEventListener("click", () => {
+        addMsgRef.classList.add("hidden");
+        addDialogRef.classList.add("hidden");
     });
 }
 
@@ -232,6 +246,19 @@ async function loadMenuItems() {
     items.map((item) => {
         createCard(item);
     });
+}
+
+function validateMenuItem(fields) {
+    if (fields.name == null || fields.name == "") {
+        return "Name cannot be empty";
+    }
+    if (fields.price < 0 || Number.isNaN(fields.price)) {
+        return "Price cannot be negative";
+    }
+    if (fields.category == null || fields.category == "") {
+        return "Category cannot be empty";
+    }
+    return true;
 }
 
 await setup();
