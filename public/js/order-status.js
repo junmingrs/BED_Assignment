@@ -79,23 +79,40 @@ async function loadQueueNumbers() {
     }
 }
 
+async function getStallInfo(stallId) {
+    try {
+        const response = await fetch(`/stalls/${stallId}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return await response.json();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 function displayQueueNumbers(orders) {
     const container = document.getElementById("queue-numbers");
 
-    // TODO: get stall name
     container.innerHTML = orders
-        .map(
-            (order) => `
+        .map(async (order) => {
+            const stallInfo = await getStallInfo(order.stall_id);
+            const stallName = stallInfo.stall.stall_name;
+            return `
         <div class="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
-            <p class="text-base text-gray-500 mb-1 font-bold">${order.stall_id}</p>
+            <p class="text-base text-gray-500 mb-1 font-bold">${stallName}</p>
             <p class="text-sm text-gray-500">Your queue number is</p>
             <p class="text-4xl font-bold text-gray-900 mt-1">${order.queue_number}</p>
             <span class="inline-block mt-3 text-xs font-medium px-2 py-1 rounded-full ${statusStyle(order.status)}">
                 ${order.status}
             </span>
         </div>
-    `,
-        )
+    `;
+        })
         .join("");
 }
 
