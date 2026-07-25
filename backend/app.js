@@ -121,8 +121,23 @@ app.post(
 );
 app.get(
     "/promotion",
+    authorise("Customer", "Vendor"),
+    promotionController.getAllPromotions,
+);
+app.get(
+    "/promotion/code/:promotionCode",
     authorise("Vendor"),
-    promotionController.getPromotionsByStallId,
+    promotionController.getPromotionByCode,
+);
+app.get(
+    "/promotion/stall/:stallId",
+    authorise("Vendor"),
+    promotionController.getPromotionByStallId,
+);
+app.get(
+    "/promotionActive/",
+    authorise("Vendor"),
+    promotionController.getActivePromotions,
 );
 app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
 app.delete(
@@ -229,6 +244,12 @@ app.get(
     "/vendor/analytics/ai-summary/:stallId",
     authorise("Vendor"),
     analyticsController.getAISummary,
+);
+
+app.get(
+    "/menuItemCuisine/:stallId/:itemCode",
+    authorise("Vendor"),
+    menuItemController.getMenuItemCuisine,
 );
 
 app.get("/hawkercentre", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getAllHawkerCentres);

@@ -25,6 +25,18 @@
     <main class="mx-auto max-w-5xl space-y-6 p-8 pb-32">
         <h1 class="text-3xl font-bold">Cart</h1>
         <section id="container" class="grid gap-5"></section>
+        <section id="promotion-container"
+            class="flex flex-col justify-center gap-2 border rounded-xl p-6 shadow-sm mt-20!">
+            <h2 class="text-xl font-semibold">Promo Code</h2>
+            <span id="promotion-msg" class="rounded-xl p-3 border bg-green-300 grow hidden"></span>
+            <div class="flex gap-5">
+                <input id="promotion-input" type="text" placeholder="Enter Promo Code"
+                    class="border rounded-xl p-3 w-2/3" />
+                <button id="promotion-btn" class="rounded-xl p-3 border bg-green-300 grow">Enter</button>
+            </div>
+            <div id="promotion-valids" class="">
+            </div>
+        </section>
         <!-- payment method -->
         <section id="payment-container" class="hidden rounded-xl border bg-white p-6 shadow-sm mt-20!">
             <h2 class="text-xl font-semibold">Payment Method</h2>
