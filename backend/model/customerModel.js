@@ -6,7 +6,7 @@ const getCustomerByAccountId = async (accountId) => {
     const result = await pool.request()
         .input("accountId", accountId)
         .query(`
-            SELECT customer_id, customer_name
+            SELECT *
             FROM Customer
             WHERE customer_id = @accountId
         `);
