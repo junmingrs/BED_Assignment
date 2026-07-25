@@ -1,18 +1,13 @@
 const { poolPromise } = require("../db");
-const menuItemModel = require("./menuItemModel");
 const { getTimeFilter } = require("../helper");
 
-async function getTotalAmount(stallId, items) {
-    const pricePromises = items.map(async (item) => {
-        const menuItem = await menuItemModel.getMenuItemsByStallIdAndItemCode(
-            stallId,
-            item.itemCode,
-        );
-        return menuItem.item_price * item.quantity;
+async function getTotalAmount(items) {
+    console.log(items)
+    let total = 0;
+    items.forEach(item => {
+        total += item.itemPrice;
     });
-
-    const itemPrices = await Promise.all(pricePromises);
-    return itemPrices.reduce((s, c) => s + c, 0);
+    return total;
 }
 
 async function getItemsFromOrder(orderId) {

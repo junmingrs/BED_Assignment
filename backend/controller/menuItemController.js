@@ -42,7 +42,15 @@ async function getMenuItemsByStallIdAndItemCode(req, res) {
 
 async function createMenuItem(req, res) {
     try {
-        const newMenuItem = await menuItemModel.createMenuItem(req.body);
+        const { menuItem, cuisines } = req.body
+        const existingCuisines = await menuItemModel.getAllCuisines();
+        cuisines.forEach(cuisine => {
+            const exists = existingCuisines.some(c => c.cuisine_name.toLowerCase() === cuisine.toLowerCase());
+            if (!exists) {
+                menuItemModel.createCuisine(cuisine)
+            }
+        });
+        const newMenuItem = await menuItemModel.createMenuItem(menuItem, cuisines);
         return res.status(201).json(newMenuItem);
     } catch (error) {
         console.error("Controller error:", error);
@@ -52,8 +60,39 @@ async function createMenuItem(req, res) {
 
 async function updateMenuItem(req, res) {
     try {
-        const item = req.body;
-        const updatedMenuItem = await menuItemModel.updateMenuItem(item);
+        const { menuItem, cuisines } = req.body;
+        let cuisinesToUpdate = [];
+        const existingCuisines = await menuItemModel.getAllCuisines();
+        const menuItemCuisines = await menuItemModel.getMenuItemCuisine(menuItem.stall_id, menuItem.item_code);
+
+        const normalize = (name) => name.toLowerCase().trim();
+
+        cuisines.forEach(cuisine => {
+            const cuisineLower = normalize(cuisine);
+            const existsInDb = existingCuisines.some(c => normalize(c.cuisine_name) === cuisineLower);
+            const hasInMenuItem = menuItemCuisines.some(c => normalize(c.cuisine_name) === cuisineLower);
+
+            if (!existsInDb) {
+                menuItemModel.createCuisine(cuisine);
+            }
+            if (!hasInMenuItem) {
+                cuisinesToUpdate.push(cuisine);
+            }
+        });
+
+        menuItemCuisines.forEach(cuisine => {
+            const cuisineLower = normalize(cuisine.cuisine_name);
+            const stillExists = cuisines.some(c => normalize(c) === cuisineLower);
+            if (!stillExists) {
+                menuItemModel.deleteMenuItemCuisine(menuItem.stall_id, menuItem.item_code, cuisine.cuisine_name);
+            }
+        });
+
+        cuisinesToUpdate.forEach(cuisine => {
+            menuItemModel.createMenuItemCuisine(menuItem.stall_id, menuItem.item_code, cuisine);
+        });
+
+        const updatedMenuItem = await menuItemModel.updateMenuItem(menuItem);
         return res.status(201).json(updatedMenuItem);
     } catch (error) {
         console.error("Controller error:", error);
@@ -76,6 +115,17 @@ async function deleteMenuItem(req, res) {
     }
 }
 
+async function getMenuItemCuisine(req, res) {
+    try {
+        const { stallId, itemCode } = req.params;
+        const cuisines = await menuItemModel.getMenuItemCuisine(stallId, itemCode);
+        return res.status(201).json({ cuisines });
+    } catch (error) {
+        console.error("Controller error:", error);
+        return res.status(500).json({ message: "Error getting cuisines for menu item" });
+    }
+}
+
 module.exports = {
     getAllMenuItems,
     getMenuItemsByStallId,
@@ -83,4 +133,5 @@ module.exports = {
     createMenuItem,
     updateMenuItem,
     deleteMenuItem,
+    getMenuItemCuisine,
 };
