@@ -99,7 +99,7 @@ async function createItem(menuItem, cuisines) {
             },
             body: JSON.stringify({ menuItem, cuisines }),
         });
-        let data = response.json();
+        let data = await response.json();
         return data;
     } catch (e) {
         alert(e);
@@ -117,10 +117,100 @@ async function updateItem(menuItem, cuisines) {
             },
             body: JSON.stringify({ menuItem, cuisines }),
         });
-        let data = response.json();
+        let data = await response.json();
         return data;
     } catch (e) {
         alert("ERROR: ", e);
+    }
+}
+
+async function fetchPromotion() {
+    try {
+        const response = await fetch(`/promotion/stall/${stallId}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!response.ok) {
+            return false;
+        }
+        let data = await response.json();
+        return data;
+    } catch (e) {
+        alert(e);
+    }
+}
+
+async function createPromotion(promotion) {
+    try {
+        const response = await fetch(`/promotion`, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ promotion }),
+        });
+        if (!response.ok) {
+            return false;
+        }
+        let data = await response.json();
+        return data;
+    } catch (e) {
+        alert(e);
+    }
+}
+
+async function updatePromotion(promotion) {
+    try {
+        const response = await fetch(`/promotion`, {
+            method: "PUT",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ promotion }),
+        });
+        if (!response.ok) {
+            return false;
+        }
+        let data = await response.json();
+        return data;
+    } catch (e) {
+        alert(e);
+    }
+}
+
+const endPromotion = async (promo) => {
+    const result = await deletePromotion(promo.promo_code);
+    if (result) {
+        loadMenuItems();
+    }
+};
+
+async function deletePromotion(promotionCode) {
+    try {
+        const response = await fetch(`/promotion`, {
+            method: "DELETE",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ promotionCode }),
+        });
+        if (!response.ok) {
+            return false;
+        }
+        let data = await response.json();
+        return data;
+    } catch (e) {
+        alert(e);
     }
 }
 
@@ -138,7 +228,7 @@ async function deleteItemRequest(stallId, itemCode) {
         if (!response.ok) {
             return false;
         }
-        let data = response.json();
+        let data = await response.json();
         return data;
     } catch (e) {
         alert(e);
@@ -254,15 +344,219 @@ const displayDeleteDialog = (item) => {
     };
 };
 
-const createCard = (item) => {
+const expandPromoForm = (promoSection, item) => {
+    // Clear current content (the + Add button or the existing promo state)
+    promoSection.innerHTML = "";
+    promoSection.className = "promo-section border-2 border-black p-2 rounded flex flex-col gap-1";
+
+    // Helper to build a labeled input row
+    const makeRow = (labelText, inputEl) => {
+        const row = document.createElement("div");
+        row.className = "flex gap-1 items-center";
+        const label = document.createElement("span");
+        label.innerText = labelText;
+        label.className = "text-sm w-20 shrink-0";
+        row.appendChild(label);
+        row.appendChild(inputEl);
+        return row;
+    };
+
+    // Promo Code
+    const promoCodeInput = document.createElement("input");
+    promoCodeInput.type = "text";
+    promoCodeInput.className = "flex-1 w-full border-2 border-black px-1 focus:outline-none";
+    promoCodeInput.placeholder = "% OFF";
+    promoSection.appendChild(makeRow("Promo Code:", promoCodeInput));
+
+    // Discount
+    const discountInput = document.createElement("input");
+    discountInput.type = "number";
+    discountInput.min = "1";
+    discountInput.max = "100";
+    discountInput.className = "flex-1 border-2 border-black px-1 focus:outline-none";
+    discountInput.placeholder = "20";
+    promoSection.appendChild(makeRow("Discount %:", discountInput));
+
+    // Start date
+    const startInput = document.createElement("input");
+    startInput.type = "date";
+    startInput.className = "flex-1 border-2 border-black px-1 focus:outline-none";
+    startInput.valueAsDate = new Date();
+    promoSection.appendChild(makeRow("Start:", startInput));
+
+    //  date
+    const endInput = document.createElement("input");
+    endInput.type = "date";
+    endInput.className = "flex-1 border-2 border-black px-1 focus:outline-none";
+    promoSection.appendChild(makeRow("End:", endInput));
+
+    // Live price preview
+    const pricePreview = document.createElement("p");
+    pricePreview.className = "text-xs text-gray-700";
+    promoSection.appendChild(pricePreview);
+
+    const updatePricePreview = () => {
+        const d = parseInt(discountInput.value);
+        if (d > 0 && d <= 100) {
+            const final = item.item_price * (1 - d / 100);
+            pricePreview.innerHTML = `Customer sees: <span class="line-through">${item.item_price.toFixed(2)}</span> → <span class="font-bold text-red-600">${final.toFixed(2)}</span>`;
+        } else {
+            pricePreview.innerText = "";
+        }
+    };
+    discountInput.addEventListener("input", updatePricePreview);
+
+    // Error message
+    const errorMsg = document.createElement("span");
+    errorMsg.className = "text-red-600 text-xs hidden";
+    promoSection.appendChild(errorMsg);
+
+    // Action buttons
+    const formActions = document.createElement("div");
+    formActions.className = "flex gap-1 pt-1";
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.innerText = "Save";
+    saveBtn.className = "flex-1 border-2 border-black bg-green-300 px-2";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.innerText = "Cancel";
+    cancelBtn.className = "flex-1 border-2 border-black px-2";
+    formActions.appendChild(saveBtn);
+    formActions.appendChild(cancelBtn);
+    promoSection.appendChild(formActions);
+
+    // === Save handler ===
+    saveBtn.addEventListener("click", async () => {
+        errorMsg.classList.add("hidden");
+
+        const discount = parseInt(discountInput.value);
+        const promotionCode = promoCodeInput.value;
+        const startDate = startInput.value;
+        const endDate = endInput.value;
+
+        // Validation
+        if (!promotionCode) {
+            showError("PromoCode is required");
+            return;
+        }
+        if (!discount || discount < 1 || discount > 100) {
+            showError("Discount must be between 1 and 100");
+            return;
+        }
+        if (!startDate || !endDate) {
+            showError("Start and  dates are required");
+            return;
+        }
+        if (new Date(endDate) <= new Date(startDate)) {
+            showError("End date must be after start date");
+            return;
+        }
+
+        const promoData = {
+            promotionCode: promo.promoCode,
+            stallId: item.stall_id,
+            itemCode: item.item_code,
+            discount,
+            startDate,
+            endDate
+        };
+
+        const result = await createPromotion(promoData);
+
+        if (result) {
+            loadMenuItems(); // refresh the whole list
+        }
+    });
+
+    // === Cancel handler: re-render the card from scratch ===
+    cancelBtn.addEventListener("click", () => {
+        loadMenuItems();
+    });
+
+    function showError(msg) {
+        errorMsg.innerText = msg;
+        errorMsg.classList.remove("hidden");
+    }
+};
+
+// TODO: HERE PROMOTION
+const createCard = (item, promos) => {
     const d = document.createElement("div");
     d.className =
-        "flex flex-col max-w-full max-h-40 h-fit gap-1 rounded-xl border-2 border-black p-2";
+        "flex flex-col max-w-full h-fit gap-1 rounded-xl border-2 border-black p-2";
     const nameRef = document.createElement("span");
     const priceRef = document.createElement("span");
     nameRef.innerText = `${item.item_desc}`;
     priceRef.innerText = `$${item.item_price.toFixed(2)}`;
-    // actions
+
+    // === Promotion section ===
+    const promoSection = document.createElement("div");
+    promoSection.className = "border-2 border-black p-2 rounded flex flex-col gap-2";
+
+    promos.forEach(promo => {
+        const today = new Date();
+        const start = new Date(promo.start_date);
+        const end = new Date(promo.end_date);
+        end.setHours(23, 59, 59, 999);
+
+        let state = "EXPIRED";
+        let stateColor = "bg-gray-500";
+        if (today < start) {
+            state = "SCHEDULED";
+            stateColor = "bg-yellow-500";
+        } else if (today >= start && today <= end) {
+            state = "ACTIVE";
+            stateColor = "bg-green-500";
+        }
+
+        const discountedPrice = item.item_price * (1 - promo.discount / 100);
+
+        const stateBadge = document.createElement("div");
+        stateBadge.className = "flex items-center gap-2 flex-wrap";
+        const stateTag = document.createElement("span");
+        stateTag.className = `${stateColor} text-white px-2 py-0.5 rounded text-sm`;
+        stateTag.innerText = `${state} — ${promo.discount}% OFF`;
+        const promoCode = document.createElement("span");
+        promoCode.className = "font-bold";
+        promoCode.innerText = promo.promo_code;
+        stateBadge.appendChild(stateTag);
+        stateBadge.appendChild(promoCode);
+        promoSection.appendChild(stateBadge);
+
+        const pricePreview = document.createElement("p");
+        pricePreview.className = "text-sm";
+        pricePreview.innerHTML = `<span class="line-through">$${item.item_price.toFixed(2)}</span> → <span class="font-bold text-red-600">$${discountedPrice.toFixed(2)}</span>`;
+        promoSection.appendChild(pricePreview);
+
+        const dateRange = document.createElement("p");
+        dateRange.className = "text-xs";
+        const fmt = (d) => new Date(d).toLocaleDateString("en-SG", { day: "2-digit", month: "short", year: "numeric" });
+        dateRange.innerText = `${fmt(start)} — ${fmt(end)}`;
+        promoSection.appendChild(dateRange);
+
+        const promoActions = document.createElement("div");
+        promoActions.className = "flex gap-1 mt-1";
+        // const editPromoBtn = document.createElement("button");
+        // editPromoBtn.innerText = "Edit";
+        // editPromoBtn.className = "flex-1 border-2 border-black px-2";
+        // editPromoBtn.addEventListener("click", () => expandPromoForm(promoSection, item));
+        const endPromoBtn = document.createElement("button");
+        endPromoBtn.innerText = "End";
+        endPromoBtn.className = "flex-1 border-2 border-black bg-red-200 px-2";
+        endPromoBtn.addEventListener("click", () => endPromotion(promo));
+        // promoActions.appendChild(editPromoBtn);
+        promoActions.appendChild(endPromoBtn);
+        promoSection.appendChild(promoActions);
+    })
+
+    const addPromoBtn = document.createElement("button");
+    addPromoBtn.innerText = "+ Add Promotion";
+    addPromoBtn.className = "border-2 border-black bg-white px-2 w-full";
+    addPromoBtn.addEventListener("click", () => expandPromoForm(promoSection, item));
+    promoSection.appendChild(addPromoBtn);
+
+    // === Item actions ===
     const action = document.createElement("div");
     action.className = "flex gap-1 pt-2";
     const edit = document.createElement("button");
@@ -278,6 +572,7 @@ const createCard = (item) => {
     action.appendChild(del);
     d.appendChild(nameRef);
     d.appendChild(priceRef);
+    d.appendChild(promoSection);
     d.appendChild(action);
     cardContainerRef.appendChild(d);
 };
@@ -351,9 +646,21 @@ async function loadMenuItems() {
     cardContainerRef.replaceChildren();
     // load menu item
     const items = await fetchItems();
-    items.map((item) => {
-        createCard(item);
-    });
+    const promotions = await fetchPromotion();
+    const promosByItemCode = new Map();
+    if (Array.isArray(promotions)) {
+        promotions.forEach(promo => {
+            if (!promo || !promo.item_code) return;
+            if (!promosByItemCode.has(promo.item_code)) {
+                promosByItemCode.set(promo.item_code, []);
+            }
+            promosByItemCode.get(promo.item_code).push(promo);
+        });
+    }
+    items.forEach((item) => {
+        const promos = promosByItemCode.get(item.item_code) || [];
+        createCard(item, promos)
+    })
 }
 
 function validateMenuItem(fields) {

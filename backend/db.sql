@@ -118,7 +118,7 @@ CREATE TABLE MenuItemCuisine
 (
     stall_id UNIQUEIDENTIFIER NOT NULL,
     item_code UNIQUEIDENTIFIER NOT NULL,
-    cuisine_name UNIQUEIDENTIFIER NOT NULL REFERENCES Cuisine(cuisine_name),
+    cuisine_name VARCHAR(30) NOT NULL REFERENCES Cuisine(cuisine_name),
     CONSTRAINT PK_MenuItemCuisine PRIMARY KEY (cuisine_name, stall_id, item_code),
     CONSTRAINT FK_MenuItemCuisine_MenuItem FOREIGN KEY (stall_id, item_code) REFERENCES MenuItem(stall_id, item_code)
 );
@@ -178,12 +178,13 @@ CREATE TABLE Feedback
 
 CREATE TABLE Promotion
 (
-    promotion_id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
-    stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
+    promo_code VARCHAR(50) PRIMARY KEY,
+    stall_id UNIQUEIDENTIFIER NOT NULL,
+    item_code UNIQUEIDENTIFIER NOT NULL,
+    discount INT NOT NULL,
     start_date DATE NOT NULL,
-    end_date DATE NOT NULL
+    end_date DATE NOT NULL,
+    CONSTRAINT FK_Promotion_MenuItem FOREIGN KEY (stall_id, item_code) REFERENCES MenuItem(stall_id, item_code)
 );
 
 GO
@@ -284,7 +285,6 @@ VALUES
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD4-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Mochi', 4.00, 'Dessert');
 
 INSERT INTO Cuisine
-    (cuisine_id, cuisine_desc)
 VALUES
     ('Korean'),
     ('Japanese'),
@@ -294,7 +294,7 @@ VALUES
     ('Others');
 
 INSERT INTO MenuItemCuisine
-    (stall_id, cuisine_id, item_code)
+    (stall_id, cuisine_name, item_code)
 VALUES
     ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Korean', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD'),
     ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Japanese', 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD'),
@@ -355,7 +355,7 @@ VALUES
     (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '11111111-1111-1111-1111-111111111111', 'The salmon was fresh and delicious!', '2026-07-14 20:00:00');
 
 INSERT INTO Promotion
-    (stall_id, title, description, start_date, end_date)
 VALUES
-    ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '10% off Kimchi Fried Rice', 'Weekday lunch special', '2026-07-14', '2026-07-31'),
-    ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Free Matcha Latte upgrade', 'Order any sushi set and get a free drink upgrade', '2026-07-10', '2026-08-01');
+    ('20OFF', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 20, '2026-07-10', '2026-08-01'),
+    ('50OFF', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 50, '2026-07-10', '2026-08-01');
+

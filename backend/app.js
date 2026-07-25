@@ -121,8 +121,23 @@ app.post(
 );
 app.get(
     "/promotion",
+    authorise("Customer", "Vendor"),
+    promotionController.getAllPromotions,
+);
+app.get(
+    "/promotion/code/:promotionCode",
     authorise("Vendor"),
-    promotionController.getPromotionsByStallId,
+    promotionController.getPromotionByCode,
+);
+app.get(
+    "/promotion/stall/:stallId",
+    authorise("Vendor"),
+    promotionController.getPromotionByStallId,
+);
+app.get(
+    "/promotionActive/",
+    authorise("Vendor"),
+    promotionController.getActivePromotions,
 );
 app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
 app.delete(
