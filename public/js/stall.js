@@ -1,5 +1,8 @@
+import { getIdFromToken } from "./helper.js";
+
 const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const menuContainer = document.getElementById("menuContainer");
+const customerId = getIdFromToken(token);
 
 const infoElements = {
     stall_name: document.getElementById("stallName"),
@@ -18,6 +21,54 @@ function getCart() {
 
 function saveCart(cart) {
     localStorage.setItem(LS_KEYS.cart, JSON.stringify(cart));
+}
+
+async function getMenuItemLikes() {
+    try {
+        const response = await fetch(`/menuitem/likes/${customerId}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        })
+        const data = await response.json();
+        return data;
+    } catch (e) {
+        alert("ERROR FETCHING", e);
+    }
+}
+
+async function updateMenuItemLike(like, stallId, itemCode) {
+    if (!like) {
+        try {
+            await fetch(`/menuitem/likes/${customerId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ stallId, itemCode })
+            })
+        } catch (e) {
+            alert("Theres something wrong with liking this menu item");
+        }
+    } else {
+        try {
+            await fetch(`/menuitem/likes/${customerId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ stallId, itemCode })
+            })
+        } catch (e) {
+            alert("Theres something wrong with unliking this menu item");
+        }
+    }
 }
 
 function itemIndexInCart(cart, stallId, itemCode) {
@@ -101,13 +152,14 @@ async function loadCuisines(stallId, itemCode) {
     return cuisineCards.join("");
 }
 
-async function loadMenuItems(menuItems) {
+async function loadMenuItems(menuItems, menuItemLikes) {
     const cart = getCart();
 
     const itemPromises = menuItems.map(async (item) => {
         const itemIndex = itemIndexInCart(cart, item.stall_id, item.item_code);
         const currentQty =
             itemIndex !== -1 ? cart[item.stall_id].items[itemIndex].quantity : 0;
+        const like = menuItemLikes.find(l => l.stall_id === item.stall_id && l.item_code === item.item_code) ? true : false;
         const cuisineContent = await loadCuisines(item.stall_id, item.item_code);
 
         const actionControl =
@@ -122,18 +174,18 @@ async function loadMenuItems(menuItems) {
               `
                 : `
                 <div class="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2 py-1 shadow-sm w-fit">
-                    <button 
+                    <button
                         class="minus-btn text-xs font-semibold text-slate-600 hover:text-slate-900 px-1"
                         data-stall-id="${item.stall_id}"
                         data-item-code="${item.item_code}">
                         −
                     </button>
-                    
+
                     <span class="text-xs font-semibold text-slate-800 w-4 text-center">
                         ${currentQty}
                     </span>
-                    
-                    <button 
+
+                    <button
                         class="plus-btn text-xs font-semibold text-slate-600 hover:text-slate-900 px-1"
                         data-stall-id="${item.stall_id}"
                         data-item-code="${item.item_code}">
@@ -157,7 +209,14 @@ async function loadMenuItems(menuItems) {
                     <div class="flex items-center justify-between gap-3">
                         <span class="text-base font-semibold">$${item.item_price.toFixed(2)}</span>
                     </div>
-                    ${actionControl}
+                    <div class="flex gap-5">
+                        ${actionControl}
+                        <button class="like-btn"
+                            data-stall-id="${item.stall_id}"
+                            data-item-code="${item.item_code}"
+                            data-liked="${like}">
+                        <i data-lucide="heart" ${like ? 'stroke="red" fill="red"' : ""}></i></button>
+                    </div>
                 </div>
                 <div class="shrink-0">
                     <img src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
@@ -169,6 +228,7 @@ async function loadMenuItems(menuItems) {
 
     const itemCards = await Promise.all(itemPromises);
     menuContainer.innerHTML = itemCards.join("");
+    lucide.createIcons();
 }
 
 function loadStallInfo(stallInfo) {
@@ -178,12 +238,22 @@ function loadStallInfo(stallInfo) {
     }
 }
 
+async function likeMenuItem(likeBtn, stallId, itemCode) {
+    const heartIcon = likeBtn.querySelector("svg");
+    const liked = likeBtn.dataset.liked === "true";
+    likeBtn.dataset.liked = (!liked).toString();
+    heartIcon.setAttribute("fill", liked ? "none" : "red");
+    heartIcon.setAttribute("stroke", liked ? "currentColor" : "red");
+    updateMenuItemLike(liked, stallId, itemCode);
+}
+
 async function init() {
     const stallData = await fetchAPI(`/stalls/${stallId}`);
     if (stallData?.stall) loadStallInfo(stallData.stall);
 
     globalMenuItems = (await fetchAPI(`/menuitemsbystall/${stallId}`)) ?? [];
-    await loadMenuItems(globalMenuItems);
+    const menuItemLikes = await getMenuItemLikes();
+    await loadMenuItems(globalMenuItems, menuItemLikes);
 }
 
 menuContainer.addEventListener("click", (e) => {
@@ -201,6 +271,8 @@ menuContainer.addEventListener("click", (e) => {
         deleteItem(stallId, itemCode, cart);
     } else if (button.classList.contains("add-btn")) {
         addToCart(stallId, itemCode, cart);
+    } else if (button.classList.contains("like-btn")) {
+        likeMenuItem(button, stallId, itemCode);
     }
 });
 

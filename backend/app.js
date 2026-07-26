@@ -269,6 +269,16 @@ app.get(
     hawkerCentreController.getHawkerCentreById,
 );
 
+app.post("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
+app.delete("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
+app.get("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.getMenuItemLikeByCustomer);
+
+app.get(
+    "/menuitem",
+    authorise("Vendor", "Customer"),
+    menuItemController.getMenuItemsByStallIdAndItemCode,
+);
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
