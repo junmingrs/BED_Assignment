@@ -22,6 +22,7 @@ const feedbackController = require("./controller/feedbackController");
 const analyticsController = require("./controller/analyticsController");
 const inspectionController = require("./controller/inspectionController");
 const hawkerCentreController = require("./controller/hawkerCentreController");
+const customerController = require("./controller/customerController.js");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -83,6 +84,11 @@ app.get(
     authorise("Customer"),
     orderController.getOrdersByCustomer,
 );
+app.get(
+    "/customer/:customerId/profile",
+    authorise("Customer"),
+    customerController.getCustomerByAccountId,
+)
 app.patch(
     "/orders/:orderId/:status",
     authorise("Vendor", "Customer"),
@@ -121,8 +127,23 @@ app.post(
 );
 app.get(
     "/promotion",
+    authorise("Customer", "Vendor"),
+    promotionController.getAllPromotions,
+);
+app.get(
+    "/promotion/code/:promotionCode",
     authorise("Vendor"),
-    promotionController.getPromotionsByStallId,
+    promotionController.getPromotionByCode,
+);
+app.get(
+    "/promotion/stall/:stallId",
+    authorise("Vendor"),
+    promotionController.getPromotionByStallId,
+);
+app.get(
+    "/promotionActive/",
+    authorise("Vendor"),
+    promotionController.getActivePromotions,
 );
 app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
 app.delete(
@@ -229,6 +250,12 @@ app.get(
     "/vendor/analytics/ai-summary/:stallId",
     authorise("Vendor"),
     analyticsController.getAISummary,
+);
+
+app.get(
+    "/menuItemCuisine/:stallId/:itemCode",
+    authorise("Vendor"),
+    menuItemController.getMenuItemCuisine,
 );
 
 app.get("/hawkercentre", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getAllHawkerCentres);

@@ -62,7 +62,6 @@ async function cancelOrder(orderId) {
         });
 
         const data = await response.json();
-        console.log(data);
         if (response.ok) {
             alert("Order cancelled successfully");
         } else {

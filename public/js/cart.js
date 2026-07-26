@@ -4,9 +4,15 @@ const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const checkoutFailBtn = document.getElementById("checkout-fail-btn");
+const promotionContainer = document.getElementById("promotion-container");
+const promotionInput = document.getElementById("promotion-input");
+const promotionBtn = document.getElementById("promotion-btn");
+const promotionMsg = document.getElementById("promotion-msg");
+const promotionValids = document.getElementById("promotion-valids");
 
 const token = sessionStorage.getItem(SS_KEYS.accessToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
+let appliedPromos = [];
 
 async function getItemById(stallId, itemCode) {
     try {
@@ -44,6 +50,21 @@ async function getStallInfo(stallId) {
     }
 }
 
+async function getAllPromotions() {
+    try {
+        const response = await fetch(`/promotion`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return await response.json();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
@@ -63,8 +84,22 @@ async function renderCartItems() {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
                     // TODO: add cuisines for the menu items
                     const cuisine = "Korean";
+                    const matchedPromo = appliedPromos.find(p =>
+                        p.item_code === menuItem.item_code && p.stall_id === menuItem.stall_id
+                    );
+                    let priceHtml;
+                    if (matchedPromo) {
+                        menuItem.item_price *= (1 - matchedPromo.discount / 100);
+                        priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">
+                            ${menuItem.item_price.toFixed(2)}
+                            <span class="ml-2 text-sm font-normal text-gray-500 line-through">${menuItem.item_price.toFixed(2)}</span>
+                            <span class="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">${matchedPromo.discount}% OFF</span>
+                        </p>`;
+                    } else {
+                        priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">${menuItem.item_price.toFixed(2)}</p>`;
+                    }
+                    item.itemPrice = menuItem.item_price;
                     totalAmount += menuItem.item_price * item.quantity;
-
                     return `
                         <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                           <img
@@ -88,9 +123,7 @@ async function renderCartItems() {
                               ${menuItem.item_desc}
                             </h2>
 
-                            <p class="mt-3 text-lg font-bold text-green-600">
-                              $${menuItem.item_price.toFixed(2)}
-                            </p>
+                            ${priceHtml}
                           </div>
 
                           <div class="flex items-center gap-4">
@@ -150,6 +183,7 @@ async function renderCartItems() {
 
 async function checkout() {
     const customerId = getIdFromToken(token);
+    console.log(cartMap)
     try {
         const response = await fetch(`/checkout`, {
             method: "POST",
@@ -251,3 +285,59 @@ cartContainer.addEventListener("change", (e) => {
 
     setEcoOption(checkbox.dataset.stallId, checkbox.checked);
 });
+
+promotionBtn.addEventListener("click", async () => {
+    const code = promotionInput.value.trim();
+    promotionMsg.classList.add("hidden");
+
+    if (!code) {
+        showMsg("Please enter a promo code", "error");
+        return;
+    }
+
+    const allPromos = await getAllPromotions();
+    if (!Array.isArray(allPromos)) {
+        showMsg("Unable to verify promo code. Try again.", "error");
+        return;
+    }
+
+    const codeLower = code.toLowerCase();
+    const matchedPromo = allPromos.find(p =>
+        p.promo_code && p.promo_code.toLowerCase() === codeLower
+    );
+
+    if (!matchedPromo) {
+        showMsg(`${code} is not a valid promo code`, "error");
+        return;
+    }
+
+    if (appliedPromos.includes(matchedPromo)) {
+        showMsg(`${code} is already applied`, "error");
+        return;
+    }
+
+    // Check if currently active
+    const today = new Date();
+    const start = new Date(matchedPromo.start_date);
+    const end = new Date(matchedPromo.end_date);
+    end.setHours(23, 59, 59, 999);
+
+    if (today < start || today > end) {
+        showMsg(`${code} is not currently active`, "error");
+        return;
+    }
+
+    // Apply
+    appliedPromos.push(matchedPromo);
+    showMsg(`${code} applied — ${matchedPromo.discount}% off`, "success");
+    promotionInput.value = "";
+    renderCartItems()
+});
+
+function showMsg(text, type) {
+    promotionMsg.innerText = text;
+    promotionMsg.className = type === "error"
+        ? "rounded-xl p-3 border bg-red-300 grow"
+        : "rounded-xl p-3 border bg-green-300 grow";
+    promotionMsg.classList.remove("hidden");
+}

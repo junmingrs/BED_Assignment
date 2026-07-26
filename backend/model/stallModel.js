@@ -162,9 +162,16 @@ const getStallIdByVendorId = async (vendorId) => {
     return stallResult.recordset[0];
 };
 
+const getStallById = async (stallId) => {
+    const query = "SELECT * FROM Stall WHERE stall_id = @stall_id";
+    const pool = await poolPromise;
+    const stallResult = await pool.request().input("stall_id", stallId).query(query);
+    return stallResult.recordset[0];
+}
 
 module.exports = {
     getStallInfo,
+    getStallById,
     updateStall,
     getAllStalls,
     getStallIdByVendorId,
