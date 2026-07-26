@@ -90,7 +90,7 @@
         async function loadStalls() {
             try {
                 const res = await fetch('/stalls', {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: {Authorization: `Bearer ${token}`}
                 });
                 const stalls = await res.json();
 
@@ -132,7 +132,7 @@
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`
                     },
-                    body: JSON.stringify({ subject, description })
+                    body: JSON.stringify({subject, description})
                 });
 
                 const data = await res.json();
@@ -152,9 +152,8 @@
 
         function showMessage(msg, type) {
             statusMsg.textContent = msg;
-            statusMsg.className = `rounded-lg p-4 text-center ${
-                type === 'green' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`;
+            statusMsg.className = `rounded-lg p-4 text-center ${type === 'green' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`;
             statusMsg.classList.remove('hidden');
             setTimeout(() => statusMsg.classList.add('hidden'), 5000);
         }

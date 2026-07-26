@@ -18,6 +18,7 @@ export const TYPE_STYLES = {
         icon: '!',
         label: 'New Complaint',
         accent: 'text-red-500',
+        message: '',
     },
 };
 
@@ -34,7 +35,6 @@ function ensureContainer() {
 }
 
 export function showNotification(type, options = {}) {
-    console.log("notification called")
     const style = TYPE_STYLES[type];
     if (!style) {
         console.warn(`showNotification: unknown type "${type}"`);

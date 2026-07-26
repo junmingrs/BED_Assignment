@@ -383,6 +383,7 @@ const expandPromoForm = (promoSection, item) => {
     startInput.valueAsDate = new Date();
     promoSection.appendChild(makeRow("Start:", startInput));
 
+    // end
     const endInput = document.createElement("input");
     endInput.type = "date";
     endInput.className = "flex-1 min-w-0 border-2 border-black px-1 focus:outline-none";
@@ -424,7 +425,6 @@ const expandPromoForm = (promoSection, item) => {
     formActions.appendChild(cancelBtn);
     promoSection.appendChild(formActions);
 
-    // === Save handler ===
     saveBtn.addEventListener("click", async () => {
         errorMsg.classList.add("hidden");
 
@@ -538,15 +538,10 @@ const createCard = (item, promos) => {
 
         const promoActions = document.createElement("div");
         promoActions.className = "flex gap-1 mt-1";
-        // const editPromoBtn = document.createElement("button");
-        // editPromoBtn.innerText = "Edit";
-        // editPromoBtn.className = "flex-1 border-2 border-black px-2";
-        // editPromoBtn.addEventListener("click", () => expandPromoForm(promoSection, item));
         const endPromoBtn = document.createElement("button");
         endPromoBtn.innerText = "End";
         endPromoBtn.className = "flex-1 border-2 border-black bg-red-200 px-2";
         endPromoBtn.addEventListener("click", () => endPromotion(promo));
-        // promoActions.appendChild(editPromoBtn);
         promoActions.appendChild(endPromoBtn);
         promoSection.appendChild(promoActions);
     })
@@ -557,7 +552,7 @@ const createCard = (item, promos) => {
     addPromoBtn.addEventListener("click", () => expandPromoForm(promoSection, item));
     promoSection.appendChild(addPromoBtn);
 
-    // === Item actions ===
+    // actions
     const action = document.createElement("div");
     action.className = "flex gap-1 pt-2";
     const edit = document.createElement("button");
