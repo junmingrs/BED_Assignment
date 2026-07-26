@@ -10,12 +10,11 @@ async function getAllMenuItems() {
 }
 
 // Get all menu items in specific stall
-async function getMenuItemsByStallId(stallId) {
+async function getMenuItemsByStallId(stall_id) {
     const query = "SELECT * FROM MenuItem WHERE stall_id = @stall_id";
     const pool = await poolPromise;
-    const result = await pool.request().input("stall_id", stallId).query(query);
-
-    return result.recordset.length === 0 ? null : result.recordset;
+    const result = await pool.request().input("stall_id", stall_id).query(query);
+    return result.recordset;
 }
 
 // Get specific menu item in specific stall
@@ -109,7 +108,7 @@ async function createCuisine(cuisineName) {
 }
 
 async function createMenuItemCuisine(stallId, itemCode, cuisineName) {
-    const query = 
+    const query =
         "INSERT INTO MenuItemCuisine OUTPUT inserted.stall_id, inserted.item_code, inserted.cuisine_name VALUES (@stallId, @itemCode, @cuisineName)"
     const pool = await poolPromise;
     const result = await pool

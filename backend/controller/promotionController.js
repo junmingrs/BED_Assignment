@@ -1,4 +1,10 @@
 const promotionModel = require("../model/promotionModel");
+const customerModel = require("../model/customerModel.js");
+const accountModel = require("../model/accountModel.js");
+const stallModel = require("../model/stallModel.js");
+const hawkerCentreModel = require("../model/hawkerCentreModel.js");
+const menuItemModel = require("../model/menuItemModel.js");
+const email = require("../config/email.js");
 
 async function getAllPromotions(req, res) {
     try {
@@ -12,12 +18,35 @@ async function getAllPromotions(req, res) {
 async function getPromotionByStallId(req, res) {
     try {
         const { stallId } = req.params;
-        console.log(stallId)
         const promos = await promotionModel.getPromotionByStallId(stallId);
         res.status(200).json(promos);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch promotions", details: err.message });
     }
+}
+
+async function sendPromotionEmail(promotion) {
+    const customers = await customerModel.getAllCustomers();
+    let emails = [];
+    customers.forEach(async (customer) => {
+        emails.push(await accountModel.getAccountById(customer.customer_id));
+    });
+    // convert promocode, stallid, itemcode, discount, startdate, enddate to
+    // hawkername, stallname, itemname, discount, promocode, startdate, enddate
+    const stall = await stallModel.getStallById(promotion.stall_id);
+    const hawkerCentre = await hawkerCentreModel.getHawkerCentreById(stall.hawker_centre_id);
+    const item = await menuItemModel.getMenuItemsByStallIdAndItemCode(promotion.stall_id, promotion.item_code);
+    const promoData = {
+        stallName: stall.stall_name,
+        itemName: item.item_desc,
+        promoCode: promotion.promo_code,
+        discount: promotion.discount,
+        hawkerCentre: hawkerCentre.centre_name,
+        endDate: promotion.end_date,
+    }
+    emails.forEach(async (e) => {
+        await email.sendPromotion(e.account_email, promoData);
+    });
 }
 
 async function createPromotion(req, res) {
@@ -27,6 +56,7 @@ async function createPromotion(req, res) {
             return res.status(400).json({ error: "Missing required fields" });
         }
         const promo = await promotionModel.createPromotion(promotion);
+        await sendPromotionEmail(promo)
         res.status(201).json(promo);
     } catch (err) {
         res.status(500).json({ error: "Failed to create promotion", details: err.message });

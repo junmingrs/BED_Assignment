@@ -1,5 +1,12 @@
 const { poolPromise } = require("../db");
 
+const getAllCustomers = async () => {
+    const query = "SELECT * FROM Customer;";
+    const pool = await poolPromise;
+    const result = await pool.request().query(query);
+    return result.recordset;
+}
+
 const getCustomerByAccountId = async (accountId) => {
     const pool = await poolPromise;
 
@@ -15,4 +22,4 @@ const getCustomerByAccountId = async (accountId) => {
     return result.recordset[0];
 };
 
-module.exports = { getCustomerByAccountId };
+module.exports = { getAllCustomers, getCustomerByAccountId };
