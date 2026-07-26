@@ -79,17 +79,36 @@ async function fetchAPI(url) {
         });
         return await response.json();
     } catch (err) {
-        console.error("API Error:", err);
+        console.error("Error:", err);
     }
 }
 
-function loadMenuItems(menuItems) {
+async function getCuisine(stallId, itemCode) {
+    const i = await fetchAPI(`/menuItemCuisine/${stallId}/${itemCode}`);
+    return i.cuisines;
+}
+
+async function loadCuisines(stallId, itemCode) {
+    const cuisines = await getCuisine(stallId, itemCode);
+
+    const cuisineCards = cuisines.map((item) => {
+        return `
+            <span class="w-fit inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-normal text-slate-500 border border-slate-200/60">
+                ${item.cuisine_name}
+            </span>
+        `;
+    });
+    return cuisineCards.join("");
+}
+
+async function loadMenuItems(menuItems) {
     const cart = getCart();
 
-    const itemCards = menuItems.map((item) => {
+    const itemPromises = menuItems.map(async (item) => {
         const itemIndex = itemIndexInCart(cart, item.stall_id, item.item_code);
         const currentQty =
             itemIndex !== -1 ? cart[item.stall_id].items[itemIndex].quantity : 0;
+        const cuisineContent = await loadCuisines(item.stall_id, item.item_code);
 
         const actionControl =
             itemIndex === -1
@@ -126,14 +145,15 @@ function loadMenuItems(menuItems) {
         return `
             <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md">
                 <div class="flex flex-col justify-between w-full space-y-2.5 pr-3">
-                    <div class="space-y-1">
-                        <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-normal text-slate-500 border border-slate-200/60">
-                            ${item.item_category}
-                        </span>
-                        <h3 class="text-base text-slate-900 line-clamp-2">
-                            ${item.item_desc}
-                        </h3>
+                    <div class="flex gap-3">
+                      <span class="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+                        ${item.item_category}
+                      </span>
+                        ${cuisineContent}
                     </div>
+                    <h3 class="text-base text-slate-900 line-clamp-2">
+                        ${item.item_desc}
+                    </h3>
                     <div class="flex items-center justify-between gap-3">
                         <span class="text-base font-semibold">$${item.item_price.toFixed(2)}</span>
                     </div>
@@ -147,6 +167,7 @@ function loadMenuItems(menuItems) {
         `;
     });
 
+    const itemCards = await Promise.all(itemPromises);
     menuContainer.innerHTML = itemCards.join("");
 }
 
@@ -162,7 +183,7 @@ async function init() {
     if (stallData?.stall) loadStallInfo(stallData.stall);
 
     globalMenuItems = (await fetchAPI(`/menuitemsbystall/${stallId}`)) ?? [];
-    loadMenuItems(globalMenuItems);
+    await loadMenuItems(globalMenuItems);
 }
 
 menuContainer.addEventListener("click", (e) => {
