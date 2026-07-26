@@ -1,10 +1,3 @@
-// notification.js
-// Toast notification helper. Uses Tailwind CSS for styling.
-// Exposes a single function: showNotification(type, options)
-//   type: 'newOrder' | 'updateOrder' | 'newComplaint'
-//   options: { title?: string, message?: string, duration?: number }
-
-
 export const TYPE_STYLES = {
     newOrder: {
         border: 'border-green-500',
