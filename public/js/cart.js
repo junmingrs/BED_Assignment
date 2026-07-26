@@ -243,17 +243,32 @@ async function checkout() {
         const data = await response.json();
         alert(data.message);
         if (response.ok) {
-            // 存订单摘要
-            const items = [];
+            const itemPromises = [];
+
             Object.keys(cartMap).forEach((stallId) => {
+                const isEco = cartMap[stallId].isEco == true;
                 cartMap[stallId].items.forEach((item) => {
-                    items.push({
-                        name: item.item_desc || "Item",
-                        quantity: item.quantity,
-                        price: item.item_price || 0,
-                    });
+                    itemPromises.push(
+                        (async () => {
+                            const menuItem = await getItemById(item.stallId, item.itemCode);
+
+                            return {
+                                name: menuItem?.item_desc || "Item",
+                                quantity: item.quantity,
+                                price: menuItem?.item_price || 0,
+                            };
+                        })(),
+                    );
                 });
+                if (isEco) {
+                    itemPromises.push({
+                        name: "Eco-friendly Packaging",
+                        quantity: 1,
+                        price: 0.3,
+                    });
+                }
             });
+            const items = await Promise.all(itemPromises);
             const total = cartTotal.textContent.replace("$", "");
             sessionStorage.setItem(
                 "orderSummary",
@@ -263,7 +278,6 @@ async function checkout() {
             // 跳转到支付成功页
             const orderIds = Object.values(data.orderIds).join(", ");
             window.location.href = `/customer/payment-success.html?orderIds=${orderIds}&total=${total}`;
-
             localStorage.setItem(LS_KEYS.cart, "{}");
         } else {
             console.error(data);
