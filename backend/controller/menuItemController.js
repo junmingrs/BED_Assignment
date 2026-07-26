@@ -12,9 +12,9 @@ async function getAllMenuItems(req, res) {
 
 async function getMenuItemsByStallId(req, res) {
     try {
-        const stallId = req.params.stallId;
+        const { stallId } = req.params;
         const menuItems = await menuItemModel.getMenuItemsByStallId(stallId);
-        return res.json(menuItems);
+        return res.status(201).json(menuItems);
     } catch (error) {
         console.error("Controller error:", error);
         return res.status(500).json({ message: "Error retrieving menu items in stall" });

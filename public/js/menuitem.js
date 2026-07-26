@@ -32,6 +32,8 @@ const deleteConfirmBtnRef = document.getElementById("deleteConfirmBtn");
 const deleteCancelBtnRef = document.getElementById("deleteCancelBtn");
 const deleteErrorMsgRef = document.getElementById("deleteErrorMsg");
 
+let promotions = [];
+
 const getStallId = async () => {
     const response = await fetch(`/vendors/${vendor_id}/stall`, {
         method: "GET",
@@ -68,7 +70,7 @@ async function fetchItems() {
         let data = await response.json();
         return data;
     } catch (e) {
-        alert("FETCH ERROR: ", e);
+        alert("FETCH ITEMS ERROR: ", e);
     }
 }
 
@@ -84,7 +86,7 @@ async function fetchItemCuisine(stallId, itemCode) {
         let data = await response.json();
         return data;
     } catch (e) {
-        alert("FETCH ERROR: ", e);
+        alert("FETCH CUISINES ERROR: ", e);
     }
 }
 
@@ -345,17 +347,15 @@ const displayDeleteDialog = (item) => {
 };
 
 const expandPromoForm = (promoSection, item) => {
-    // Clear current content (the + Add button or the existing promo state)
     promoSection.innerHTML = "";
-    promoSection.className = "promo-section border-2 border-black p-2 rounded flex flex-col gap-1";
+    promoSection.className = "promo-section border-2 border-black p-2 rounded flex flex-col gap-1 min-w-0 overflow-hidden";
 
-    // Helper to build a labeled input row
     const makeRow = (labelText, inputEl) => {
         const row = document.createElement("div");
-        row.className = "flex gap-1 items-center";
+        row.className = "flex gap-2 items-center w-full min-w-0";
         const label = document.createElement("span");
         label.innerText = labelText;
-        label.className = "text-sm w-20 shrink-0";
+        label.className = "text-sm w-16 shrink-0";
         row.appendChild(label);
         row.appendChild(inputEl);
         return row;
@@ -377,17 +377,15 @@ const expandPromoForm = (promoSection, item) => {
     discountInput.placeholder = "20";
     promoSection.appendChild(makeRow("Discount %:", discountInput));
 
-    // Start date
     const startInput = document.createElement("input");
     startInput.type = "date";
-    startInput.className = "flex-1 border-2 border-black px-1 focus:outline-none";
+    startInput.className = "flex-1 min-w-0 border-2 border-black px-1 focus:outline-none";
     startInput.valueAsDate = new Date();
     promoSection.appendChild(makeRow("Start:", startInput));
 
-    //  date
     const endInput = document.createElement("input");
     endInput.type = "date";
-    endInput.className = "flex-1 border-2 border-black px-1 focus:outline-none";
+    endInput.className = "flex-1 min-w-0 border-2 border-black px-1 focus:outline-none";
     promoSection.appendChild(makeRow("End:", endInput));
 
     // Live price preview
@@ -440,6 +438,10 @@ const expandPromoForm = (promoSection, item) => {
             showError("PromoCode is required");
             return;
         }
+        if (promotions.find(p => p.promo_code === promotionCode)) {
+            showError("This promo code already exist");
+            return;
+        }
         if (!discount || discount < 1 || discount > 100) {
             showError("Discount must be between 1 and 100");
             return;
@@ -454,7 +456,7 @@ const expandPromoForm = (promoSection, item) => {
         }
 
         const promoData = {
-            promotionCode: promo.promoCode,
+            promotionCode: promotionCode,
             stallId: item.stall_id,
             itemCode: item.item_code,
             discount,
@@ -480,7 +482,6 @@ const expandPromoForm = (promoSection, item) => {
     }
 };
 
-// TODO: HERE PROMOTION
 const createCard = (item, promos) => {
     const d = document.createElement("div");
     d.className =
@@ -646,7 +647,7 @@ async function loadMenuItems() {
     cardContainerRef.replaceChildren();
     // load menu item
     const items = await fetchItems();
-    const promotions = await fetchPromotion();
+    promotions = await fetchPromotion();
     const promosByItemCode = new Map();
     if (Array.isArray(promotions)) {
         promotions.forEach(promo => {
