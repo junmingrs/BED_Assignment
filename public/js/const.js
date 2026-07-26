@@ -6,7 +6,7 @@ const LS_KEYS = {
 
 const SS_KEYS = {
     accessToken: "token",
-}
+};
 
 const wsMessages = {
     newOrder: "newOrder",

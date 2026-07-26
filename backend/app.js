@@ -88,7 +88,7 @@ app.get(
     "/customer/:customerId/profile",
     authorise("Customer"),
     customerController.getCustomerByAccountId,
-)
+);
 app.patch(
     "/orders/:orderId/:status",
     authorise("Vendor", "Customer"),
@@ -254,12 +254,20 @@ app.get(
 
 app.get(
     "/menuItemCuisine/:stallId/:itemCode",
-    authorise("Vendor"),
+    authorise("Vendor", "Customer"),
     menuItemController.getMenuItemCuisine,
 );
 
-app.get("/hawkercentre", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getAllHawkerCentres);
-app.get("/hawkercentre/:id", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getHawkerCentreById);
+app.get(
+    "/hawkercentre",
+    authorise("Vendor", "Customer", "Operator"),
+    hawkerCentreController.getAllHawkerCentres,
+);
+app.get(
+    "/hawkercentre/:id",
+    authorise("Vendor", "Customer", "Operator"),
+    hawkerCentreController.getHawkerCentreById,
+);
 
 app.post("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
 app.delete("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
