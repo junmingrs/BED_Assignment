@@ -26,11 +26,11 @@ async function loginUser(e) {
         } else {
             if (data.role == "Operator") {
                 alert(data.message);
-                localStorage.setItem(LS_KEYS.authToken, data.token);
+                sessionStorage.setItem(SS_KEYS.accessToken, data.token);
                 window.location.href = "/operator/";
             } else if (data.role == "NEA") {
                 alert(data.message);
-                localStorage.setItem(LS_KEYS.authToken, data.token);
+                sessionStorage.setItem(SS_KEYS.accessToken, data.token);
                 window.location.href = "/nea/";
             } else {
                 alert(

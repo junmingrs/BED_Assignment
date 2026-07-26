@@ -45,7 +45,7 @@ async function registerUser(req, res) {
 
         const token = generateToken(accountId, role);
         const refreshToken = jwt.sign({ accountId, role }, process.env.REFRESH_TOKEN_SECRET_KEY, {
-            expiresIn: "604,800" // 7 days in seconds
+            expiresIn: "7d" // 7 days in seconds
         });
         await accountModel.createRefreshToken(accountId, refreshToken);
 

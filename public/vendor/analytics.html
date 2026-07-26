@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vendor Analytics</title>
+    <link rel="stylesheet" href="../css/output.css" />
+</head>
+
+<body>
+    <nav class="flex justify-between">
+        <div class="flex gap-7">
+            <a href="/vendor" class="text-xl">Home</a>
+            <a href="/vendor/orders.html" class="text-xl">Orders</a>
+            <a href="/vendor/analytics.html" class="text-xl">Analytics</a>
+        </div>
+        <div class="flex gap-7">
+            <a href="/vendor/menuitem.html" class="text-xl">Menu</a>
+            <a href="/vendor/stall.html" class="text-xl">Stall</a>
+        </div>
+    </nav>
+
+    <header class="my-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="space-y-2">
+            <h1 class="text-3xl">Vendor Analytics</h1>
+            <p class="text-sm text-slate-500">
+                Overview of your store performance and real-time insights.
+            </p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <select id="timeframe"
+                class="h-9 w-40 rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50">
+                <option value="today">Today</option>
+                <option value="this_week" selected>This Week</option>
+                <option value="this_month">This Month</option>
+            </select>
+        </div>
+    </header>
+
+    <section class="rounded-xl border border-slate-200 bg-card text-card-foreground shadow-sm">
+        <div class="p-6 pb-0 flex flex-col space-y-1.5">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="sparkles" class="size-5 text-slate-900"></i>
+                    <h3 class="font-semibold">AI Executive Summary</h3>
+                </div>
+            </div>
+            <p class="text-sm text-slate-500">
+                Automated insight generated from recent orders.
+            </p>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded-lg border border-slate-200 bg-slate-50/50 p-4 space-y-2">
+                <div class="flex items-center space-x-2 text-emerald-600 font-medium text-sm">
+                    <i data-lucide="circle-check" class="size-4"></i>
+                    <span>Highlights</span>
+                </div>
+                <p id="ai-highlights" class="text-xs text-slate-600 leading-relaxed">
+                    Loading...
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50/50 p-4 space-y-2">
+                <div class="flex items-center space-x-2 text-amber-600 font-medium text-sm">
+                    <i data-lucide="triangle-alert" class="size-4"></i>
+                    <span>Flags & Warnings</span>
+                </div>
+                <p id="ai-flags" class="text-xs text-slate-600 leading-relaxed">
+                    Loading...
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50/50 p-4 space-y-2">
+                <div class="flex items-center space-x-2 text-indigo-600 font-medium text-sm">
+                    <i data-lucide="list-checks" class="size-4"></i>
+                    <span>Action Items</span>
+                </div>
+                <p id="ai-actions" class="text-xs text-slate-600 leading-relaxed">
+                    Loading...
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <h3 class="tracking-tight text-sm font-medium text-slate-500">
+                    Total Revenue
+                </h3>
+                <i class="fa-solid fa-dollar-sign text-slate-400 text-sm"></i>
+            </div>
+            <div class="text-2xl font-bold text-slate-900" id="kpi-revenue">
+                $1,240.50
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <h3 class="tracking-tight text-sm font-medium text-slate-500">
+                    Total Orders
+                </h3>
+                <i class="fa-solid fa-shopping-bag text-slate-400 text-sm"></i>
+            </div>
+            <div class="text-2xl font-bold text-slate-900" id="kpi-orders">142</div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <h3 class="tracking-tight text-sm font-medium text-slate-500">
+                    Average Order Value
+                </h3>
+                <i class="fa-solid fa-chart-line text-slate-400 text-sm"></i>
+            </div>
+            <div class="text-2xl font-bold text-slate-900" id="kpi-aov">$8.73</div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-7 gap-4">
+        <div class="lg:col-span-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+            <div class="space-y-1">
+                <h3 class="font-semibold tracking-tight text-slate-900">
+                    Hourly Sales
+                </h3>
+                <p class="text-sm text-slate-500">
+                    Revenue distributed across store hours for
+                    <span class="font-bold">today</span>.
+                </p>
+            </div>
+            <div class="relative h-70 w-full">
+                <canvas id="hourlySalesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+            <div class="space-y-1">
+                <h3 class="font-semibold tracking-tight text-slate-900">
+                    Top <span id="max-menu-item">5</span> Menu Items
+                </h3>
+                <p class="text-sm text-slate-500">
+                    Most popular menu items by quantity sold.
+                </p>
+            </div>
+            <div class="relative h-70 w-full flex items-center justify-center">
+                <canvas id="topItemsChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div class="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6 pb-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="triangle-alert" class="size-4 text-amber-600"></i>
+                        <h3 class="font-semibold text-base leading-none tracking-tight">
+                            Complaints Log
+                        </h3>
+                    </div>
+                    <span id="open-complaints-badge"
+                        class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500">
+                    Overview of customer complaints submitted for this stall.
+                </p>
+            </div>
+
+            <div class="p-6 pt-0">
+                <div class="relative w-full overflow-auto">
+                    <table class="w-full caption-bottom text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-200 transition-colors hover:bg-slate-50/50">
+                                <th
+                                    class="h-10 px-2 text-left align-middle font-medium text-xs text-slate-500 uppercase tracking-wider">
+                                    Subject & Description
+                                </th>
+                                <th
+                                    class="h-10 px-2 text-right align-middle font-medium text-xs text-slate-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaints-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6 pb-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="message-square" class="size-4"></i>
+                        <h3 class="font-semibold text-base leading-none tracking-tight">
+                            Ratings & Feedback
+                        </h3>
+                    </div>
+                    <div id="avg-rating-container"
+                        class="flex items-center text-xs font-medium text-slate-600 space-x-1">
+                        <i data-lucide="star" class="size-3.5 fill-amber-400 text-amber-400"></i>
+                        <span id="avg-rating-text">4.0 / 5.0</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500">
+                    Recent ratings, comments, and general customer feedback.
+                </p>
+            </div>
+
+            <div id="feedback-feed-container" class="p-6 pt-0 space-y-3"></div>
+        </div>
+    </section>
+    <!-- charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- render markdown for ai generated summary -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script src="/js/const.js"></script>
+    <script type="module" src="/js/analytics.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

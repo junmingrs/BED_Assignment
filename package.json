@@ -5,7 +5,9 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "nodemon backend/app.js"
+        "dev": "nodemon backend/app.js 3000",
+        "d1": "nodemon backend/app.js 3001",
+        "swagger": "node backend/swagger.js"
     },
     "repository": {
         "type": "git",
@@ -20,6 +22,9 @@
     },
     "homepage": "https://github.com/junmingrs/BED_Assignment#readme",
     "dependencies": {
+        "@huggingface/hub": "^2.13.3",
+        "@huggingface/inference": "^4.13.23",
+        "@huggingface/mcp-client": "^0.2.3",
         "bcrypt": "^6.0.0",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
@@ -27,11 +32,15 @@
         "jsonwebtoken": "^9.0.3",
         "lucide": "^1.24.0",
         "mssql": "^12.7.0",
+        "nodemailer": "^9.0.3",
         "nodemon": "^3.1.14",
+        "ollama": "^0.6.3",
+        "swagger-ui-express": "^5.0.1",
         "ws": "^8.21.1"
     },
     "devDependencies": {
         "@tailwindcss/cli": "^4.3.2",
+        "swagger-autogen": "^2.23.7",
         "tailwindcss": "^4.3.2"
     }
 }

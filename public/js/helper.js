@@ -26,6 +26,21 @@ export function statusStyle(status) {
     }
 }
 
+export function complaintStatusStyle(status) {
+    switch (status?.toLowerCase()) {
+        case "open":
+            return "bg-red-50 text-red-700 ring-red-600/20";
+        case "investigating":
+            return "bg-amber-50 text-amber-700 ring-amber-600/20";
+        case "resolved":
+            return "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
+        case "closed":
+            return "bg-slate-100 text-slate-600 ring-slate-500/10";
+        default:
+            return "bg-slate-50 text-slate-700 ring-slate-600/20";
+    }
+}
+
 export function formatDate(date) {
     return new Date(date).toLocaleString("en-SG", {
         day: "numeric",
@@ -35,6 +50,12 @@ export function formatDate(date) {
         minute: "2-digit",
         hour12: true,
     });
+}
+
+export function formatHour(hour) {
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+    return `${displayHour} ${ampm}`;
 }
 
 // FOR VENDOR ORDER AND VENDOR INDEX PAGES

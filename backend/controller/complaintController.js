@@ -1,12 +1,18 @@
+const { wsMessages } = require("../../public/js/const.js");
 const complaintModel = require("../model/complaintModel");
 const { getCustomerByAccountId } = require("../model/customerModel");
 const { poolPromise } = require("../db");
+const { broadcast } = require("../ws");
 
 // GET /stalls/:stallId/complaints - get complaints for a stall
 const getComplaints = async (req, res) => {
     try {
         const { stallId } = req.params;
-        const result = await complaintModel.getComplaintsByStallId(stallId);
+        const timeframe = req.query.timeframe || null;
+        const result = await complaintModel.getComplaintsByStallId(
+            stallId,
+            timeframe,
+        );
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in getComplaints:", error);
@@ -23,12 +29,13 @@ const submitComplaint = async (req, res) => {
 
         if (!subject || !description) {
             return res.status(400).json({
-                error: "Missing required fields: subject, description"
+                error: "Missing required fields: subject, description",
             });
         }
 
         const pool = await poolPromise;
-        const stallCheck = await pool.request()
+        const stallCheck = await pool
+            .request()
             .input("stallId", stallId)
             .query("SELECT stall_id FROM Stall WHERE stall_id = @stallId");
 
@@ -45,8 +52,16 @@ const submitComplaint = async (req, res) => {
             stallId,
             customer.customer_id,
             subject,
-            description
+            description,
         );
+
+        broadcast({
+            type: wsMessages.newComplaint,
+            customerId: result.customer_id,
+            stallId,
+            subject,
+            description
+        });
 
         res.status(201).json(result);
     } catch (error) {
@@ -61,7 +76,10 @@ const deleteComplaint = async (req, res) => {
         const { complaintId } = req.params;
         const customerId = req.user.id;
 
-        const result = await complaintModel.deleteComplaint(complaintId, customerId);
+        const result = await complaintModel.deleteComplaint(
+            complaintId,
+            customerId,
+        );
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in deleteComplaint:", error);
@@ -72,5 +90,5 @@ const deleteComplaint = async (req, res) => {
 module.exports = {
     getComplaints,
     submitComplaint,
-    deleteComplaint
+    deleteComplaint,
 };

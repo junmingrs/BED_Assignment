@@ -27,12 +27,12 @@ async function loginUser(e) {
             switch (data.role) {
                 case "Vendor":
                     alert(data.message);
-                    localStorage.setItem(LS_KEYS.authToken, data.token);
+                    sessionStorage.setItem(SS_KEYS.accessToken, data.token)
                     window.location.href = "/vendor/";
                     break;
                 case "Customer":
                     alert(data.message);
-                    localStorage.setItem(LS_KEYS.authToken, data.token);
+                    sessionStorage.setItem(SS_KEYS.accessToken, data.token)
                     window.location.href = "/customer/";
                     break;
                 default:

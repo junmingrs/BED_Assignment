@@ -5,7 +5,7 @@ import {
     statusStyle,
 } from "./helper.js";
 import { getSocket } from "./websocket.js";
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const orderTable = document.getElementById("order-table");
 const statusFilter = document.getElementById("statusFilter");
 

@@ -1,18 +1,18 @@
 const { poolPromise } = require("../db");
+const { getTimeFilter } = require("../helper");
 
 // get feedback for a stall
-const getFeedbackByStallId = async (stallId) => {
+const getFeedbackByStallId = async (stallId, timeframe = null) => {
     const pool = await poolPromise;
+    const timeFilter = getTimeFilter(timeframe, "created_at");
 
-    const result = await pool.request()
-        .input("stallId", stallId)
-        .query(`
+    const result = await pool.request().input("stallId", stallId).query(`
             SELECT 
                 feedback_id,
                 description,
                 created_at
             FROM Feedback
-            WHERE stall_id = @stallId
+            WHERE stall_id = @stallId ${timeFilter}
             ORDER BY created_at DESC
         `);
 
@@ -23,19 +23,19 @@ const getFeedbackByStallId = async (stallId) => {
 const createFeedback = async (stallId, customerId, description) => {
     const pool = await poolPromise;
 
-    await pool.request()
+    await pool
+        .request()
         .input("stallId", stallId)
         .input("customerId", customerId)
-        .input("description", description)
-        .query(`
+        .input("description", description).query(`
             INSERT INTO Feedback (stall_id, customer_id, description)
             VALUES (@stallId, @customerId, @description)
         `);
 
-    const result = await pool.request()
+    const result = await pool
+        .request()
         .input("stallId", stallId)
-        .input("customerId", customerId)
-        .query(`
+        .input("customerId", customerId).query(`
             SELECT TOP 1
                 feedback_id,
                 stall_id,
@@ -55,19 +55,22 @@ const deleteFeedback = async (feedbackId, customerId) => {
     const pool = await poolPromise;
 
     // Check if feedback exists and belongs to this customer
-    const checkResult = await pool.request()
+    const checkResult = await pool
+        .request()
         .input("feedbackId", feedbackId)
-        .input("customerId", customerId)
-        .query(`
+        .input("customerId", customerId).query(`
             SELECT feedback_id FROM Feedback 
             WHERE feedback_id = @feedbackId AND customer_id = @customerId
         `);
 
     if (checkResult.recordset.length === 0) {
-        throw new Error("Feedback not found or you are not authorized to delete it");
+        throw new Error(
+            "Feedback not found or you are not authorized to delete it",
+        );
     }
 
-    await pool.request()
+    await pool
+        .request()
         .input("feedbackId", feedbackId)
         .query("DELETE FROM Feedback WHERE feedback_id = @feedbackId");
 
@@ -77,5 +80,5 @@ const deleteFeedback = async (feedbackId, customerId) => {
 module.exports = {
     getFeedbackByStallId,
     createFeedback,
-    deleteFeedback
+    deleteFeedback,
 };
