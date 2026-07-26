@@ -1,6 +1,8 @@
+const { wsMessages } = require("../../public/js/const.js");
 const complaintModel = require("../model/complaintModel");
 const { getCustomerByAccountId } = require("../model/customerModel");
 const { poolPromise } = require("../db");
+const { broadcast } = require("../ws");
 
 // GET /stalls/:stallId/complaints - get complaints for a stall
 const getComplaints = async (req, res) => {
@@ -52,6 +54,14 @@ const submitComplaint = async (req, res) => {
             subject,
             description,
         );
+
+        broadcast({
+            type: wsMessages.newComplaint,
+            customerId: result.customer_id,
+            stallId,
+            subject,
+            description
+        });
 
         res.status(201).json(result);
     } catch (error) {

@@ -1,5 +1,5 @@
 import { formatDate, getIdFromToken, getOrders, getStallId } from "./helper.js";
-import { showNotification, TYPE_STYLES } from "./notification.js";
+import { showNotification } from "./notification.js";
 import { getSocket } from "./websocket.js";
 
 const pendingContainer = document.getElementById("pending-container");
@@ -123,7 +123,7 @@ socket.addEventListener("message", async (event) => {
         const order = await response.json();
         showNotification(msg.type, { message: order.queue_number });
     } else {
-        showNotification(msg.type, { message: "COMPLAINT CONTENT" }); // TODO: complaint content 
+        showNotification(msg.type, { message: msg.subject });
     }
     await loadSections();
 });
