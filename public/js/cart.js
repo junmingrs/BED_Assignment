@@ -65,6 +65,39 @@ async function getAllPromotions() {
     }
 }
 
+async function fetchAPI(url) {
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return await response.json();
+    } catch (err) {
+        console.error("Error:", err);
+    }
+}
+
+async function getCuisine(stallId, itemCode) {
+    const i = await fetchAPI(`/menuItemCuisine/${stallId}/${itemCode}`);
+    return i.cuisines;
+}
+
+async function loadCuisines(stallId, itemCode) {
+    const cuisines = await getCuisine(stallId, itemCode);
+
+    const cuisineCards = cuisines.map((item) => {
+        return `
+            <span class="w-fit inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-normal text-slate-500 border border-slate-200/60">
+                ${item.cuisine_name}
+            </span>
+        `;
+    });
+    return cuisineCards.join("");
+}
+
 async function renderCartItems() {
     // TODO: store images?
     // src = "${item.image}";
@@ -75,102 +108,112 @@ async function renderCartItems() {
         Object.keys(cartMap).map(async (stallId) => {
             const stallInfo = await getStallInfo(stallId);
             const stallName = stallInfo.stall.stall_name;
-
             const stallItems = cartMap[stallId].items;
             const isEco = cartMap[stallId].isEco === true;
+
             if (isEco) totalAmount += 0.3;
             const itemCards = await Promise.all(
                 stallItems.map(async (item) => {
                     const menuItem = await getItemById(item.stallId, item.itemCode);
-                    // TODO: add cuisines for the menu items
-                    const cuisine = "Korean";
-                    const matchedPromo = appliedPromos.find(p =>
-                        p.item_code === menuItem.item_code && p.stall_id === menuItem.stall_id
+
+                    const cuisineContent = await loadCuisines(
+                        item.stallId,
+                        item.itemCode,
                     );
+
+                    const matchedPromo = appliedPromos.find(
+                        (p) =>
+                            p.item_code === menuItem.item_code &&
+                            p.stall_id === menuItem.stall_id,
+                    );
+
                     let priceHtml;
                     if (matchedPromo) {
-                        menuItem.item_price *= (1 - matchedPromo.discount / 100);
+                        const discountedPrice =
+                            menuItem.item_price * (1 - matchedPromo.discount / 100);
                         priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">
-                            ${menuItem.item_price.toFixed(2)}
-                            <span class="ml-2 text-sm font-normal text-gray-500 line-through">${menuItem.item_price.toFixed(2)}</span>
-                            <span class="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">${matchedPromo.discount}% OFF</span>
-                        </p>`;
+                        $${discountedPrice.toFixed(2)}
+                        <span class="ml-2 text-sm font-normal text-gray-500 line-through">$${menuItem.item_price.toFixed(2)}</span>
+                        <span class="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">${matchedPromo.discount}% OFF</span>
+                    </p>`;
+                        menuItem.item_price = discountedPrice; // Update price for total amount calculation
                     } else {
-                        priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">${menuItem.item_price.toFixed(2)}</p>`;
+                        priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">$${menuItem.item_price.toFixed(2)}</p>`;
                     }
+
                     item.itemPrice = menuItem.item_price;
                     totalAmount += menuItem.item_price * item.quantity;
+
                     return `
-                        <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                          <img
-                            src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
-                            alt="${menuItem.item_desc}"
-                            class="size-24 rounded-lg object-cover"
-                          />
+                    <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                      <img
+                        src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
+                        alt="${menuItem.item_desc}"
+                        class="size-24 rounded-lg object-cover"
+                      />
 
-                          <div class="flex-1">
-                            <div class="flex flex-wrap items-center gap-1.5">
-                              <span class="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
-                                ${menuItem.item_category}
-                              </span>
-                              
-                              <span class="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-600">
-                                ${cuisine}
-                              </span>
-                            </div>
+                      <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                          <span class="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+                            ${menuItem.item_category}
+                          </span>
+                          
+                          ${cuisineContent}
+                        </div>
 
-                            <h2 class="mt-2 text-lg font-semibold">
-                              ${menuItem.item_desc}
-                            </h2>
+                        <h2 class="mt-2 text-lg font-semibold">
+                          ${menuItem.item_desc}
+                        </h2>
 
-                            ${priceHtml}
-                          </div>
+                        ${priceHtml}
+                      </div>
 
-                          <div class="flex items-center gap-4">
-                            <button class="minus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">−</button>
-                            <span>${item.quantity}</span>
-                            <button class="plus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">+</button>
-                          </div>
+                      <div class="flex items-center gap-4">
+                        <button class="minus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">−</button>
+                        <span>${item.quantity}</span>
+                        <button class="plus rounded-md border px-3 py-2" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">+</button>
+                      </div>
 
-                          <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">
-                            Delete
-                          </button>
-                        </div>                `;
+                      <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">
+                        Delete
+                      </button>
+                    </div>
+                `;
                 }),
             );
 
             return `
-            <section class="space-y-4">
-                <h2 class="text-2xl font-semibold">${stallName}</h2>
-                ${itemCards.join("")}
-                <div class="mt-2 flex justify-between items-center">
-                    <label class="flex cursor-pointer items-center gap-3">
-                        <input
-                            type="checkbox"
-                            class="eco-checkbox size-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black"
-                            data-stall-id="${stallId}"
-                            ${isEco ? "checked" : ""}
-                        />
-                        <div>
-                            <p class="text-sm font-medium leading-none">
-                                Eco-friendly packaging
-                            </p>
-                            <p class="mt-1 text-xs text-gray-500">
-                                Use paper containers and reduce plastic where possible.
-                            </p>
-                        </div>
-                    </label>
-                    <p class="text-sm font-semibold text-gray-900">
-                        +$0.30
-                    </p>
-                </div>
-            </section>
+        <section class="space-y-4">
+            <h2 class="text-2xl font-semibold">${stallName}</h2>
+            ${itemCards.join("")}
+            <div class="mt-2 flex justify-between items-center">
+                <label class="flex cursor-pointer items-center gap-3">
+                    <input
+                        type="checkbox"
+                        class="eco-checkbox size-4 rounded border-gray-300 text-black focus:ring-2 focus:ring-black"
+                        data-stall-id="${stallId}"
+                        ${isEco ? "checked" : ""}
+                    />
+                    <div>
+                        <p class="text-sm font-medium leading-none">
+                            Eco-friendly packaging
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Use paper containers and reduce plastic where possible.
+                        </p>
+                    </div>
+                </label>
+                <p class="text-sm font-semibold text-gray-900">
+                    +$0.30
+                </p>
+            </div>
+        </section>
         `;
         }),
     );
 
     cartContainer.innerHTML = cards.join("");
-    if (cartContainer.innerHTML == "") {
+    if (cartContainer.innerHTML === "") {
         cartContainer.innerHTML =
             '<p class="text-sm text-gray-500 text-center py-8">No items added in cart</p>';
         paymentContainer.classList.add("hidden");
@@ -183,7 +226,6 @@ async function renderCartItems() {
 
 async function checkout() {
     const customerId = getIdFromToken(token);
-    console.log(cartMap)
     try {
         const response = await fetch(`/checkout`, {
             method: "POST",
@@ -201,17 +243,32 @@ async function checkout() {
         const data = await response.json();
         alert(data.message);
         if (response.ok) {
-            // 存订单摘要
-            const items = [];
+            const itemPromises = [];
+
             Object.keys(cartMap).forEach((stallId) => {
+                const isEco = cartMap[stallId].isEco == true;
                 cartMap[stallId].items.forEach((item) => {
-                    items.push({
-                        name: item.item_desc || "Item",
-                        quantity: item.quantity,
-                        price: item.item_price || 0,
-                    });
+                    itemPromises.push(
+                        (async () => {
+                            const menuItem = await getItemById(item.stallId, item.itemCode);
+
+                            return {
+                                name: menuItem?.item_desc || "Item",
+                                quantity: item.quantity,
+                                price: menuItem?.item_price || 0,
+                            };
+                        })(),
+                    );
                 });
+                if (isEco) {
+                    itemPromises.push({
+                        name: "Eco-friendly Packaging",
+                        quantity: 1,
+                        price: 0.3,
+                    });
+                }
             });
+            const items = await Promise.all(itemPromises);
             const total = cartTotal.textContent.replace("$", "");
             sessionStorage.setItem(
                 "orderSummary",
@@ -221,7 +278,6 @@ async function checkout() {
             // 跳转到支付成功页
             const orderIds = Object.values(data.orderIds).join(", ");
             window.location.href = `/customer/payment-success.html?orderIds=${orderIds}&total=${total}`;
-
             localStorage.setItem(LS_KEYS.cart, "{}");
         } else {
             console.error(data);
@@ -302,8 +358,8 @@ promotionBtn.addEventListener("click", async () => {
     }
 
     const codeLower = code.toLowerCase();
-    const matchedPromo = allPromos.find(p =>
-        p.promo_code && p.promo_code.toLowerCase() === codeLower
+    const matchedPromo = allPromos.find(
+        (p) => p.promo_code && p.promo_code.toLowerCase() === codeLower,
     );
 
     if (!matchedPromo) {
@@ -331,13 +387,14 @@ promotionBtn.addEventListener("click", async () => {
     appliedPromos.push(matchedPromo);
     showMsg(`${code} applied — ${matchedPromo.discount}% off`, "success");
     promotionInput.value = "";
-    renderCartItems()
+    renderCartItems();
 });
 
 function showMsg(text, type) {
     promotionMsg.innerText = text;
-    promotionMsg.className = type === "error"
-        ? "rounded-xl p-3 border bg-red-300 grow"
-        : "rounded-xl p-3 border bg-green-300 grow";
+    promotionMsg.className =
+        type === "error"
+            ? "rounded-xl p-3 border bg-red-300 grow"
+            : "rounded-xl p-3 border bg-green-300 grow";
     promotionMsg.classList.remove("hidden");
 }
