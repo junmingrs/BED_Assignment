@@ -22,6 +22,7 @@ const feedbackController = require("./controller/feedbackController");
 const analyticsController = require("./controller/analyticsController");
 const inspectionController = require("./controller/inspectionController");
 const hawkerCentreController = require("./controller/hawkerCentreController");
+const customerController = require("./controller/customerController.js");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -83,6 +84,11 @@ app.get(
     authorise("Customer"),
     orderController.getOrdersByCustomer,
 );
+app.get(
+    "/customer/:customerId/profile",
+    authorise("Customer"),
+    customerController.getCustomerByAccountId,
+)
 app.patch(
     "/orders/:orderId/:status",
     authorise("Vendor", "Customer"),
