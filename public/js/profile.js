@@ -3,6 +3,7 @@ import { getIdFromToken } from "./helper.js";
 const signoutBtn = document.getElementById("signout-btn");
 const name = document.getElementById("name");
 const points = document.getElementById("points");
+const profile = document.getElementById("profile");
 const token = sessionStorage.getItem(SS_KEYS.accessToken);
 
 async function fetchCustomer() {
@@ -17,7 +18,6 @@ async function fetchCustomer() {
             },
         });
         const data = await response.json();
-        console.log(data)
         return data;
     } catch (e) {
         console.log(e)
@@ -33,9 +33,14 @@ function signOut() {
 }
 
 signoutBtn.addEventListener("click", signOut);
-const customer = await fetchCustomer();
-name.innerText = customer.customer_name;
-points.innerText = customer.loyalty_points;
 
-// TODO: Get guest to sign in 
+const isGuest = JSON.parse(atob(token.split(".")[1])).isGuest;
+if (isGuest) {
+    profile.classList.add("hidden");
+    signoutBtn.innerText = "Login";
+} else {
+    const customer = await fetchCustomer();
+    name.innerText = customer.customer_name;
+    points.innerText = customer.loyalty_points;
+}
 
