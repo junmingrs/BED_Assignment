@@ -1,4 +1,4 @@
-import { getIdFromToken } from "./helper.js";
+import { getIdFromToken, getIsGuest } from "./helper.js";
 
 const signoutBtn = document.getElementById("signout-btn");
 const name = document.getElementById("name");
@@ -34,7 +34,7 @@ function signOut() {
 
 signoutBtn.addEventListener("click", signOut);
 
-const isGuest = JSON.parse(atob(token.split(".")[1])).isGuest;
+const isGuest = getIsGuest(token);
 if (isGuest) {
     profile.classList.add("hidden");
     signoutBtn.innerText = "Login";
