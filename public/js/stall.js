@@ -31,7 +31,7 @@ async function getMenuItemLikes() {
                 Accept: "application/json",
                 Authorization: `Bearer ${token}`,
             },
-        })
+        });
         const data = await response.json();
         return data;
     } catch (e) {
@@ -49,8 +49,8 @@ async function updateMenuItemLike(like, stallId, itemCode) {
                     Accept: "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ stallId, itemCode })
-            })
+                body: JSON.stringify({ stallId, itemCode }),
+            });
         } catch (e) {
             alert("Theres something wrong with liking this menu item");
         }
@@ -63,8 +63,8 @@ async function updateMenuItemLike(like, stallId, itemCode) {
                     Accept: "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ stallId, itemCode })
-            })
+                body: JSON.stringify({ stallId, itemCode }),
+            });
         } catch (e) {
             alert("Theres something wrong with unliking this menu item");
         }
@@ -87,7 +87,7 @@ function addToCart(stallId, itemCode, cart) {
 
     cart[stallId].items.push(item);
     saveCart(cart);
-    loadMenuItems(globalMenuItems);
+    loadMenuItems(globalMenuItems, menuItemLikes);
 }
 
 function changeQuantity(stallId, itemCode, delta, cart) {
@@ -105,7 +105,7 @@ function changeQuantity(stallId, itemCode, delta, cart) {
     }
 
     saveCart(cart);
-    loadMenuItems(globalMenuItems);
+    loadMenuItems(globalMenuItems, menuItemLikes);
 }
 
 function deleteItem(stallId, itemCode, cart) {
@@ -116,7 +116,7 @@ function deleteItem(stallId, itemCode, cart) {
     if (stallCart.items.length === 0) delete cart[stallId];
 
     saveCart(cart);
-    loadMenuItems(globalMenuItems);
+    loadMenuItems(globalMenuItems, menuItemLikes);
 }
 
 async function fetchAPI(url) {
@@ -159,7 +159,11 @@ async function loadMenuItems(menuItems, menuItemLikes) {
         const itemIndex = itemIndexInCart(cart, item.stall_id, item.item_code);
         const currentQty =
             itemIndex !== -1 ? cart[item.stall_id].items[itemIndex].quantity : 0;
-        const like = menuItemLikes.find(l => l.stall_id === item.stall_id && l.item_code === item.item_code) ? true : false;
+        const like = menuItemLikes.find(
+            (l) => l.stall_id === item.stall_id && l.item_code === item.item_code,
+        )
+            ? true
+            : false;
         const cuisineContent = await loadCuisines(item.stall_id, item.item_code);
 
         const actionControl =
@@ -252,7 +256,6 @@ async function init() {
     if (stallData?.stall) loadStallInfo(stallData.stall);
 
     globalMenuItems = (await fetchAPI(`/menuitemsbystall/${stallId}`)) ?? [];
-    const menuItemLikes = await getMenuItemLikes();
     await loadMenuItems(globalMenuItems, menuItemLikes);
 }
 
@@ -276,4 +279,5 @@ menuContainer.addEventListener("click", (e) => {
     }
 });
 
+const menuItemLikes = await getMenuItemLikes();
 init();
