@@ -89,7 +89,7 @@ async function checkoutCart(req, res) {
             const orderId = crypto.randomUUID();
             const items = cartMap[stallId].items; // []
             const isEco = cartMap[stallId].isEco || false;
-            let total = await orderModel.getTotalAmount(stallId, items);
+            let total = await orderModel.getTotalAmount(items);
             if (isEco) total += 0.3; // extra fee for eco friendly packaging
 
             await orderModel.createOrder(orderId, stallId, customerId, total, isEco);

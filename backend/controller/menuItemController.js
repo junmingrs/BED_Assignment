@@ -12,9 +12,9 @@ async function getAllMenuItems(req, res) {
 
 async function getMenuItemsByStallId(req, res) {
     try {
-        const stallId = req.params.stallId;
+        const { stallId } = req.params;
         const menuItems = await menuItemModel.getMenuItemsByStallId(stallId);
-        return res.json(menuItems);
+        return res.status(201).json(menuItems);
     } catch (error) {
         console.error("Controller error:", error);
         return res.status(500).json({ message: "Error retrieving menu items in stall" });
@@ -42,7 +42,15 @@ async function getMenuItemsByStallIdAndItemCode(req, res) {
 
 async function createMenuItem(req, res) {
     try {
-        const newMenuItem = await menuItemModel.createMenuItem(req.body);
+        const { menuItem, cuisines } = req.body
+        const existingCuisines = await menuItemModel.getAllCuisines();
+        cuisines.forEach(cuisine => {
+            const exists = existingCuisines.some(c => c.cuisine_name.toLowerCase() === cuisine.toLowerCase());
+            if (!exists) {
+                menuItemModel.createCuisine(cuisine)
+            }
+        });
+        const newMenuItem = await menuItemModel.createMenuItem(menuItem, cuisines);
         return res.status(201).json(newMenuItem);
     } catch (error) {
         console.error("Controller error:", error);
@@ -52,8 +60,39 @@ async function createMenuItem(req, res) {
 
 async function updateMenuItem(req, res) {
     try {
-        const item = req.body;
-        const updatedMenuItem = await menuItemModel.updateMenuItem(item);
+        const { menuItem, cuisines } = req.body;
+        let cuisinesToUpdate = [];
+        const existingCuisines = await menuItemModel.getAllCuisines();
+        const menuItemCuisines = await menuItemModel.getMenuItemCuisine(menuItem.stall_id, menuItem.item_code);
+
+        const normalize = (name) => name.toLowerCase().trim();
+
+        cuisines.forEach(cuisine => {
+            const cuisineLower = normalize(cuisine);
+            const existsInDb = existingCuisines.some(c => normalize(c.cuisine_name) === cuisineLower);
+            const hasInMenuItem = menuItemCuisines.some(c => normalize(c.cuisine_name) === cuisineLower);
+
+            if (!existsInDb) {
+                menuItemModel.createCuisine(cuisine);
+            }
+            if (!hasInMenuItem) {
+                cuisinesToUpdate.push(cuisine);
+            }
+        });
+
+        menuItemCuisines.forEach(cuisine => {
+            const cuisineLower = normalize(cuisine.cuisine_name);
+            const stillExists = cuisines.some(c => normalize(c) === cuisineLower);
+            if (!stillExists) {
+                menuItemModel.deleteMenuItemCuisine(menuItem.stall_id, menuItem.item_code, cuisine.cuisine_name);
+            }
+        });
+
+        cuisinesToUpdate.forEach(cuisine => {
+            menuItemModel.createMenuItemCuisine(menuItem.stall_id, menuItem.item_code, cuisine);
+        });
+
+        const updatedMenuItem = await menuItemModel.updateMenuItem(menuItem);
         return res.status(201).json(updatedMenuItem);
     } catch (error) {
         console.error("Controller error:", error);
@@ -61,7 +100,7 @@ async function updateMenuItem(req, res) {
     }
 }
 
-// Delete existing book
+// Delete existing menu item
 async function deleteMenuItem(req, res) {
     try {
         const { stallId, itemCode } = req.body;
@@ -76,6 +115,58 @@ async function deleteMenuItem(req, res) {
     }
 }
 
+async function getMenuItemLikeByCustomer(req, res) {
+    try {
+        const { customerId } = req.params;
+        const menuItemLike = await menuItemModel.getMenuItemLikesByCustomer(customerId);
+        if (!menuItemLike) {
+            return res.status(404).json({ message: "Menu item not found" });
+        }
+        return res.json(menuItemLike);
+    } catch (error) {
+        console.error("Controller error:", error);
+        return res
+            .status(500)
+            .json({ message: "Error retrieving menu item likes by customer" });
+    }
+}
+
+async function createMenuItemLike(req, res) {
+    try {
+        const { stallId, itemCode } = req.body;
+        const { customerId } = req.params;
+        const newMenuItemLike = await menuItemModel.createMenuItemLike(stallId, itemCode, customerId);
+        return res.status(201).json(newMenuItemLike);
+    } catch (error) {
+        console.error("Controller error:", error);
+        return res.status(500).json({ message: "Error creating menu item" });
+    }
+}
+
+// Delete existing menu item like
+async function deleteMenuItemLike(req, res) {
+    try {
+        const { customerId } = req.params;
+        const { stallId, itemCode } = req.body;
+        await menuItemModel.deleteMenuItemLike(stallId, itemCode, customerId);
+        return res.status(201).json({ success: true });
+    } catch (error) {
+        console.error("Controller error:", error);
+        return res.status(500).json({ message: "Error deleting menu item" });
+    }
+}
+
+async function getMenuItemCuisine(req, res) {
+    try {
+        const { stallId, itemCode } = req.params;
+        const cuisines = await menuItemModel.getMenuItemCuisine(stallId, itemCode);
+        return res.status(201).json({ cuisines });
+    } catch (error) {
+        console.error("Controller error:", error);
+        return res.status(500).json({ message: "Error getting cuisines for menu item" });
+    }
+}
+
 module.exports = {
     getAllMenuItems,
     getMenuItemsByStallId,
@@ -83,4 +174,8 @@ module.exports = {
     createMenuItem,
     updateMenuItem,
     deleteMenuItem,
+    getMenuItemLikeByCustomer,
+    createMenuItemLike,
+    deleteMenuItemLike,
+    getMenuItemCuisine,
 };
