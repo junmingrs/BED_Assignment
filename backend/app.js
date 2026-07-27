@@ -23,6 +23,7 @@ const analyticsController = require("./controller/analyticsController");
 const inspectionController = require("./controller/inspectionController");
 const hawkerCentreController = require("./controller/hawkerCentreController");
 const customerController = require("./controller/customerController.js");
+const chatbotController = require("./controller/chatbotController.js");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -273,12 +274,13 @@ app.get(
 app.post("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
 app.delete("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
 app.get("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.getMenuItemLikeByCustomer);
-
 app.get(
     "/menuitem",
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
+
+app.post("/customer/chatbot/:customerId", authorise("Customer"), chatbotController.chat);
 
 // Start server
 app.listen(port, () => {
