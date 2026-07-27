@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Payment Successful</title>
@@ -9,30 +10,7 @@
     <script src="/js/i18n.js"></script>
 </head>
 
-  <body>
-    <!-- ===== NAVBAR ===== -->
-    <nav class="flex justify-between items-center">
-        <div class="flex gap-5">
-            <a href="/customer" class="text-xl" data-i18n="nav_home">Home</a>
-            <a href="/customer/hawkers.html" class="text-xl" data-i18n="nav_browse">Browse</a>
-        </div>
-        <div class="flex gap-5 items-center">
-            <a href="/customer/cart.html" class="text-xl" data-i18n="nav_cart">Cart</a>
-            <a href="/customer/profile.html" class="text-xl" data-i18n="nav_profile">Profile</a>
-            <!-- 语言切换 -->
-            <div class="flex gap-1 ml-4">
-                <button onclick="window.i18n.setLanguage('en')" 
-                        class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
-                    EN
-                </button>
-                <button onclick="window.i18n.setLanguage('zh')" 
-                        class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
-                    中文
-                </button>
-            </div>
-        </div>
-    </nav>
-
+<body>
     <!-- ===== MAIN CONTENT ===== -->
     <main class="mx-auto max-w-3xl space-y-6 p-8 pb-32">
         <!-- Success Card -->
@@ -67,15 +45,19 @@
 
             <!-- Actions -->
             <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <a href="/customer" class="rounded-lg bg-black px-6 py-3 font-medium text-white transition hover:bg-gray-800" data-i18n="back_to_home">
+                <a href="/customer"
+                    class="rounded-lg bg-black px-6 py-3 font-medium text-white transition hover:bg-gray-800"
+                    data-i18n="back_to_home">
                     Back to Home
                 </a>
-                <a href="/customer/orders.html" class="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50" data-i18n="view_orders">
+                <a href="/customer/orders.html"
+                    class="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
+                    data-i18n="view_orders">
                     View Orders
                 </a>
             </div>
         </div>
-      </div>
+        </div>
     </main>
 
     <!-- ===== FOOTER ===== -->
@@ -87,54 +69,56 @@
     </footer>
 
     <script>
-      // Read URL params
-      const params = new URLSearchParams(window.location.search);
-      const orderIds = params.get("orderIds");
-      const total = params.get("total");
+        // Read URL params
+        const params = new URLSearchParams(window.location.search);
+        const orderIds = params.get("orderIds");
+        const total = params.get("total");
 
-      // Display order ID
-      if (orderIds) {
-        document.getElementById("order-id").textContent =
-          `Order ID: ${orderIds}`;
-      }
+        // Display order ID
+        if (orderIds) {
+            document.getElementById("order-id").textContent =
+                `Order ID: ${orderIds}`;
+        }
 
-      // Display total
-      if (total) {
-        document.getElementById("order-total").textContent =
-          `$${parseFloat(total).toFixed(2)}`;
-      }
+        // Display total
+        if (total) {
+            document.getElementById("order-total").textContent =
+                `$${parseFloat(total).toFixed(2)}`;
+        }
 
-      // Try to load order summary from sessionStorage
-      const summary = sessionStorage.getItem("orderSummary");
-      if (summary) {
-        try {
-          const data = JSON.parse(summary);
-          const container = document.getElementById("order-items");
-          let html = "";
-          data.items.forEach((item) => {
-            html += `
+        // Try to load order summary from sessionStorage
+        const summary = sessionStorage.getItem("orderSummary");
+        if (summary) {
+            try {
+                const data = JSON.parse(summary);
+                const container = document.getElementById("order-items");
+                let html = "";
+                data.items.forEach((item) => {
+                    html += `
                         <div class="flex justify-between text-sm">
                             <span>${item.name} × ${item.quantity}</span>
                             <span>$${(item.price * item.quantity).toFixed(2)}</span>
                         </div>
                     `;
-          });
-          container.innerHTML = html;
-          if (data.total) {
-            document.getElementById("order-total").textContent =
-              `$${data.total.toFixed(2)}`;
-          }
-          // Clear after use
-          sessionStorage.removeItem("orderSummary");
-        } catch (e) {
-          console.warn("Could not parse order summary", e);
+                });
+                container.innerHTML = html;
+                if (data.total) {
+                    document.getElementById("order-total").textContent =
+                        `$${data.total.toFixed(2)}`;
+                }
+                // Clear after use
+                sessionStorage.removeItem("orderSummary");
+            } catch (e) {
+                console.warn("Could not parse order summary", e);
+            }
         }
-      }
     </script>
 
+    <script src="/js/navbar.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-      lucide.createIcons();
+        lucide.createIcons();
     </script>
-  </body>
+</body>
+
 </html>
