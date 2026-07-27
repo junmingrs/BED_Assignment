@@ -49,6 +49,7 @@ app.use(express.static(path.join("public")));
 // Routes
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
+app.post("/loginGuest", accountController.loginGuest);
 
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);

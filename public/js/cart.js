@@ -1,4 +1,4 @@
-import { getIdFromToken } from "./helper.js";
+import { getIdFromToken, getIsGuest } from "./helper.js";
 const cartContainer = document.getElementById("container");
 const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
