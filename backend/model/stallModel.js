@@ -169,10 +169,82 @@ const getStallById = async (stallId) => {
     return stallResult.recordset[0];
 }
 
+// POST /stalls/:stallId/complaints - submit complaint
+const submitComplaint = async (stallId, customerId, complaintData) => {
+    const { subject, description } = complaintData;
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+        .input("stallId", stallId)
+        .input("customerId", customerId)
+        .input("subject", subject)
+        .input("description", description)
+        .query(`
+            INSERT INTO Complaint (stall_id, customer_id, subject, description, status)
+            VALUES (@stallId, @customerId, @subject, @description, 'Open')
+        `);
+
+    // Return the newly created complaint
+    const newComplaint = await pool.request()
+        .input("stallId", stallId)
+        .input("customerId", customerId)
+        .query(`
+            SELECT TOP 1 
+                complaint_id,
+                stall_id,
+                customer_id,
+                subject,
+                description,
+                status,
+                created_at
+            FROM Complaint
+            WHERE stall_id = @stallId AND customer_id = @customerId
+            ORDER BY created_at DESC
+        `);
+
+    return newComplaint.recordset[0];
+};
+
+// POST /stalls/:stallId/ratings - submit rating
+const submitRating = async (stallId, customerId, ratingData) => {
+    const { rating, comment } = ratingData;
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+        .input("stallId", stallId)
+        .input("customerId", customerId)
+        .input("rating", rating)
+        .input("comment", comment || null)
+        .query(`
+            INSERT INTO Rating (stall_id, customer_id, rating, comment)
+            VALUES (@stallId, @customerId, @rating, @comment)
+        `);
+
+    // Return the newly created rating
+    const newRating = await pool.request()
+        .input("stallId", stallId)
+        .input("customerId", customerId)
+        .query(`
+            SELECT TOP 1 
+                rating_id,
+                stall_id,
+                customer_id,
+                rating,
+                comment,
+                created_at
+            FROM Rating
+            WHERE stall_id = @stallId AND customer_id = @customerId
+            ORDER BY created_at DESC
+        `);
+
+    return newRating.recordset[0];
+};
+
 module.exports = {
     getStallInfo,
-    getStallById,
-    updateStall,
-    getAllStalls,
-    getStallIdByVendorId,
+    addMenuItem,
+    updateMenuItem,
+    deleteMenuItem,
+    submitComplaint,
+    submitRating
 };
