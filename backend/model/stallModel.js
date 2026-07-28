@@ -162,7 +162,6 @@ const getStallIdByVendorId = async (vendorId) => {
     return stallResult.recordset[0];
 };
 
-<<<<<<< Updated upstream
 const getStallById = async (stallId) => {
     const query = "SELECT * FROM Stall WHERE stall_id = @stall_id";
     const pool = await poolPromise;
@@ -170,13 +169,7 @@ const getStallById = async (stallId) => {
     return stallResult.recordset[0];
 }
 
-module.exports = {
-    getStallInfo,
-    updateStall,
-    getAllStalls,
-    getStallIdByVendorId,
-};
-=======
+
 // POST /stalls/:stallId/complaints - submit complaint
 const submitComplaint = async (stallId, customerId, complaintData) => {
     const { subject, description } = complaintData;
@@ -256,4 +249,3 @@ module.exports = {
     submitComplaint,
     submitRating
 };
->>>>>>> Stashed changes
