@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest",
         "dev": "nodemon backend/app.js 3000",
         "d1": "nodemon backend/app.js 3001",
         "swagger": "node backend/swagger.js"
@@ -41,6 +41,7 @@
     },
     "devDependencies": {
         "@tailwindcss/cli": "^4.3.2",
+        "jest": "^30.4.2",
         "swagger-autogen": "^2.23.7",
         "tailwindcss": "^4.3.2"
     }

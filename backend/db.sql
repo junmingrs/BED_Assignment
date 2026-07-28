@@ -35,7 +35,7 @@ CREATE TABLE Customer
 (
     customer_id UNIQUEIDENTIFIER PRIMARY KEY REFERENCES Account(account_id),
     customer_name VARCHAR(255) NOT NULL,
-    loyalty_points SMALLINT NOT NULL,
+    loyalty_points SMALLINT NOT NULL
 );
 
 CREATE TABLE Vendor
@@ -57,7 +57,7 @@ CREATE TABLE RefreshToken
 (
     account_id UNIQUEIDENTIFIER PRIMARY KEY REFERENCES Account(account_id),
     refresh_token VARCHAR(MAX) NOT NULL,
-    created_at DATETIME DEFAULT GETDATE(),
+    created_at DATETIME DEFAULT GETDATE()
 );
 
 -- NEW: HawkerCentre (must be created before Stall)

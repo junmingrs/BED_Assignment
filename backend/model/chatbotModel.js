@@ -85,13 +85,12 @@ async function getChatResponse(history, context) {
                 const parsed = JSON.parse(jsonMatch[1].trim());
                 actions = parsed.actions || [];
             } catch (e) {
-                console.error("Failed to parse action JSON:", e);
+                // console.error("Failed to parse action JSON:", e);
             }
             reply = rawContent.replace(/```json\n?[\s\S]*?```/, "").trim();
         }
         return { reply, actions };
     } catch (err) {
-        console.error("Error in chat response:", err);
         return {
             reply: "Sorry, I'm having trouble connecting. Please try again later.",
             actions: [],

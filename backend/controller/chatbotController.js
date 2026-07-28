@@ -8,7 +8,6 @@ async function chat(req, res) {
         const result = await chatbotModel.getChatResponse(history, context);
         return res.status(200).json(result);
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ message: "Internal server error" });
     }
 }
