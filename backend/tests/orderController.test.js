@@ -1,10 +1,9 @@
-const { checkoutCart } = require("../controller/orderController");
+const { checkoutCart, getOrderById } = require("../controller/orderController");
 const orderModel = require("../model/orderModel");
 const { broadcast } = require("../ws");
 const { sendReceipt } = require("../config/email");
 const crypto = require("crypto");
 
-// Mock external dependencies
 jest.mock("../model/orderModel");
 jest.mock("../ws", () => ({
     initWebServer: jest.fn(),
@@ -141,6 +140,75 @@ describe("checkoutCart Controller Tests", () => {
 
         await checkoutCart(req, res);
 
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+    });
+});
+
+describe("getOrderById Controller Tests", () => {
+    let req, res;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+
+        req = {
+            params: {
+                orderId: "11111111-1111-1111-1111-111111111111",
+            },
+        };
+
+        res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn().mockReturnThis(),
+        };
+
+        // ignore error logs
+        jest.spyOn(console, "error").mockImplementation(() => { });
+    });
+
+    test("should return status 200 and the order object when order is found", async () => {
+        const mockOrder = {
+            order_id: "11111111-1111-1111-1111-111111111111",
+            stall_id: "stall_A",
+            total_amount: 15.5,
+            items: [
+                {
+                    item_code: "code-1",
+                    quantity: 2,
+                    item_desc: "Salmon Sushi",
+                    item_price: 7.75,
+                    item_category: "Japanese",
+                },
+            ],
+        };
+
+        orderModel.getOrderById.mockResolvedValueOnce(mockOrder);
+
+        await getOrderById(req, res);
+
+        expect(orderModel.getOrderById).toHaveBeenCalledWith(req.params.orderId);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(mockOrder);
+    });
+
+    test("should return status 200 and null if order is not found in database", async () => {
+        orderModel.getOrderById.mockResolvedValueOnce(null);
+
+        await getOrderById(req, res);
+
+        expect(orderModel.getOrderById).toHaveBeenCalledWith(req.params.orderId);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(null);
+    });
+
+    test("should return status 500 when orderModel throws an error", async () => {
+        orderModel.getOrderById.mockRejectedValueOnce(
+            new Error("Database connection error"),
+        );
+
+        await getOrderById(req, res);
+
+        expect(orderModel.getOrderById).toHaveBeenCalledWith(req.params.orderId);
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
     });

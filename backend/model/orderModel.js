@@ -2,9 +2,9 @@ const { poolPromise } = require("../db");
 const { getTimeFilter } = require("../helper");
 
 async function getTotalAmount(items) {
-    console.log(items)
+    console.log(items);
     let total = 0;
-    items.forEach(item => {
+    items.forEach((item) => {
         total += item.itemPrice;
     });
     return total;
@@ -171,4 +171,5 @@ module.exports = {
     getOrderById,
     getOrderByStallId,
     updateOrderStatus,
+    getItemsFromOrder,
 };
