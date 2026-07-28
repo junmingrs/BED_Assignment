@@ -10,32 +10,17 @@
 </head>
 
 <body>
-    <nav class="flex justify-between">
-        <div class="flex gap-5">
-            <a href="/customer" class="text-xl">Home</a>
-            <a href="/customer/hawkers.html" class="text-xl">Browse</a>
-        </div>
-        <div class="flex gap-5">
-            <a href="/customer/cart.html" class="text-xl">Cart</a>
-            <a href="/customer/profile.html" class="text-xl">Profile</a>
-            <a href="/customer/complaint.html" class="text-xl">Complaint</a>
-        </div>
-    </nav>
-
-    <section>
-        <h1 class="text-3xl">Customer Homepage</h1>
-        <p>TODO</p>
-    </section>
-
     <section class="space-y-6">
-        <h2 class="text-2xl font-semibold tracking-tight">Active Orders</h2>
+        <h1 class="text-3xl font-semibold tracking-tight">Active Orders</h1>
 
         <div id="orders-container"></div>
     </section>
 
+    <script src="/js/navbar.js"></script>
     <script src="/js/const.js"></script>
     <script type="module" src="/js/customer-index.js"></script>
     <script type="module" src="/js/helper.js"></script>
+    <script type="module" src="/js/chatbot.js"></script>
 </body>
 
 </html>

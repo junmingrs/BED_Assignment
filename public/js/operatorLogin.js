@@ -31,7 +31,7 @@ async function loginUser(e) {
             } else if (data.role == "NEA") {
                 alert(data.message);
                 sessionStorage.setItem(SS_KEYS.accessToken, data.token);
-                window.location.href = "/nea/";
+                window.location.href = "/nea/inspections.html";
             } else {
                 alert(
                     "You need to be an Operator or an NEA Officer to log in via this portal.",

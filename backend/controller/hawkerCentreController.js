@@ -3,7 +3,14 @@ const hawkerCentreModel = require("../model/hawkerCentreModel");
 // GET /hawkercentre -> for the list page
 async function getAllHawkerCentres(req, res) {
   try {
-    const centres = await hawkerCentreModel.getAllHawkerCentres();
+    let centres;
+
+    if (req.user.role === "Operator") {
+      centres = await hawkerCentreModel.getHawkerCentresByOperatorId(req.user.id);
+    } else {
+      centres = await hawkerCentreModel.getAllHawkerCentres();
+    }
+
     res.status(200).json(centres);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch hawker centres", details: err.message });

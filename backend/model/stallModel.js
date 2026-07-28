@@ -169,7 +169,6 @@ const getStallById = async (stallId) => {
     return stallResult.recordset[0];
 }
 
-
 // POST /stalls/:stallId/complaints - submit complaint
 const submitComplaint = async (stallId, customerId, complaintData) => {
     const { subject, description } = complaintData;

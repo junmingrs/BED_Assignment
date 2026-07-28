@@ -9,18 +9,6 @@
 </head>
 
 <body>
-    <nav class="flex justify-between">
-        <div class="flex gap-5">
-            <a href="/customer" class="text-xl">Home</a>
-            <a href="/customer/hawkers.html" class="text-xl">Browse</a>
-        </div>
-        <div class="flex gap-5">
-            <a href="/customer/cart.html" class="text-xl">Cart</a>
-            <a href="/customer/profile.html" class="text-xl">Profile</a>
-            <a href="/customer/complaint.html" class="text-xl">Complaint</a>
-        </div>
-    </nav>
-
     <section class="space-y-1">
         <div class="flex items-center gap-3">
             <h1 id="stallName" class="text-3xl font-bold">Stall 1</h1>
@@ -44,8 +32,11 @@
         <div id="menuContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/js/const.js"></script>
+    <script src="/js/navbar.js"></script>
     <script type="module" src="/js/stall.js"></script>
+    <script type="module" src="/js/chatbot.js"></script>
 </body>
 
 </html>

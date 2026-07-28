@@ -1,4 +1,29 @@
+import { getIdFromToken, getIsGuest } from "./helper.js";
+
 const signoutBtn = document.getElementById("signout-btn");
+const name = document.getElementById("name");
+const points = document.getElementById("points");
+const profile = document.getElementById("profile");
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
+
+async function fetchCustomer() {
+    const accountId = getIdFromToken(token);
+
+    try {
+        const response = await fetch(`/customer/${accountId}/profile`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (e) {
+        console.log(e)
+    }
+
+}
 
 function signOut() {
     sessionStorage.removeItem(SS_KEYS.accessToken);
@@ -8,3 +33,14 @@ function signOut() {
 }
 
 signoutBtn.addEventListener("click", signOut);
+
+const isGuest = getIsGuest(token);
+if (isGuest) {
+    profile.classList.add("hidden");
+    signoutBtn.innerText = "Login";
+} else {
+    const customer = await fetchCustomer();
+    name.innerText = customer.customer_name;
+    points.innerText = customer.loyalty_points;
+}
+

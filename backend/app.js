@@ -16,12 +16,15 @@ const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
 const stallController = require("./controller/stallController");
 const promotionController = require("./controller/promotionController");
+const rentalAgreementController = require("./controller/rentalAgreementController");
 const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
 const analyticsController = require("./controller/analyticsController");
 const inspectionController = require("./controller/inspectionController");
 const hawkerCentreController = require("./controller/hawkerCentreController");
+const customerController = require("./controller/customerController.js");
+const chatbotController = require("./controller/chatbotController.js");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -48,6 +51,7 @@ app.use(express.static(path.join("public")));
 // Routes
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
+app.post("/loginGuest", accountController.loginGuest);
 
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);
@@ -83,6 +87,11 @@ app.get(
     authorise("Customer"),
     orderController.getOrdersByCustomer,
 );
+app.get(
+    "/customer/:customerId/profile",
+    authorise("Customer"),
+    customerController.getCustomerByAccountId,
+);
 app.patch(
     "/orders/:orderId/:status",
     authorise("Vendor", "Customer"),
@@ -98,22 +107,6 @@ app.get(
     authorise("Vendor", "Operator", "Customer"),
     stallController.getStallInfo,
 );
-app.get(
-    "/stalls",
-    authorise("Vendor", "Customer"),
-    stallController.getAllStalls,
-);
-app.put(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.updateStall,
-);
-app.get(
-    "/vendors/:vendorId/stall",
-    authorise("Vendor"),
-    stallController.getStallIdByVendorId,
-);
-
 app.post(
     "/promotion",
     authorise("Vendor"),
@@ -121,14 +114,62 @@ app.post(
 );
 app.get(
     "/promotion",
+    authorise("Customer", "Vendor"),
+    promotionController.getAllPromotions,
+);
+app.get(
+    "/promotion/code/:promotionCode",
     authorise("Vendor"),
-    promotionController.getPromotionsByStallId,
+    promotionController.getPromotionByCode,
+);
+app.get(
+    "/promotion/stall/:stallId",
+    authorise("Vendor"),
+    promotionController.getPromotionByStallId,
+);
+app.get(
+    "/promotionActive/",
+    authorise("Vendor"),
+    promotionController.getActivePromotions,
 );
 app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
 app.delete(
     "/promotion",
     authorise("Vendor"),
     promotionController.deletePromotion,
+);
+
+app.get(
+    "/stalls",
+    authorise("Vendor", "Customer", "Operator"),
+    stallController.getAllStalls,
+);
+
+app.get(
+    "/rentalagreement",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.getRentalAgreementsByStallId,
+);
+app.get(
+    "/rentalagreement/:id",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.getRentalAgreementById,
+);
+app.post(
+    "/rentalagreement",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.createRentalAgreement,
+);
+app.put(
+    "/rentalagreement",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.updateRentalAgreement,
+);
+
+app.get(
+    "/vendors/:vendorId/stall",
+    authorise("Vendor"),
+    stallController.getStallIdByVendorId,
 );
 
 // GET /stalls/:stallId/ratings - get ratings for a stall
@@ -231,8 +272,33 @@ app.get(
     analyticsController.getAISummary,
 );
 
-app.get("/hawkercentre", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getAllHawkerCentres);
-app.get("/hawkercentre/:id", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getHawkerCentreById);
+app.get(
+    "/menuItemCuisine/:stallId/:itemCode",
+    authorise("Vendor", "Customer"),
+    menuItemController.getMenuItemCuisine,
+);
+
+app.get(
+    "/hawkercentre",
+    authorise("Vendor", "Customer", "Operator"),
+    hawkerCentreController.getAllHawkerCentres,
+);
+app.get(
+    "/hawkercentre/:id",
+    authorise("Vendor", "Customer", "Operator"),
+    hawkerCentreController.getHawkerCentreById,
+);
+
+app.post("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
+app.delete("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
+app.get("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.getMenuItemLikeByCustomer);
+app.get(
+    "/menuitem",
+    authorise("Vendor", "Customer"),
+    menuItemController.getMenuItemsByStallIdAndItemCode,
+);
+
+app.post("/customer/chatbot/:customerId", authorise("Customer"), chatbotController.chat);
 
 // Start server
 app.listen(port, () => {
