@@ -312,20 +312,3 @@ process.on("SIGINT", async () => {
     console.log("Database connections closed");
     process.exit(0);
 });
-<<<<<<< Updated upstream
-=======
-
-
-// ============ STALL ROUTES ============
-const stallController = require("./controller/stallController");
-
-// GET /stalls/:stallId - get stall info
-app.get("/stalls/:stallId", verifyJWT, stallController.getStallInfo);
-
-// POST /stalls/:stallId/complaints - submit complaint
-app.post("/stalls/:stallId/complaints", verifyJWT, stallController.submitComplaint);
-// app.post("/stalls/:stallId/ratings", stallController.submitRating);
-// POST /stalls/:stallId/ratings - submit rating
-app.post("/stalls/:stallId/ratings", verifyJWT, stallController.submitRating);
-// app.post("/stalls/:stallId/ratings", stallController.submitRating);
->>>>>>> Stashed changes

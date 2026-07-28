@@ -1,6 +1,5 @@
+// stallController.js
 const stallModel = require("../model/stallModel");
-const { getCustomerByAccountId } = require("../model/customerModel");
-const { poolPromise } = require("../db");  
 
 const getStallInfo = async (req, res) => {
     try {
@@ -13,7 +12,6 @@ const getStallInfo = async (req, res) => {
     }
 };
 
-<<<<<<< Updated upstream
 const getStallIdByVendorId = async (req, res) => {
     const { vendorId } = req.params;
     try {
@@ -21,93 +19,6 @@ const getStallIdByVendorId = async (req, res) => {
         res.status(200).json(result.stall_id);
     } catch (error) {
         console.error("Error in getStallIdByVendorId:", error);
-=======
-// POST /stalls/:stallId/complaints - submit complaint
-const submitComplaint = async (req, res) => {
-    try {
-        const { stallId } = req.params;
-        const { subject, description } = req.body;
-        const accountId = req.user.id;
-
-        if (!subject || !description) {
-            return res.status(400).json({
-                error: "Missing required fields: subject, description"
-            });
-        }
-
-        // Check if stall exists - 使用 poolPromise
-        const pool = await poolPromise;
-        const stallCheck = await pool.request()
-            .input("stallId", stallId)
-            .query("SELECT stall_id FROM Stall WHERE stall_id = @stallId");
-
-        if (stallCheck.recordset.length === 0) {
-            return res.status(404).json({ error: "Stall not found" });
-        }
-
-        // Get customer_id from account_id
-        const customer = await getCustomerByAccountId(accountId);
-        console.log(accountId)
-        if (!customer) {
-            return res.status(404).json({ error: "Customer profile not found" });
-        }
-
-        const result = await stallModel.submitComplaint(stallId, customer.customer_id, {
-            subject,
-            description
-        });
-
-        res.status(201).json(result);
-    } catch (error) {
-        console.error("Error in submitComplaint:", error);
-        res.status(500).json({ error: error.message });
-    }
-};
-
-// POST /stalls/:stallId/ratings
-const submitRating = async (req, res) => {
-    try {
-        const { stallId } = req.params;
-        const { rating, comment } = req.body;
-        const accountId = req.user.id;
-
-        if (!rating) {
-            return res.status(400).json({
-                error: "Missing required field: rating"
-            });
-        }
-
-        if (rating < 1 || rating > 5) {
-            return res.status(400).json({
-                error: "Rating must be between 1 and 5"
-            });
-        }
-
-        // Check if stall exists - 使用 poolPromise
-        const pool = await poolPromise;
-        const stallCheck = await pool.request()
-            .input("stallId", stallId)
-            .query("SELECT stall_id FROM Stall WHERE stall_id = @stallId");
-
-        if (stallCheck.recordset.length === 0) {
-            return res.status(404).json({ error: "Stall not found" });
-        }
-
-        // Get customer_id from account_id
-        const customer = await getCustomerByAccountId(accountId);
-        if (!customer) {
-            return res.status(404).json({ error: "Customer profile not found" });
-        }
-
-        const result = await stallModel.submitRating(stallId, customer.customer_id, {
-            rating,
-            comment
-        });
-
-        res.status(201).json(result);
-    } catch (error) {
-        console.error("Error in submitRating:", error);
->>>>>>> Stashed changes
         res.status(500).json({ error: error.message });
     }
 };
@@ -151,13 +62,7 @@ const updateStall = async (req, res) => {
 
 module.exports = {
     getStallInfo,
-<<<<<<< Updated upstream
     getAllStalls,
     updateStall,
     getStallIdByVendorId,
 };
-=======
-    submitComplaint,
-    submitRating
-};
->>>>>>> Stashed changes
