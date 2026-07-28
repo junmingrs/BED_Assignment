@@ -1,6 +1,6 @@
 const { Ollama } = require("ollama");
 const { poolPromise } = require("../db");
-const { getTimeFilter } = require("../helper");
+const helper = require("../helper");
 
 async function getKPI(stallId, timeframe) {
     const query = `
@@ -10,7 +10,7 @@ async function getKPI(stallId, timeframe) {
             ISNULL(AVG(total_amount), 0.00) AS averageOrderValue 
         FROM Orders 
         WHERE stall_id = @id 
-        ${getTimeFilter(timeframe, "order_date")}
+        ${helper.getTimeFilter(timeframe, "order_date")}
         `;
     const pool = await poolPromise;
     const result = await pool.request().input("id", stallId).query(query);
@@ -52,7 +52,7 @@ async function getTopItems(stallId, timeframe) {
         WHERE 
             o.stall_id = @id
             AND o.status = 'Completed'
-            ${getTimeFilter(timeframe, "order_date")}
+            ${helper.getTimeFilter(timeframe, "order_date")}
         GROUP BY 
             CAST(m.item_desc AS NVARCHAR(255))
         ORDER BY 
