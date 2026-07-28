@@ -1,3 +1,13 @@
+const {
+    getOrderById,
+    createOrder,
+    getItemsFromOrder,
+    getOrdersByCustomer,
+    getOrderByStallId,
+    createOrderItem,
+    updateOrderStatus,
+} = require("../model/orderModel");
+
 const mockRequest = {
     input: jest.fn().mockReturnThis(),
     query: jest.fn(),
@@ -14,15 +24,11 @@ jest.mock("mssql", () => {
     };
 });
 
-const {
-    getOrderById,
-    createOrder,
-    getItemsFromOrder,
-} = require("../model/orderModel");
 describe("orderModel Unit Tests", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockRequest.input.mockReturnThis();
+        mockRequest.query.mockReset();
     });
 
     describe("createOrder", () => {
@@ -113,6 +119,49 @@ describe("orderModel Unit Tests", () => {
         });
     });
 
+    describe("createOrderItem", () => {
+        test("should bind all item properties and execute the INSERT query successfully", async () => {
+            const orderId = "11111111-1111-1111-1111-111111111111";
+            const item = {
+                stallId: "stall_A",
+                itemCode: "code-101",
+                quantity: 2,
+            };
+
+            mockRequest.query.mockResolvedValueOnce({ rowsAffected: [1] });
+
+            await createOrderItem(orderId, item);
+
+            // verify that the inputs are correct
+            expect(mockRequest.input).toHaveBeenCalledWith("order_id", orderId);
+            expect(mockRequest.input).toHaveBeenCalledWith("stall_id", item.stallId);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "item_code",
+                item.itemCode,
+            );
+            expect(mockRequest.input).toHaveBeenCalledWith("quantity", item.quantity);
+
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+        });
+
+        test("should throw an error if the database query fails", async () => {
+            const orderId = "11111111-1111-1111-1111-111111111111";
+            const item = {
+                stallId: "stall_A",
+                itemCode: "code-101",
+                quantity: 2,
+            };
+
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Foreign key constraint failed"),
+            );
+
+            await expect(createOrderItem(orderId, item)).rejects.toThrow(
+                "Foreign key constraint failed",
+            );
+        });
+    });
+
     describe("getItemsFromOrder", () => {
         test("should return array of items for that order", async () => {
             const orderId = "11111111-1111-1111-1111-111111111111";
@@ -190,6 +239,199 @@ describe("orderModel Unit Tests", () => {
 
             await expect(getOrderById(orderId)).rejects.toThrow(
                 "Database connection error",
+            );
+        });
+    });
+
+    describe("getOrdersByCustomer", () => {
+        test("should return orders with items without filtering by status", async () => {
+            const customerId = "cust_1";
+            const mockOrders = [
+                { order_id: "order_1", customer_id: customerId, total_amount: 15.0 },
+                { order_id: "order_2", customer_id: customerId, total_amount: 20.0 },
+            ];
+            const mockItemsOrder1 = [{ item_code: "item_a", quantity: 1 }];
+            const mockItemsOrder2 = [{ item_code: "item_b", quantity: 2 }];
+
+            mockRequest.query
+                // select all items
+                .mockResolvedValueOnce({ recordset: mockOrders })
+                // get items from order 1
+                .mockResolvedValueOnce({ recordset: mockItemsOrder1 })
+                // get items from order 2
+                .mockResolvedValueOnce({ recordset: mockItemsOrder2 });
+
+            const result = await getOrdersByCustomer(customerId);
+
+            expect(result).toHaveLength(2);
+            expect(result[0]).toEqual({ ...mockOrders[0], items: mockItemsOrder1 });
+            expect(result[1]).toEqual({ ...mockOrders[1], items: mockItemsOrder2 });
+
+            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
+            expect(mockRequest.query).toHaveBeenCalledTimes(3);
+        });
+
+        test("should handle status filtering correctly", async () => {
+            const customerId = "cust_1";
+            const statuses = ["Pending", "Preparing"];
+            const mockOrders = [
+                { order_id: "order_1", customer_id: customerId, status: "Pending" },
+            ];
+            const mockItems = [{ item_code: "item_a", quantity: 1 }];
+
+            mockRequest.query
+                .mockResolvedValueOnce({ recordset: mockOrders })
+                .mockResolvedValueOnce({ recordset: mockItems });
+
+            const result = await getOrdersByCustomer(customerId, statuses);
+
+            expect(result).toEqual([{ ...mockOrders[0], items: mockItems }]);
+            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
+            expect(mockRequest.input).toHaveBeenCalledWith("status0", "Pending");
+            expect(mockRequest.input).toHaveBeenCalledWith("status1", "Preparing");
+        });
+
+        test("should return null if no orders are found for the customer", async () => {
+            const customerId = "non_existent_cust";
+
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
+
+            const result = await getOrdersByCustomer(customerId);
+
+            expect(result).toBeNull();
+            // should stop early and not call getItems
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+        });
+
+        test("should throw an error if the database query fails", async () => {
+            const customerId = "cust_1";
+
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Database connection error"),
+            );
+
+            await expect(getOrdersByCustomer(customerId)).rejects.toThrow(
+                "Database connection error",
+            );
+        });
+    });
+
+    describe("getOrderByStallId", () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+            mockRequest.input.mockReturnThis();
+            mockRequest.query.mockReset();
+        });
+
+        test("should return list of orders with items when no timeframe is provided", async () => {
+            const stallId = "stall_A";
+            const mockOrders = [
+                { order_id: "order_1", stall_id: stallId, queue_number: 1 },
+                { order_id: "order_2", stall_id: stallId, queue_number: 2 },
+            ];
+            const mockItemsOrder1 = [{ item_code: "item_a", quantity: 1 }];
+            const mockItemsOrder2 = [{ item_code: "item_b", quantity: 2 }];
+
+            mockRequest.query
+                // returns 2 orders
+                .mockResolvedValueOnce({ recordset: mockOrders })
+                // returns items for order item 1
+                .mockResolvedValueOnce({ recordset: mockItemsOrder1 })
+                // returns items for order item 2
+                .mockResolvedValueOnce({ recordset: mockItemsOrder2 });
+
+            const result = await getOrderByStallId(stallId);
+
+            expect(result).toHaveLength(2);
+            expect(result[0]).toEqual({ ...mockOrders[0], items: mockItemsOrder1 });
+            expect(result[1]).toEqual({ ...mockOrders[1], items: mockItemsOrder2 });
+
+            expect(mockRequest.input).toHaveBeenCalledWith("id", stallId);
+            expect(mockRequest.query).toHaveBeenCalledTimes(3);
+        });
+
+        test("should return list of orders correctly when a timeframe parameter is passed", async () => {
+            const stallId = "stall_A";
+            const timeframe = "today";
+            const mockOrders = [
+                { order_id: "order_1", stall_id: stallId, queue_number: 1 },
+            ];
+            const mockItems = [{ item_code: "item_a", quantity: 1 }];
+
+            mockRequest.query
+                .mockResolvedValueOnce({ recordset: mockOrders })
+                .mockResolvedValueOnce({ recordset: mockItems });
+
+            const result = await getOrderByStallId(stallId, timeframe);
+
+            expect(result).toEqual([{ ...mockOrders[0], items: mockItems }]);
+            expect(mockRequest.input).toHaveBeenCalledWith("id", stallId);
+            expect(mockRequest.query).toHaveBeenCalledTimes(2);
+        });
+
+        test("should return null if no orders exist for the given stallId", async () => {
+            const stallId = "non_existent_stall";
+
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
+
+            const result = await getOrderByStallId(stallId);
+
+            expect(result).toBeNull();
+            // stop early and not call getItems
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+        });
+
+        test("should throw an error if the database query fails", async () => {
+            const stallId = "stall_A";
+
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Database connection error"),
+            );
+
+            await expect(getOrderByStallId(stallId)).rejects.toThrow(
+                "Database connection error",
+            );
+        });
+    });
+    describe("updateOrderStatus", () => {
+        test("should return true when order status is successfully updated", async () => {
+            const orderId = "11111111-1111-1111-1111-111111111111";
+            const status = "Completed";
+
+            mockRequest.query.mockResolvedValueOnce({ rowsAffected: [1] });
+
+            const result = await updateOrderStatus(orderId, status);
+
+            expect(result).toBe(true);
+            expect(mockRequest.input).toHaveBeenCalledWith("status", status);
+            expect(mockRequest.input).toHaveBeenCalledWith("orderId", orderId);
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+        });
+
+        test("should return false if order_id is not found and no rows are updated", async () => {
+            const orderId = "non-existent-id";
+            const status = "Completed";
+
+            mockRequest.query.mockResolvedValueOnce({ rowsAffected: [0] });
+
+            const result = await updateOrderStatus(orderId, status);
+
+            expect(result).toBe(false);
+            expect(mockRequest.input).toHaveBeenCalledWith("status", status);
+            expect(mockRequest.input).toHaveBeenCalledWith("orderId", orderId);
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+        });
+
+        test("should throw an error if the database query fails", async () => {
+            const orderId = "11111111-1111-1111-1111-111111111111";
+            const status = "Completed";
+
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Database write failure"),
+            );
+
+            await expect(updateOrderStatus(orderId, status)).rejects.toThrow(
+                "Database write failure",
             );
         });
     });
