@@ -29,7 +29,7 @@ let hourlyChartInstance = null;
 let itemsChartInstance = null;
 let currentReqTimeframe = null;
 
-const token = localStorage.getItem(LS_KEYS.authToken);
+const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const vendorId = await getIdFromToken(token);
 const stallId = await getStallId(vendorId, token);
 

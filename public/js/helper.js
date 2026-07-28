@@ -4,6 +4,15 @@ export function getIdFromToken(token) {
     return payload.id;
 }
 
+export function getIsGuest(token) {
+    try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return Boolean(payload.isGuest);
+    } catch {
+        return false;
+    }
+}
+
 export function statusStyle(status) {
     switch (status) {
         case "Pending":

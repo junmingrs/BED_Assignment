@@ -1,3 +1,4 @@
+const { custom } = require("joi");
 const { poolPromise } = require("../db");
 
 // Get all menu items
@@ -10,12 +11,11 @@ async function getAllMenuItems() {
 }
 
 // Get all menu items in specific stall
-async function getMenuItemsByStallId(stallId) {
+async function getMenuItemsByStallId(stall_id) {
     const query = "SELECT * FROM MenuItem WHERE stall_id = @stall_id";
     const pool = await poolPromise;
-    const result = await pool.request().input("stall_id", stallId).query(query);
-
-    return result.recordset.length === 0 ? null : result.recordset;
+    const result = await pool.request().input("stall_id", stall_id).query(query);
+    return result.recordset;
 }
 
 // Get specific menu item in specific stall
@@ -71,7 +71,7 @@ async function updateMenuItem(menuItemData) {
 }
 
 // Delete menu item
-async function deleteMenuItem(stallId, itemCode) {
+async function deleteMenuItem(stallId, itemCode) { // NOTE: might need to add checks here instead of deleting items
     try {
         const deleteMenuItemCuisineQuery = "DELETE FROM MenuItemCuisine WHERE stall_id = @stallId AND item_code = @itemCode"
         const query = "DELETE FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode";
@@ -83,6 +83,29 @@ async function deleteMenuItem(stallId, itemCode) {
     catch (e) {
         return false;
     }
+}
+
+// Get all menu item likes by customer
+async function getMenuItemLikesByCustomer(customerId) {
+    const query = "SELECT * FROM MenuItemLikes WHERE customer_id = @customerId";
+    const pool = await poolPromise;
+    const result = await pool.request().input("customerId", customerId).query(query);
+    return result.recordset;
+}
+
+// Create menu item like
+async function createMenuItemLike(stallId, itemCode, customerId) {
+    const query =
+        `INSERT INTO MenuItemLikes
+            OUTPUT inserted.*
+            VALUES (@stallId, @itemCode, @customerId)`;
+    const pool = await poolPromise;
+    const result = await pool.request()
+        .input("stallId", stallId)
+        .input("itemCode", itemCode)
+        .input("customerId", customerId)
+        .query(query);
+    return result.recordset[0];
 }
 
 // Get specific menu item cuisine
@@ -109,7 +132,7 @@ async function createCuisine(cuisineName) {
 }
 
 async function createMenuItemCuisine(stallId, itemCode, cuisineName) {
-    const query = 
+    const query =
         "INSERT INTO MenuItemCuisine OUTPUT inserted.stall_id, inserted.item_code, inserted.cuisine_name VALUES (@stallId, @itemCode, @cuisineName)"
     const pool = await poolPromise;
     const result = await pool
@@ -118,7 +141,21 @@ async function createMenuItemCuisine(stallId, itemCode, cuisineName) {
         .input("itemCode", itemCode)
         .input("cuisineName", cuisineName)
         .query(query);
+
     return result.recordset[0];
+}
+
+// Delete menu item like
+async function deleteMenuItemLike(stallId, itemCode, customerId) {
+    const query =
+        `DELETE FROM MenuItemLikes 
+            WHERE stall_id = @stallId AND item_code = @itemCode AND customer_id = @customerId`;
+    const pool = await poolPromise;
+    await pool.request()
+        .input("stallId", stallId)
+        .input("itemCode", itemCode)
+        .input("customerId", customerId)
+        .query(query)
 }
 
 async function deleteMenuItemCuisine(stallId, itemCode, cuisineName) {
@@ -140,6 +177,9 @@ module.exports = {
     createMenuItem,
     updateMenuItem,
     deleteMenuItem,
+    getMenuItemLikesByCustomer,
+    createMenuItemLike,
+    deleteMenuItemLike,
     getMenuItemCuisine,
     getAllCuisines,
     createCuisine,

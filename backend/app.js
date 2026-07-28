@@ -23,6 +23,8 @@ const feedbackController = require("./controller/feedbackController");
 const analyticsController = require("./controller/analyticsController");
 const inspectionController = require("./controller/inspectionController");
 const hawkerCentreController = require("./controller/hawkerCentreController");
+const customerController = require("./controller/customerController.js");
+const chatbotController = require("./controller/chatbotController.js");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -49,6 +51,7 @@ app.use(express.static(path.join("public")));
 // Routes
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
+app.post("/loginGuest", accountController.loginGuest);
 
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);
@@ -83,6 +86,11 @@ app.get(
     "/customer/:customerId/orders",
     authorise("Customer"),
     orderController.getOrdersByCustomer,
+);
+app.get(
+    "/customer/:customerId/profile",
+    authorise("Customer"),
+    customerController.getCustomerByAccountId,
 );
 app.patch(
     "/orders/:orderId/:status",
@@ -266,12 +274,31 @@ app.get(
 
 app.get(
     "/menuItemCuisine/:stallId/:itemCode",
-    authorise("Vendor"),
+    authorise("Vendor", "Customer"),
     menuItemController.getMenuItemCuisine,
 );
 
-app.get("/hawkercentre", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getAllHawkerCentres);
-app.get("/hawkercentre/:id", authorise("Vendor", "Customer", "Operator"), hawkerCentreController.getHawkerCentreById);
+app.get(
+    "/hawkercentre",
+    authorise("Vendor", "Customer", "Operator"),
+    hawkerCentreController.getAllHawkerCentres,
+);
+app.get(
+    "/hawkercentre/:id",
+    authorise("Vendor", "Customer", "Operator"),
+    hawkerCentreController.getHawkerCentreById,
+);
+
+app.post("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
+app.delete("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
+app.get("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.getMenuItemLikeByCustomer);
+app.get(
+    "/menuitem",
+    authorise("Vendor", "Customer"),
+    menuItemController.getMenuItemsByStallIdAndItemCode,
+);
+
+app.post("/customer/chatbot/:customerId", authorise("Customer"), chatbotController.chat);
 
 // Start server
 app.listen(port, () => {

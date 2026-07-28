@@ -8,6 +8,102 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+const sendPromotion = async (toEmail, promotionData) => {
+    try {
+        const mailOptions = {
+            from: `Hawker Centre <${process.env.EMAIL_USER}>`,
+            to: toEmail,
+            subject: `New Promotion - ${promotionData.stallName}'s ${promotionData.itemName} ${promotionData.discount}% OFF using ${promotionData.promoCode}`,
+            html: generateHtmlContent(promotionData)
+        };
+
+        await transporter.sendMail(mailOptions);
+        return true;
+    } catch (e) {
+        console.error('Error sending email:', e, toEmail);
+        return false;
+    }
+}
+
+const generateHtmlContent = (data) => {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Promotion - ${data.stallName}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-[600px] mx-auto my-0 bg-white shadow-lg rounded-lg overflow-hidden">
+
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-500 to-pink-500 text-white text-center py-8 px-5">
+            <h1 class="text-3xl font-bold m-0">🎉 Special Promotion!</h1>
+            <div class="inline-block bg-yellow-400 text-red-600 text-4xl font-black px-5 py-3 rounded-full mt-4">
+                ${data.discount}% OFF
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="p-8">
+            <h2 class="text-xl text-gray-800 m-0 mb-3">Hi there! 👋</h2>
+            <p class="text-gray-600 leading-relaxed m-0 mb-6">
+                Great news! <strong class="text-gray-800">${data.stallName}</strong> is running a special promotion just for you!
+            </p>
+
+            <!-- Item Name -->
+            <div class="text-2xl font-bold text-gray-800 my-4">
+                🍜 ${data.itemName}
+            </div>
+
+            <!-- Stall Info -->
+            <div class="flex flex-col bg-gray-50 p-4 border-l-4 border-red-500 my-5">
+                <strong class="text-gray-800 block mb-2">🏪 Where to Find Us</strong>
+                <div>
+                    <span class="text-gray-700 block"><strong>Stall:</strong> ${data.stallName}</span>
+                </div>
+                <div>
+                    ${data.hawkerCentre ? `<span class="text-gray-700 block"><strong>Location:</strong> ${data.hawkerCentre}</span>` : ''}
+                </div>
+            </div>
+
+            <!-- Promo Code Box -->
+            <div class="bg-yellow-50 border-2 border-dashed border-yellow-400 p-6 text-center my-6 rounded-lg">
+                <div class="text-sm text-gray-600 mb-2">YOUR PROMO CODE</div>
+                <div class="text-3xl font-black text-red-600 tracking-widest font-mono">
+                    ${data.promoCode}
+                </div>
+                ${data.endDate
+            ? `<div class="text-red-600 font-bold mt-2">Valid until: ${data.endDate}</div>`
+            : `<div class="text-red-600 font-bold mt-2">⏰ Limited time only!</div>`
+        }
+            </div>
+
+            <p class="text-gray-600 leading-relaxed m-0 mb-6">
+                Hurry, this offer won't last long! Visit us soon and treat yourself to some amazing ${data.itemName}.
+            </p>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 p-5 text-center text-xs text-gray-600">
+            <p class="m-0 mb-2">See you at the hawker centre! 🍴</p>
+            <p class="m-0 mb-3">
+                <strong class="text-gray-800">${data.stallName}</strong><br>
+                Hawker Centre Team
+            </p>
+            <p class="text-[10px] text-gray-400 m-0">
+                You received this email because you're a valued customer.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+    `.trim();
+};
+
 const sendReceipt = async (toEmail, orderData) => {
     try {
         const mailOptions = {
@@ -69,4 +165,4 @@ const sendReceipt = async (toEmail, orderData) => {
     }
 };
 
-module.exports = { sendReceipt };
+module.exports = { sendPromotion, sendReceipt };

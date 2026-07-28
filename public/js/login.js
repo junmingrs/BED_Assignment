@@ -2,6 +2,8 @@ const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const form = document.getElementById("loginForm");
 
+const guestLoginBtn = document.getElementById("guestLogin");
+
 async function loginUser(e) {
     e.preventDefault();
     try {
@@ -27,12 +29,12 @@ async function loginUser(e) {
             switch (data.role) {
                 case "Vendor":
                     alert(data.message);
-                    sessionStorage.setItem(SS_KEYS.accessToken, data.token)
+                    sessionStorage.setItem(SS_KEYS.accessToken, data.token);
                     window.location.href = "/vendor/";
                     break;
                 case "Customer":
                     alert(data.message);
-                    sessionStorage.setItem(SS_KEYS.accessToken, data.token)
+                    sessionStorage.setItem(SS_KEYS.accessToken, data.token);
                     window.location.href = "/customer/";
                     break;
                 default:
@@ -46,4 +48,31 @@ async function loginUser(e) {
     }
 }
 
+async function guestLogin() {
+    try {
+        const response = await fetch("/loginGuest", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.log("ERROR WHILE LOGIN: " + data.message);
+            alert(data.message);
+            return;
+        } else {
+            alert(data.message);
+            sessionStorage.setItem(SS_KEYS.accessToken, data.token);
+            window.location.href = "/customer/";
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 form.addEventListener("submit", loginUser);
+guestLoginBtn.addEventListener("click", guestLogin);
