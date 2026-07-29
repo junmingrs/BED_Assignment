@@ -14,7 +14,7 @@ const getStallInfo = async (stallId) => {
                 s.stall_name,
                 s.stall_unit_no,
                 v.vendor_id,
-                a.account_email
+                a.account_email AS vendor_email
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
             JOIN Account a ON v.vendor_id = a.account_id
@@ -117,10 +117,10 @@ const updateStall = async (stallId, accountId, updateData) => {
                 s.stall_name,
                 s.stall_unit_no,
                 v.vendor_id,
-                a.account_email
+                a.account_email AS vendor_email
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
-            JOIN Account a ON v.vendor_id = a.vendor_id
+            JOIN Account a ON v.vendor_id = a.account_id
             WHERE s.stall_id = @stallId
         `);
 
