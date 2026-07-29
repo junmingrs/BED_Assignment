@@ -16,6 +16,7 @@ const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
 const stallController = require("./controller/stallController");
 const promotionController = require("./controller/promotionController");
+const rentalAgreementController = require("./controller/rentalAgreementController");
 const ratingController = require("./controller/ratingController");
 const complaintController = require("./controller/complaintController");
 const feedbackController = require("./controller/feedbackController");
@@ -106,22 +107,6 @@ app.get(
     authorise("Vendor", "Operator", "Customer"),
     stallController.getStallInfo,
 );
-app.get(
-    "/stalls",
-    authorise("Vendor", "Customer"),
-    stallController.getAllStalls,
-);
-app.put(
-    "/stalls/:stallId",
-    authorise("Vendor", "Operator"),
-    stallController.updateStall,
-);
-app.get(
-    "/vendors/:vendorId/stall",
-    authorise("Vendor"),
-    stallController.getStallIdByVendorId,
-);
-
 app.post(
     "/promotion",
     authorise("Vendor"),
@@ -152,6 +137,39 @@ app.delete(
     "/promotion",
     authorise("Vendor"),
     promotionController.deletePromotion,
+);
+
+app.get(
+    "/stalls",
+    authorise("Vendor", "Customer", "Operator"),
+    stallController.getAllStalls,
+);
+
+app.get(
+    "/rentalagreement",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.getRentalAgreementsByStallId,
+);
+app.get(
+    "/rentalagreement/:id",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.getRentalAgreementById,
+);
+app.post(
+    "/rentalagreement",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.createRentalAgreement,
+);
+app.put(
+    "/rentalagreement",
+    authorise("Vendor", "Operator"),
+    rentalAgreementController.updateRentalAgreement,
+);
+
+app.get(
+    "/vendors/:vendorId/stall",
+    authorise("Vendor"),
+    stallController.getStallIdByVendorId,
 );
 
 // GET /stalls/:stallId/ratings - get ratings for a stall
