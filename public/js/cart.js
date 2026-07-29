@@ -275,6 +275,22 @@ async function checkout() {
                 JSON.stringify({ items, total: parseFloat(total) }),
             );
 
+            if (getIsGuest(token)) {
+                const guestOrders = JSON.parse(localStorage.getItem(LS_KEYS.createdOrderIds) ?? "[]");
+                const statuses = {};
+                Object.values(data.orderIds).forEach((orderId) => {
+                    statuses[orderId] = "Pending";
+                });
+                guestOrders.push({
+                    orderIds: data.orderIds,
+                    items,
+                    total: parseFloat(total),
+                    date: new Date().toISOString(),
+                    statuses,
+                });
+                localStorage.setItem(LS_KEYS.createdOrderIds, JSON.stringify(guestOrders));
+            }
+
             // 跳转到支付成功页
             const orderIds = Object.values(data.orderIds).join(", ");
             window.location.href = `/customer/payment-success.html?orderIds=${orderIds}&total=${total}`;

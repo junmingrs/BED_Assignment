@@ -8,6 +8,7 @@ const NAV_ITEMS = {
             activePages: ["/customer/hawkers", "/customer/hawker", "/customer/stall"],
         },
         { name: "Complaint", href: "/customer/complaint.html", align: "left" },
+        { name: "Order History", href: "/customer/order-history.html", align: "left" },
         { name: "Cart", href: "/customer/cart.html", align: "right" },
         {
             name: "Profile",
