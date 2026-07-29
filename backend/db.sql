@@ -38,7 +38,7 @@ CREATE TABLE Customer
 (
     customer_id UNIQUEIDENTIFIER PRIMARY KEY REFERENCES Account(account_id),
     customer_name VARCHAR(255) NOT NULL,
-    loyalty_points SMALLINT NOT NULL,
+    loyalty_points SMALLINT NOT NULL
 );
 
 CREATE TABLE Vendor

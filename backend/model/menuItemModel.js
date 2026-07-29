@@ -121,7 +121,7 @@ async function getAllCuisines() {
     const query = "SELECT * FROM Cuisine";
     const pool = await poolPromise;
     const result = await pool.request().query(query);
-    return result.recordsets[0];
+    return result.recordsets;
 }
 
 async function createCuisine(cuisineName) {

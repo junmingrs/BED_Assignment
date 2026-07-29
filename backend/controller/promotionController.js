@@ -67,7 +67,7 @@ async function getPromotionByCode(req, res) {
     try {
         const { promotionCode } = req.params;
         if (!promotionCode) return res.status(400).json({ error: "Promo code is required" });
-        const promo = await promotionModel.getPromotionByCode(stallId);
+        const promo = await promotionModel.getPromotionByCode(promotionCode);
         res.status(200).json(promo);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch promotions", details: err.message });
