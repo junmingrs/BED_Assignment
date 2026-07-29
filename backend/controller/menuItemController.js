@@ -53,7 +53,7 @@ async function createMenuItem(req, res) {
         const newMenuItem = await menuItemModel.createMenuItem(menuItem, cuisines);
         return res.status(201).json(newMenuItem);
     } catch (error) {
-        // console.error("Controller error:", error);
+        console.error("Controller error:", error);
         return res.status(500).json({ message: "Error creating menu item" });
     }
 }
