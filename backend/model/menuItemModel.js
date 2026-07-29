@@ -1,4 +1,3 @@
-const { custom } = require("joi");
 const { poolPromise } = require("../db");
 
 // Get all menu items
@@ -29,8 +28,9 @@ async function getMenuItemsByStallIdAndItemCode(stallId, itemCode) {
 
 // Create new menu item
 async function createMenuItem(menuItem, cuisines) {
-    const query =
-        "INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category)  OUTPUT inserted.item_code, inserted.stall_id, inserted.item_desc, inserted.item_price, inserted.item_category VALUES (@stallId, NEWID(), @itemDesc, @itemPrice, @itemCategory);";
+    const query = `INSERT INTO MenuItem
+            OUTPUT inserted.*
+            VALUES (@stallId, NEWID(), @itemDesc, @itemPrice, @itemCategory, @itemImage); `;
     const pool = await poolPromise;
     let result = { menuItem: null, cuisines: [] }
     const res = await pool.request()
@@ -38,6 +38,7 @@ async function createMenuItem(menuItem, cuisines) {
         .input("itemDesc", menuItem.item_desc)
         .input("itemPrice", menuItem.item_price)
         .input("itemCategory", menuItem.item_category)
+        .input("itemImage", menuItem.item_image)
         .query(query);
     result.menuItem = res.recordset[0];
 
@@ -57,7 +58,7 @@ async function createMenuItem(menuItem, cuisines) {
 
 // Update menu item
 async function updateMenuItem(menuItemData) {
-    const query = "UPDATE MenuItem SET item_desc = COALESCE(@itemDesc, item_desc), item_price = COALESCE(@itemPrice, item_price), item_category = COALESCE(@itemCategory, item_category) WHERE stall_id = @stallId AND item_code = @itemCode;";
+    const query = "UPDATE MenuItem SET item_desc = COALESCE(@itemDesc, item_desc), item_price = COALESCE(@itemPrice, item_price), item_category = COALESCE(@itemCategory, item_category), item_image = COALESCE(@itemImage, item_image) WHERE stall_id = @stallId AND item_code = @itemCode;";
     const pool = await poolPromise;
     await pool.request()
         .input("stallId", menuItemData.stall_id)
@@ -65,6 +66,7 @@ async function updateMenuItem(menuItemData) {
         .input("itemDesc", menuItemData.item_desc)
         .input("itemPrice", menuItemData.item_price)
         .input("itemCategory", menuItemData.item_category)
+        .input("itemImage", menuItemData.item_image)
         .query(query);
 
     return await getMenuItemsByStallIdAndItemCode(menuItemData.stall_id, menuItemData.item_code);
@@ -121,7 +123,7 @@ async function getAllCuisines() {
     const query = "SELECT * FROM Cuisine";
     const pool = await poolPromise;
     const result = await pool.request().query(query);
-    return result.recordsets;
+    return result.recordsets[0];
 }
 
 async function createCuisine(cuisineName) {
