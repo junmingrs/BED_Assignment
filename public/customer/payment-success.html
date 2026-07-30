@@ -20,12 +20,18 @@
                 ✅
             </div>
 
-            <h1 class="text-3xl font-bold text-green-600" data-i18n="payment_successful">Payment Successful!</h1>
-            <p class="mt-2 text-gray-600" data-i18n="thank_you">Thank you for your order.</p>
+            <h1 class="text-3xl font-bold text-green-600" data-i18n="payment_successful">
+                Payment Successful!
+            </h1>
+            <p class="mt-2 text-gray-600" data-i18n="thank_you">
+                Thank you for your order.
+            </p>
 
             <!-- Order Summary -->
             <div class="mt-8 text-left border-t pt-6">
-                <h2 class="text-lg font-semibold" data-i18n="order_summary">Order Summary</h2>
+                <h2 class="text-lg font-semibold" data-i18n="order_summary">
+                    Order Summary
+                </h2>
                 <div id="order-items" class="mt-3 space-y-2">
                     <!-- Dynamically populated -->
                 </div>
@@ -36,7 +42,10 @@
             </div>
 
             <!-- Order ID -->
-            <p id="order-id" class="mt-4 text-sm text-gray-400" data-i18n="order_id">Order ID: Loading...</p>
+            <p class="mt-4 text-sm text-gray-400">
+                <span data-i18n="order_id">Order ID:</span>
+                <span id="order-id">Loading...</span>
+            </p>
 
             <!-- Email notice -->
             <div class="mt-6 rounded-lg bg-gray-50 p-4 text-sm text-gray-600" data-i18n="receipt_sent">
@@ -50,13 +59,7 @@
                     data-i18n="back_to_home">
                     Back to Home
                 </a>
-                <a href="/customer/orders.html"
-                    class="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
-                    data-i18n="view_orders">
-                    View Orders
-                </a>
             </div>
-        </div>
         </div>
     </main>
 
@@ -64,20 +67,21 @@
     <footer class="fixed bottom-0 left-0 right-0 border-t bg-white/95 backdrop-blur">
         <div class="mx-auto flex max-w-5xl items-center justify-between p-5">
             <p class="text-sm text-gray-500">© 2026 Hawker Centre</p>
-            <p class="text-sm text-gray-500" data-i18n="enjoy_your_meal">Enjoy your meal!</p>
+            <p class="text-sm text-gray-500" data-i18n="enjoy_your_meal">
+                Enjoy your meal!
+            </p>
         </div>
     </footer>
 
     <script>
         // Read URL params
         const params = new URLSearchParams(window.location.search);
-        const orderIds = params.get("orderIds");
+        const rawOrderIds = params.get("orderIds");
         const total = params.get("total");
 
-        // Display order ID
-        if (orderIds) {
-            document.getElementById("order-id").textContent =
-                `Order ID: ${orderIds}`;
+        if (rawOrderIds) {
+            const formattedOrderIds = decodeURIComponent(rawOrderIds);
+            document.getElementById("order-id").textContent = formattedOrderIds;
         }
 
         // Display total
