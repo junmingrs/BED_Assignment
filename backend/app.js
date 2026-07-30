@@ -280,12 +280,12 @@ app.get(
 
 app.get(
     "/hawkercentre",
-    authorise("Vendor", "Customer", "Operator"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     hawkerCentreController.getAllHawkerCentres,
 );
 app.get(
     "/hawkercentre/:id",
-    authorise("Vendor", "Customer", "Operator"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     hawkerCentreController.getHawkerCentreById,
 );
 
