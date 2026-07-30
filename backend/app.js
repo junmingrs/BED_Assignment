@@ -25,6 +25,7 @@ const inspectionController = require("./controller/inspectionController");
 const hawkerCentreController = require("./controller/hawkerCentreController");
 const customerController = require("./controller/customerController.js");
 const chatbotController = require("./controller/chatbotController.js");
+const googleCalendarController = require("./controller/googleCalendarController");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -299,6 +300,25 @@ app.get(
 );
 
 app.post("/customer/chatbot/:customerId", authorise("Customer"), chatbotController.chat);
+
+// Google Calendar sync
+app.get("/auth/google", googleCalendarController.connectGoogle);
+app.get("/auth/google/callback", googleCalendarController.googleCallback);
+app.get(
+    "/vendor/calendar/status",
+    authorise("Vendor"),
+    googleCalendarController.getConnectionStatus,
+);
+app.get(
+    "/vendor/calendar/events",
+    authorise("Vendor"),
+    googleCalendarController.getGoogleEvents,
+);
+app.delete(
+    "/vendor/calendar/disconnect",
+    authorise("Vendor"),
+    googleCalendarController.disconnectGoogle,
+);
 
 // Start server
 app.listen(port, () => {

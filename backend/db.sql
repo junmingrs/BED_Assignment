@@ -1,6 +1,7 @@
 USE bed_db;
 GO
 
+DROP TABLE IF EXISTS VendorGoogleToken;
 DROP TABLE IF EXISTS RentalAgreement;
 DROP TABLE IF EXISTS Promotion;
 DROP TABLE IF EXISTS MenuItemCuisine;
@@ -44,6 +45,16 @@ CREATE TABLE Customer
 CREATE TABLE Vendor
 (
     vendor_id UNIQUEIDENTIFIER PRIMARY KEY REFERENCES Account(account_id)
+);
+
+-- NEW: stores each vendor's Google Calendar OAuth tokens
+CREATE TABLE VendorGoogleToken
+(
+    vendor_id UNIQUEIDENTIFIER PRIMARY KEY REFERENCES Vendor(vendor_id),
+    access_token VARCHAR(MAX) NOT NULL,
+    refresh_token VARCHAR(MAX) NULL,
+    token_expiry DATETIME NULL,
+    connected_at DATETIME DEFAULT GETDATE()
 );
 
 CREATE TABLE Operator
@@ -378,4 +389,3 @@ INSERT INTO Promotion
 VALUES
     ('20OFF', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 20, '2026-07-10', '2026-08-01'),
     ('50OFF', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 50, '2026-07-10', '2026-08-01');
-
