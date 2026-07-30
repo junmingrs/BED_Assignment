@@ -21,7 +21,6 @@ const sendPromotion = async (toEmail, promotionData) => {
         return true;
     } catch (e) {
         console.error('Error sending email:', e, toEmail);
-        return false;
     }
 }
 

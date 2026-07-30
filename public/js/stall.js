@@ -73,7 +73,7 @@ async function updateMenuItemLike(like, stallId, itemCode) {
 
 function itemIndexInCart(cart, stallId, itemCode) {
     if (cart[stallId]) {
-        return cart[stallId].items.findIndex((i) => i.itemCode === itemCode);
+        return cart[stallId].items.findIndex((i) => i.itemCode == itemCode);
     }
     return -1;
 }

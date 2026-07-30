@@ -226,6 +226,11 @@ async function renderCartItems() {
 
 async function checkout() {
     const customerId = getIdFromToken(token);
+    if (Object.keys(cartMap).length == 0) {
+        alert("Cannot checkout if there are no items in the cart.");
+        return;
+    }
+
     try {
         const response = await fetch(`/checkout`, {
             method: "POST",
@@ -276,7 +281,9 @@ async function checkout() {
             );
 
             if (getIsGuest(token)) {
-                const guestOrders = JSON.parse(localStorage.getItem(LS_KEYS.createdOrderIds) ?? "[]");
+                const guestOrders = JSON.parse(
+                    localStorage.getItem(LS_KEYS.createdOrderIds) ?? "[]",
+                );
                 const statuses = {};
                 Object.values(data.orderIds).forEach((orderId) => {
                     statuses[orderId] = "Pending";
@@ -288,12 +295,15 @@ async function checkout() {
                     date: new Date().toISOString(),
                     statuses,
                 });
-                localStorage.setItem(LS_KEYS.createdOrderIds, JSON.stringify(guestOrders));
+                localStorage.setItem(
+                    LS_KEYS.createdOrderIds,
+                    JSON.stringify(guestOrders),
+                );
             }
 
-            // 跳转到支付成功页
             const orderIds = Object.values(data.orderIds).join(", ");
-            window.location.href = `/customer/payment-success.html?orderIds=${orderIds}&total=${total}`;
+            const encodedOrderIds = encodeURIComponent(orderIds);
+            window.location.href = `/customer/payment-success.html?orderIds=${encodedOrderIds}&total=${total}`;
             localStorage.setItem(LS_KEYS.cart, "{}");
         } else {
             console.error(data);
@@ -310,7 +320,15 @@ function changeQuality(stallId, itemCode, amount) {
 }
 
 function deleteItem(stallId, itemCode) {
-    cartMap = cartMap[stallId].items.filter((item) => item.itemCode != itemCode);
+    if (!cartMap[stallId]) return;
+
+    cartMap[stallId].items = cartMap[stallId].items.filter(
+        (item) => item.itemCode != itemCode,
+    );
+
+    if (cartMap[stallId].items.length === 0) {
+        delete cartMap[stallId];
+    }
 }
 
 function setEcoOption(stallId, checked) {
