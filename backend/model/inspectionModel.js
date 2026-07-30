@@ -1,6 +1,6 @@
 const { poolPromise } = require("../db");
 
-// get inspections for a stall
+// get inspections for a stall 
 const getInspectionsByStallId = async (stallId) => {
     const pool = await poolPromise;
 
@@ -24,7 +24,7 @@ const getInspectionsByStallId = async (stallId) => {
     return result.recordset;
 };
 
-// create an inspection
+// create an inspection 
 const createInspection = async (stallId, neaId, score, remarks, hygieneGrade) => {
     const pool = await poolPromise;
 
@@ -59,20 +59,19 @@ const createInspection = async (stallId, neaId, score, remarks, hygieneGrade) =>
     return result.recordset[0];
 };
 
-// delete an inspection
-const deleteInspection = async (inspectionId, neaId) => {
+// delete an inspection 
+const deleteInspection = async (inspectionId) => {
     const pool = await poolPromise;
 
     const checkResult = await pool.request()
         .input("inspectionId", inspectionId)
-        .input("neaId", neaId)
         .query(`
             SELECT inspection_id FROM Inspection 
-            WHERE inspection_id = @inspectionId AND nea_id = @neaId
+            WHERE inspection_id = @inspectionId
         `);
 
     if (checkResult.recordset.length === 0) {
-        throw new Error("Inspection not found or you are not authorized to delete it");
+        throw new Error("Inspection not found");
     }
 
     await pool.request()
@@ -82,8 +81,81 @@ const deleteInspection = async (inspectionId, neaId) => {
     return { message: "Inspection deleted successfully" };
 };
 
+// get a single inspection 
+const getInspectionById = async (inspectionId) => {
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+        .input("inspectionId", inspectionId)
+        .query(`
+            SELECT 
+                inspection_id,
+                stall_id,
+                inspection_date,
+                score,
+                remarks,
+                hygiene_grade
+            FROM Inspection
+            WHERE inspection_id = @inspectionId
+        `);
+
+    if (result.recordset.length === 0) return null;
+    return result.recordset[0];
+};
+
+// update an inspection 
+const updateInspection = async (inspectionId, updateData) => {
+    const { score, remarks, hygiene_grade } = updateData;
+    const pool = await poolPromise;
+
+    let updateQuery = "UPDATE Inspection SET ";
+    const updates = [];
+    const request = pool.request();
+    request.input("inspectionId", inspectionId);
+
+    if (score !== undefined) {
+        updates.push("score = @score");
+        request.input("score", score);
+    }
+    if (remarks !== undefined) {
+        updates.push("remarks = @remarks");
+        request.input("remarks", remarks || null);
+    }
+    if (hygiene_grade !== undefined) {
+        updates.push("hygiene_grade = @hygiene_grade");
+        request.input("hygiene_grade", hygiene_grade);
+    }
+
+    if (updates.length === 0) {
+        throw new Error("No fields to update");
+    }
+
+    updateQuery += updates.join(", ");
+    updateQuery += " WHERE inspection_id = @inspectionId";
+
+    await request.query(updateQuery);
+
+    const result = await pool.request()
+        .input("inspectionId", inspectionId)
+        .query(`
+            SELECT 
+                inspection_id,
+                stall_id,
+                inspection_date,
+                score,
+                remarks,
+                hygiene_grade
+            FROM Inspection
+            WHERE inspection_id = @inspectionId
+        `);
+
+    return result.recordset[0];
+};
+
 module.exports = {
     getInspectionsByStallId,
     createInspection,
-    deleteInspection
+    deleteInspection,      
+    getInspectionById,
+    updateInspection
 };

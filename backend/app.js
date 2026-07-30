@@ -141,7 +141,7 @@ app.delete(
 
 app.get(
     "/stalls",
-    authorise("Vendor", "Customer", "Operator"),
+    authorise("Vendor", "Customer", "Operator","NEA"),
     stallController.getAllStalls,
 );
 
@@ -172,78 +172,91 @@ app.get(
     stallController.getStallIdByVendorId,
 );
 
-// GET /stalls/:stallId/ratings - get ratings for a stall
+// get ratings for a stall
 app.get(
     "/stalls/:stallId/ratings",
     authorise("Vendor", "Customer", "Operator"),
     ratingController.getRatings,
 );
 
-// POST /stalls/:stallId/ratings - submit a rating
+//  submit a rating
 app.post(
     "/stalls/:stallId/ratings",
     authorise("Customer"),
     ratingController.submitRating,
 );
-// DELETE /ratings/:ratingId - delete a rating
+//  delete a rating
 app.delete(
     "/ratings/:ratingId",
     authorise("Customer"),
     ratingController.deleteRating,
 );
 
-// GET /stalls/:stallId/complaints - get complaints for a stall
+// get complaints for a stall
 app.get(
     "/stalls/:stallId/complaints",
-    authorise("Vendor", "Customer", "Operator"),
+    authorise("Vendor", "Customer", "Operator","NEA"),
     complaintController.getComplaints,
 );
 
-// POST /stalls/:stallId/complaints - submit a complaint
+//  submit a complaint
 app.post(
     "/stalls/:stallId/complaints",
     authorise("Customer"),
     complaintController.submitComplaint,
 );
-// DELETE /complaints/:complaintId - delete a complaint
+//  delete a complaint
 app.delete(
     "/complaints/:complaintId",
     authorise("Customer"),
     complaintController.deleteComplaint,
 );
-// GET /stalls/:stallId/feedback - get feedbacks for a stall
+//  get feedbacks for a stall
 app.get(
     "/stalls/:stallId/feedback",
     authorise("Vendor", "Customer", "Operator"),
     feedbackController.getFeedback,
 );
-// POST /stalls/:stallId/feedback - submit feedback(only by customer)
+// submit feedback(only by customer)
 app.post(
     "/stalls/:stallId/feedback",
     authorise("Customer"),
     feedbackController.submitFeedback,
 );
-// DELETE /feedback/:feedbackId - delete a feedback
+// delete a feedback
 app.delete(
     "/feedback/:feedbackId",
     authorise("Customer"),
     feedbackController.deleteFeedback,
 );
-// GET /stalls/:stallId/inspections - get inspections for a stall
+// get inspections for a stall
 app.get(
     "/stalls/:stallId/inspections",
     authorise("NEA", "Vendor", "Operator"),
     inspectionController.getInspections,
 );
 
-// POST /stalls/:stallId/inspections - create an inspection (NEA only)
+// create an inspection (NEA only)
 app.post(
     "/stalls/:stallId/inspections",
     authorise("NEA"),
     inspectionController.createInspection,
 );
+// get a single inspection (NEA only)
+app.get(
+    "/inspections/:inspectionId",
+    authorise("NEA"),
+    inspectionController.getInspectionById
+);
 
-// DELETE /inspections/:inspectionId - delete an inspection (NEA only)
+// add an inspection (NEA only)
+app.put(
+    "/inspections/:inspectionId",
+    authorise("NEA"),
+    inspectionController.updateInspection
+);
+
+// delete an inspection (NEA only)
 app.delete(
     "/inspections/:inspectionId",
     authorise("NEA"),
@@ -280,12 +293,12 @@ app.get(
 
 app.get(
     "/hawkercentre",
-    authorise("Vendor", "Customer", "Operator"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     hawkerCentreController.getAllHawkerCentres,
 );
 app.get(
     "/hawkercentre/:id",
-    authorise("Vendor", "Customer", "Operator"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     hawkerCentreController.getHawkerCentreById,
 );
 
