@@ -1,10 +1,11 @@
 const { Ollama } = require("ollama");
 const { poolPromise } = require("../db");
 const { getAllHawkerCentres } = require("./hawkerCentreModel.js");
+const { getAllCuisines } = require("./menuItemModel.js");
 
 async function getRelevantContext() {
     const pool = await poolPromise;
-    const ctx = { hawkerCentres: [], stalls: [], popularItems: [], menuItems: [] };
+    const ctx = { hawkerCentres: [], stalls: [], popularItems: [], menuItems: [], cuisines: [] };
     const hawkerResult = await getAllHawkerCentres();
     ctx.hawkerCentres = hawkerResult;
     const stallsResult = await pool.request().query(`
@@ -32,6 +33,8 @@ async function getRelevantContext() {
         FROM MenuItem mi
     `);
     ctx.menuItems = menuResult.recordset;
+    const cuisineResult = await getAllCuisines();
+    ctx.cuisines = cuisineResult;
     return ctx;
 }
 
@@ -44,6 +47,8 @@ async function getChatResponse(history, context) {
         ${JSON.stringify(context.stalls, null, 2)}
         ALL MENU ITEMS:
         ${JSON.stringify(context.menuItems, null, 2)}
+        ALL CUISINES ITEMS:
+        ${JSON.stringify(context.cuisines, null, 2)}
         MOST POPULAR ITEMS:
         ${JSON.stringify(context.popularItems, null, 2)}
         GUIDELINES:
@@ -85,13 +90,12 @@ async function getChatResponse(history, context) {
                 const parsed = JSON.parse(jsonMatch[1].trim());
                 actions = parsed.actions || [];
             } catch (e) {
-                console.error("Failed to parse action JSON:", e);
+                // console.error("Failed to parse action JSON:", e);
             }
             reply = rawContent.replace(/```json\n?[\s\S]*?```/, "").trim();
         }
         return { reply, actions };
     } catch (err) {
-        console.error("Error in chat response:", err);
         return {
             reply: "Sorry, I'm having trouble connecting. Please try again later.",
             actions: [],

@@ -5,7 +5,7 @@ async function getAllMenuItems(req, res) {
         const menuItems = await menuItemModel.getAllMenuItems();
         return res.json(menuItems);
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res.status(500).json({ message: "Error retrieving menu items" });
     }
 }
@@ -16,7 +16,7 @@ async function getMenuItemsByStallId(req, res) {
         const menuItems = await menuItemModel.getMenuItemsByStallId(stallId);
         return res.status(201).json(menuItems);
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res.status(500).json({ message: "Error retrieving menu items in stall" });
     }
 }
@@ -33,7 +33,7 @@ async function getMenuItemsByStallIdAndItemCode(req, res) {
         }
         return res.json(menuItem);
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res
             .status(500)
             .json({ message: "Error retrieving specific menu item in stall" });
@@ -95,7 +95,7 @@ async function updateMenuItem(req, res) {
         const updatedMenuItem = await menuItemModel.updateMenuItem(menuItem);
         return res.status(201).json(updatedMenuItem);
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res.status(500).json({ message: "Error updating menu item" });
     }
 }
@@ -110,7 +110,7 @@ async function deleteMenuItem(req, res) {
         }
         return res.status(201).json({ success: "true" });
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res.status(500).json({ message: "Error deleting menu item" });
     }
 }
@@ -124,7 +124,7 @@ async function getMenuItemLikeByCustomer(req, res) {
         }
         return res.json(menuItemLike);
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res
             .status(500)
             .json({ message: "Error retrieving menu item likes by customer" });
@@ -138,7 +138,7 @@ async function createMenuItemLike(req, res) {
         const newMenuItemLike = await menuItemModel.createMenuItemLike(stallId, itemCode, customerId);
         return res.status(201).json(newMenuItemLike);
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res.status(500).json({ message: "Error creating menu item" });
     }
 }
@@ -151,7 +151,7 @@ async function deleteMenuItemLike(req, res) {
         await menuItemModel.deleteMenuItemLike(stallId, itemCode, customerId);
         return res.status(201).json({ success: true });
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res.status(500).json({ message: "Error deleting menu item" });
     }
 }
@@ -162,7 +162,7 @@ async function getMenuItemCuisine(req, res) {
         const cuisines = await menuItemModel.getMenuItemCuisine(stallId, itemCode);
         return res.status(201).json({ cuisines });
     } catch (error) {
-        console.error("Controller error:", error);
+        // console.error("Controller error:", error);
         return res.status(500).json({ message: "Error getting cuisines for menu item" });
     }
 }
