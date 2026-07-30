@@ -5,6 +5,7 @@ async function loadHawkerCentres() {
     const container = document.getElementById('hawker-container');
 
     try {
+        // 1. 获取所有 hawker centres
         const hcRes = await fetch('/hawkercentre', {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -16,22 +17,15 @@ async function loadHawkerCentres() {
             return;
         }
 
-        const stallRes = await fetch('/stalls', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const allStalls = await stallRes.json();
-
-        const hcMap = {};
-        hawkerCentres.forEach(hc => {
-            hcMap[hc.hawker_centre_id] = {
-                ...hc,
-                stalls: allStalls.filter(s => s.hawker_centre_id === hc.hawker_centre_id)
-            };
-        });
-
+        // 2. 对每个 hawker centre，调用详情接口获取 stalls
         let html = '';
-        hawkerCentres.forEach(hc => {
-            const stalls = hcMap[hc.hawker_centre_id]?.stalls || [];
+        for (const hc of hawkerCentres) {
+            const detailRes = await fetch(`/hawkercentre/${hc.hawker_centre_id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const detail = await detailRes.json();
+            const stalls = detail.stalls || [];
+
             const stallList = stalls.length > 0
                 ? stalls.map(s => `<li class="text-sm text-gray-600">${s.stall_name} (${s.stall_unit_no || '-'})</li>`).join('')
                 : '<li class="text-sm text-gray-400">No stalls</li>';
@@ -48,7 +42,7 @@ async function loadHawkerCentres() {
                     </div>
                 </div>
             `;
-        });
+        }
 
         container.innerHTML = html;
 

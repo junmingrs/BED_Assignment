@@ -57,20 +57,24 @@ function renderComplaints(complaints) {
     const container = document.getElementById('complaint-container');
 
     if (complaints.length === 0) {
-        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-8">No complaints found.</p>';
+        container.innerHTML = `
+            <div class="text-center py-8">
+                <p class="text-sm text-gray-400">No complaints found.</p>
+            </div>
+        `;
         return;
     }
 
     let html = `
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm table-fixed">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stall</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="w-[15%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stall</th>
+                        <th class="w-[18%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                        <th class="w-[35%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="w-[15%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="w-[12%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -87,15 +91,15 @@ function renderComplaints(complaints) {
 
         html += `
             <tr class="border-b hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 font-medium text-gray-800">${c.stall_name}</td>
-                <td class="px-4 py-3 text-gray-700 max-w-xs truncate">${c.subject}</td>
-                <td class="px-4 py-3 text-gray-600 max-w-xs truncate">${c.description || '-'}</td>
-                <td class="px-4 py-3">
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold ${statusStyle}">
+                <td class="px-3 py-2 font-medium text-gray-800 break-words">${c.stall_name}</td>
+                <td class="px-3 py-2 text-gray-700 break-words">${c.subject}</td>
+                <td class="px-3 py-2 text-gray-600 break-words">${c.description || '-'}</td>
+                <td class="px-3 py-2">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold ${statusStyle}">
                         ${c.status}
                     </span>
                 </td>
-                <td class="px-4 py-3 text-gray-500">${date}</td>
+                <td class="px-3 py-2 text-gray-500">${date}</td>
             </tr>
         `;
     });

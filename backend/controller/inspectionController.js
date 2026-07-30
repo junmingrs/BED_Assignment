@@ -20,7 +20,6 @@ const createInspection = async (req, res) => {
         const { score, remarks, hygiene_grade } = req.body;
         const neaId = req.user.id;
 
-        // Validation
         if (score === undefined || !hygiene_grade) {
             return res.status(400).json({ 
                 error: "Missing required fields: score, hygiene_grade" 
@@ -68,12 +67,91 @@ const createInspection = async (req, res) => {
 const deleteInspection = async (req, res) => {
     try {
         const { inspectionId } = req.params;
-        const neaId = req.user.id;
 
-        const result = await inspectionModel.deleteInspection(inspectionId, neaId);
+        const result = await inspectionModel.deleteInspection(inspectionId);
         res.status(200).json(result);
     } catch (error) {
         console.error("Error in deleteInspection:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+// get a single inspection by inspectionid
+const getInspectionById = async (req, res) => {
+    try {
+        const { inspectionId } = req.params;
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input("inspectionId", inspectionId)
+            .query(`
+                SELECT 
+                    i.inspection_id,
+                    i.stall_id,
+                    i.inspection_date,
+                    i.score,
+                    i.remarks,
+                    i.hygiene_grade
+                FROM Inspection i
+                WHERE i.inspection_id = @inspectionId
+            `);
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ error: "Inspection not found" });
+        }
+
+        res.status(200).json(result.recordset[0]);
+    } catch (error) {
+        console.error("Error in getInspectionById:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// add an inspection by id
+const updateInspection = async (req, res) => {
+    try {
+        const { inspectionId } = req.params;
+        const { score, remarks, hygiene_grade } = req.body;
+        const neaId = req.user.id;
+
+        const pool = await poolPromise;
+
+        const checkResult = await pool.request()
+            .input("inspectionId", inspectionId)
+            .query("SELECT * FROM Inspection WHERE inspection_id = @inspectionId");
+
+        if (checkResult.recordset.length === 0) {
+            return res.status(404).json({ error: "Inspection not found" });
+        }
+
+        await pool.request()
+            .input("inspectionId", inspectionId)
+            .input("score", score)
+            .input("remarks", remarks || null)
+            .input("hygiene_grade", hygiene_grade)
+            .query(`
+                UPDATE Inspection
+                SET score = @score,
+                    remarks = @remarks,
+                    hygiene_grade = @hygiene_grade
+                WHERE inspection_id = @inspectionId
+            `);
+
+        const result = await pool.request()
+            .input("inspectionId", inspectionId)
+            .query(`
+                SELECT 
+                    inspection_id,
+                    stall_id,
+                    inspection_date,
+                    score,
+                    remarks,
+                    hygiene_grade
+                FROM Inspection
+                WHERE inspection_id = @inspectionId
+            `);
+
+        res.status(200).json(result.recordset[0]);
+    } catch (error) {
+        console.error("Error in updateInspection:", error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -81,5 +159,7 @@ const deleteInspection = async (req, res) => {
 module.exports = {
     getInspections,
     createInspection,
-    deleteInspection
+    deleteInspection,
+    getInspectionById,
+    updateInspection
 };
