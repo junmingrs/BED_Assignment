@@ -14,6 +14,7 @@ const swaggerDocument = require("./swagger-output.json");
 const accountController = require("./controller/accountController");
 const menuItemController = require("./controller/menuItemController");
 const orderController = require("./controller/orderController");
+const emailController = require("./controller/emailController");
 const stallController = require("./controller/stallController");
 const promotionController = require("./controller/promotionController");
 const rentalAgreementController = require("./controller/rentalAgreementController");
@@ -261,6 +262,12 @@ app.delete(
     "/inspections/:inspectionId",
     authorise("NEA"),
     inspectionController.deleteInspection,
+);
+// send email 
+app.post(
+    "/send-receipt",
+    authorise("Customer"),
+    emailController.sendReceiptEmail
 );
 
 // Stall Analytics
