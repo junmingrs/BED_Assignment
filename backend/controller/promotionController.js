@@ -4,7 +4,7 @@ const accountModel = require("../model/accountModel.js");
 const stallModel = require("../model/stallModel.js");
 const hawkerCentreModel = require("../model/hawkerCentreModel.js");
 const menuItemModel = require("../model/menuItemModel.js");
-const email = require("../config/email.js");
+const email = require("../model/emailModel.js");
 
 async function getAllPromotions(req, res) {
     try {

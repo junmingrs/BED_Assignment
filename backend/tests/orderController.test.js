@@ -7,7 +7,7 @@ const {
 } = require("../controller/orderController");
 const orderModel = require("../model/orderModel");
 const { broadcast } = require("../ws");
-const { sendReceipt } = require("../config/email");
+const { sendReceipt } = require("../model/emailModel");
 const crypto = require("crypto");
 const { wsMessages } = require("../../public/js/const");
 
@@ -17,7 +17,7 @@ jest.mock("../ws", () => ({
     broadcast: jest.fn(),
 }));
 
-jest.mock("../config/email.js", () => ({
+jest.mock("../email.js", () => ({
     sendReceipt: jest.fn().mockResolvedValue(true),
 }));
 
