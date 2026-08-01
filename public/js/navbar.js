@@ -24,6 +24,7 @@ const NAV_ITEMS = {
         { name: "Home", href: "/vendor/", align: "left" },
         { name: "Orders", href: "/vendor/orders.html", align: "left" },
         { name: "Analytics", href: "/vendor/analytics.html", align: "left" },
+        { name: "Calendar", href: "/vendor/calendar.html", align: "left" },
         { name: "Menu", href: "/vendor/menuitem.html", align: "right" },
         { name: "Stall", href: "/vendor/stall.html", align: "right" },
     ],

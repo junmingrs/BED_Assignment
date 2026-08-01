@@ -26,6 +26,7 @@ const hawkerCentreController = require("./controller/hawkerCentreController");
 const customerController = require("./controller/customerController.js");
 const chatbotController = require("./controller/chatbotController.js");
 const googleCalendarController = require("./controller/googleCalendarController");
+const inspectionSchedulingController = require("./controller/inspectionSchedulingController");
 const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
@@ -331,6 +332,22 @@ app.delete(
     "/vendor/calendar/disconnect",
     authorise("Vendor"),
     googleCalendarController.disconnectGoogle,
+);
+
+app.post(
+    "/stalls/:stallId/inspections/schedule",
+    authorise("NEA"),
+    inspectionSchedulingController.scheduleInspection,
+);
+app.patch(
+    "/inspections/:inspectionId/complete",
+    authorise("NEA"),
+    inspectionSchedulingController.completeInspection,
+);
+app.get(
+    "/stalls/:stallId/inspections/scheduled",
+    authorise("Vendor", "NEA", "Operator"),
+    inspectionSchedulingController.getScheduledInspections,
 );
 
 // Start server

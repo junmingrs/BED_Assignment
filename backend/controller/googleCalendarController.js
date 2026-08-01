@@ -89,22 +89,40 @@ const getGoogleEvents = async (req, res) => {
 
         const calendar = google.calendar({ version: "v3", auth: client });
 
-        const response = await calendar.events.list({
-            calendarId: "primary",
-            timeMin: new Date().toISOString(),
-            maxResults: 50,
-            singleEvents: true,
-            orderBy: "startTime",
-        });
+        // get every calendar this account has access to (not just "primary")
+        const calendarListResponse = await calendar.calendarList.list();
+        const calendarIds = (calendarListResponse.data.items || []).map((cal) => cal.id);
 
-        const events = (response.data.items || []).map((event) => ({
-            id: event.id,
-            title: event.summary || "(No title)",
-            start: event.start?.dateTime || event.start?.date,
-            end: event.end?.dateTime || event.end?.date,
-            description: event.description || "",
-            source: "google",
-        }));
+        // fetch events from each calendar in parallel, then merge
+        const eventsPerCalendar = await Promise.all(
+            calendarIds.map((calendarId) =>
+                calendar.events
+                    .list({
+                        calendarId,
+                        timeMin: new Date().toISOString(),
+                        maxResults: 50,
+                        singleEvents: true,
+                        orderBy: "startTime",
+                    })
+                    .then((res) => res.data.items || [])
+                    .catch((err) => {
+                        console.error(`Failed to fetch events for calendar ${calendarId}:`, err.message);
+                        return []; // skip calendars that fail (e.g. no access) rather than failing the whole request
+                    })
+            )
+        );
+
+        const events = eventsPerCalendar
+            .flat()
+            .map((event) => ({
+                id: event.id,
+                title: event.summary || "(No title)",
+                start: event.start?.dateTime || event.start?.date,
+                end: event.end?.dateTime || event.end?.date,
+                description: event.description || "",
+                source: "google",
+            }))
+            .sort((a, b) => new Date(a.start) - new Date(b.start));
 
         res.status(200).json(events);
     } catch (err) {

@@ -230,6 +230,7 @@ VALUES
     ('A0000005-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'siti@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
     ('A0000006-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'ah_hock@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
     ('A0000007-AAAA-AAAA-AAAA-AAAAAAAAAAAA', 'grace@email.com', '$2b$10$8rFbEh89PiH8zM34KJcut.jie1VXPZw7MvBxO2nWrd6nKzOuyikr6', 'Vendor'),
+    ('67015C02-FC28-435B-94F6-C5D13C0442FE', 'mq07110@gmail.com', '$2b$10$EBm4Q2utwC.sgsoN67zclugBD3CnMOHKm6Sz9etvJ4Y6wKhnWTQ.2', 'Vendor'),
     ('B0000001-BBBB-BBBB-BBBB-BBBBBBBBBBBB', 'operator2@email.com', '$2b$10$7JAl8APklPKi/49gSRhbe.Pdtf8bLzTSJzZoODzRJztw1I4Ys4YDS', 'Operator'),
     ('B0000002-BBBB-BBBB-BBBB-BBBBBBBBBBBB', 'operator3@email.com', '$2b$10$7JAl8APklPKi/49gSRhbe.Pdtf8bLzTSJzZoODzRJztw1I4Ys4YDS', 'Operator');
 
@@ -237,7 +238,7 @@ INSERT INTO Customer
     (customer_id, customer_name, loyalty_points)
 VALUES
     ('11111111-1111-1111-1111-111111111111', 'Alice Tan', 0),
-    ('22222222-2222-2222-2222-222222222222', 'Ben Lee', 0);
+    ('22222222-2222-2222-2222-222222222222', 'Ben Lee', 0)
 
 INSERT INTO Vendor
     (vendor_id)
@@ -250,6 +251,7 @@ VALUES
     ('A0000004-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
     ('A0000005-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
     ('A0000006-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+    ('67015C02-FC28-435B-94F6-C5D13C0442FE'),
     ('A0000007-AAAA-AAAA-AAAA-AAAAAAAAAAAA');
 
 INSERT INTO Operator
