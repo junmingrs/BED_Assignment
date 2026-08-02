@@ -130,9 +130,9 @@ async function checkoutCart(req, res) {
             const allItems = [];
             let totalAmount = 0;
 
-            for (const stallId of Object.keys(cartMap)) {
-                const items = cartMap[stallId].items;
-                const isEco = cartMap[stallId].isEco || false;
+            for (const stallId of Object.keys(cart)) {
+                const items = cart[stallId].items;
+                const isEco = cart[stallId].isEco || false;
                 let stallTotal = 0;
 
                 for (const item of items) {
