@@ -1,15 +1,18 @@
+// hawkerCentreController.test.js
 const {
     getAllHawkerCentres,
     getHawkerCentreById,
 } = require("../controller/hawkerCentreController");
 const hawkerCentreModel = require("../model/hawkerCentreModel");
 
-// Mock dependencies
+jest.mock("../db", () => ({
+    poolPromise: Promise.resolve({}),
+}));
 jest.mock("../model/hawkerCentreModel");
 
 // Mock console.error
 beforeAll(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
@@ -52,12 +55,16 @@ describe("hawkerCentreController Unit Tests", () => {
 
         test("should return all hawker centres for non-Operator user", async () => {
             req.user.role = "Customer";
-            hawkerCentreModel.getAllHawkerCentres.mockResolvedValue(mockHawkerCentres);
+            hawkerCentreModel.getAllHawkerCentres.mockResolvedValue(
+                mockHawkerCentres,
+            );
 
             await getAllHawkerCentres(req, res);
 
             expect(hawkerCentreModel.getAllHawkerCentres).toHaveBeenCalled();
-            expect(hawkerCentreModel.getHawkerCentresByOperatorId).not.toHaveBeenCalled();
+            expect(
+                hawkerCentreModel.getHawkerCentresByOperatorId,
+            ).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(mockHawkerCentres);
         });
@@ -66,12 +73,18 @@ describe("hawkerCentreController Unit Tests", () => {
             req.user.role = "Operator";
             req.user.id = "op_1";
             const mockOperatorCentres = [mockHawkerCentres[0]];
-            hawkerCentreModel.getHawkerCentresByOperatorId.mockResolvedValue(mockOperatorCentres);
+            hawkerCentreModel.getHawkerCentresByOperatorId.mockResolvedValue(
+                mockOperatorCentres,
+            );
 
             await getAllHawkerCentres(req, res);
 
-            expect(hawkerCentreModel.getHawkerCentresByOperatorId).toHaveBeenCalledWith("op_1");
-            expect(hawkerCentreModel.getAllHawkerCentres).not.toHaveBeenCalled();
+            expect(
+                hawkerCentreModel.getHawkerCentresByOperatorId,
+            ).toHaveBeenCalledWith("op_1");
+            expect(
+                hawkerCentreModel.getAllHawkerCentres,
+            ).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(mockOperatorCentres);
         });
@@ -111,19 +124,33 @@ describe("hawkerCentreController Unit Tests", () => {
             operator_id: "op_1",
         };
         const mockStalls = [
-            { stall_id: "stall_A", stall_name: "Kim Kitchen", stall_unit_no: "#01-01" },
-            { stall_id: "stall_B", stall_name: "Sakura Sushi", stall_unit_no: "#01-02" },
+            {
+                stall_id: "stall_A",
+                stall_name: "Kim Kitchen",
+                stall_unit_no: "#01-01",
+            },
+            {
+                stall_id: "stall_B",
+                stall_name: "Sakura Sushi",
+                stall_unit_no: "#01-02",
+            },
         ];
 
         test("should return hawker centre with stalls successfully", async () => {
             req.params.id = "hc_1";
             hawkerCentreModel.getHawkerCentreById.mockResolvedValue(mockCentre);
-            hawkerCentreModel.getStallsByHawkerCentreId.mockResolvedValue(mockStalls);
+            hawkerCentreModel.getStallsByHawkerCentreId.mockResolvedValue(
+                mockStalls,
+            );
 
             await getHawkerCentreById(req, res);
 
-            expect(hawkerCentreModel.getHawkerCentreById).toHaveBeenCalledWith("hc_1");
-            expect(hawkerCentreModel.getStallsByHawkerCentreId).toHaveBeenCalledWith("hc_1");
+            expect(hawkerCentreModel.getHawkerCentreById).toHaveBeenCalledWith(
+                "hc_1",
+            );
+            expect(
+                hawkerCentreModel.getStallsByHawkerCentreId,
+            ).toHaveBeenCalledWith("hc_1");
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 ...mockCentre,
@@ -137,7 +164,9 @@ describe("hawkerCentreController Unit Tests", () => {
 
             await getHawkerCentreById(req, res);
 
-            expect(hawkerCentreModel.getStallsByHawkerCentreId).not.toHaveBeenCalled();
+            expect(
+                hawkerCentreModel.getStallsByHawkerCentreId,
+            ).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({
                 error: "Hawker centre not found",
