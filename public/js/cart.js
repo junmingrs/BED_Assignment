@@ -108,7 +108,7 @@ async function renderCartItems() {
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
             const stallInfo = await getStallInfo(stallId);
-            const stallName = stallInfo.stall.stall_name;
+            const stallName = stallInfo.stall_name;
             const stallItems = cartMap[stallId].items;
             const isEco = cartMap[stallId].isEco === true;
 
@@ -230,8 +230,7 @@ async function renderCartItems() {
 
     // display promo
     if (Object.keys(cartMap).length > 0) {
-        console.log(promotionContainer.classList)
-        promotionContainer.classList.remove("hidden!")
+        promotionContainer.classList.remove("hidden!");
     }
 }
 
@@ -345,7 +344,7 @@ function deleteItem(stallId, itemCode) {
         delete cartMap[stallId];
     }
     if (Object.keys(cartMap).length === 0) {
-        promotionContainer.classList.add("hidden!")
+        promotionContainer.classList.add("hidden!");
     }
 }
 

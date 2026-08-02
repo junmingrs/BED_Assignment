@@ -21,7 +21,7 @@ async function fetchCustomer() {
         const data = await response.json();
         return data;
     } catch (e) {
-        console.log(e);
+        console.error("Error: ", e)
     }
 }
 
@@ -30,7 +30,8 @@ signoutBtn.addEventListener("click", signOut);
 const isGuest = getIsGuest(token);
 if (isGuest) {
     profile.classList.add("hidden");
-    signoutBtn.innerText = "Login";
+    signoutBtn.setAttribute("data-i18n", "login_btn");
+    signoutBtn.textContent = t("login_btn");
 } else {
     const [customer, account] = await Promise.all([
         fetchCustomer(),

@@ -121,6 +121,7 @@ const translations = {
         name_label: 'Name:',
         points_label: 'Points:',
         sign_out: 'Sign Out',
+        login_btn: 'Login',
 
         // stall.html 
         menu_items: 'Menu Items',
@@ -269,6 +270,7 @@ const translations = {
         name_label: '姓名：',
         points_label: '积分：',
         sign_out: '登出',
+        login_btn: '登录',
 
         // stall.html
         menu_items: '菜单',
