@@ -222,6 +222,12 @@ async function renderCartItems() {
     }
 
     cartTotal.textContent = "$" + totalAmount.toFixed(2);
+
+    // display promo
+    if (Object.keys(cartMap).length > 0) {
+        console.log(promotionContainer.classList)
+        promotionContainer.classList.remove("hidden!")
+    }
 }
 
 async function checkout() {
@@ -328,6 +334,9 @@ function deleteItem(stallId, itemCode) {
 
     if (cartMap[stallId].items.length === 0) {
         delete cartMap[stallId];
+    }
+    if (Object.keys(cartMap).length === 0) {
+        promotionContainer.classList.add("hidden!")
     }
 }
 

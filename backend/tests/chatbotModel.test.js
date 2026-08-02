@@ -1,6 +1,7 @@
 const { Ollama } = require("ollama");
 const { poolPromise } = require("../db");
 const { getAllHawkerCentres } = require("../model/hawkerCentreModel");
+const { getAllCuisines } = require("../model/menuItemModel");
 const chatbotModel = require("../model/chatbotModel");
 
 jest.mock("../db", () => ({
@@ -13,6 +14,10 @@ jest.mock("../db", () => ({
 
 jest.mock("../model/hawkerCentreModel", () => ({
     getAllHawkerCentres: jest.fn(),
+}));
+
+jest.mock("../model/menuItemModel", () => ({
+    getAllCuisines: jest.fn(),
 }));
 
 const mockChat = jest.fn();
@@ -32,8 +37,10 @@ describe("chatbotModel.getRelevantContext", () => {
         const mockStalls = [{ stall_id: "1", stall_name: "Best Stall", avg_rating: 4.5 }];
         const mockPopularItems = [{ item_name: "Chicken Rice", total_ordered: 50 }];
         const mockMenuItems = [{ stall_id: "1", item_code: "A1", item_desc: "Chicken Rice" }];
+        const mockCuisines = [{ cuisine_name: "Chinese" }];
 
         getAllHawkerCentres.mockResolvedValue(mockHawkerCentres);
+        getAllCuisines.mockResolvedValue(mockCuisines);
 
         const mockPool = await poolPromise;
         mockPool.request.mockReturnValue({
@@ -50,6 +57,7 @@ describe("chatbotModel.getRelevantContext", () => {
         expect(ctx.stalls).toEqual(mockStalls);
         expect(ctx.popularItems).toEqual(mockPopularItems);
         expect(ctx.menuItems).toEqual(mockMenuItems);
+        expect(ctx.cuisines).toEqual(mockCuisines);
     });
 
     it("should handle errors from hawker centre model", async () => {

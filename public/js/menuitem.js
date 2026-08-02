@@ -19,6 +19,7 @@ const editDialogRef = document.getElementById("editDialog");
 const deleteDialogRef = document.getElementById("deleteDialog");
 const editNameInputRef = document.getElementById("editNameInput");
 const editPriceInputRef = document.getElementById("editPriceInput");
+const editCategoryInputRef = document.getElementById("editCategorySelect");
 const editFormRef = document.getElementById("editForm");
 const editCancelBtnRef = document.getElementById("editCancelBtn");
 const editMsgRef = document.getElementById("editMsg");
@@ -254,6 +255,7 @@ const displayEditDialog = async (item) => {
         "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs";
     editNameInputRef.value = item.item_desc;
     editPriceInputRef.value = item.item_price.toFixed(2);
+    editCategoryInputRef.value = item.item_category;
     editMsgRef.classList.add("hidden");
 
     editImagePreviewRef.classList.add("hidden");
@@ -321,6 +323,7 @@ const displayEditDialog = async (item) => {
         e.preventDefault();
         item.item_desc = editNameInputRef.value;
         item.item_price = parseFloat(editPriceInputRef.value);
+        item.item_category = editCategoryInputRef.value;
         item.item_image = editImageInputRef.files.length > 0 ? editImagePreviewRef.src : (item.item_image || null);
 
         const editCuisineInputFieldRefs = document.querySelectorAll(".editCuisineInputField");
@@ -333,9 +336,14 @@ const displayEditDialog = async (item) => {
         });
 
         const data = await updateItem(item, cuisines);
-        if (data) {
-            editMsgRef.classList.remove("hidden");
+        if (data && data.message) {
+            editMsgRef.innerText = data.message;
+            editMsgRef.className = "text-red-600";
+            return;
         }
+        editMsgRef.innerText = "Edit successful";
+        editMsgRef.className = "text-green-600";
+        editDialogRef.classList.add("hidden");
         loadMenuItems();
     };
 
@@ -345,7 +353,6 @@ const displayEditDialog = async (item) => {
     };
 };
 const displayDeleteDialog = (item) => {
-    // TODO: needs testing
     deleteDialogRef.className =
         "absolute flex inset-0 h-screen items-center justify-center backdrop-blur-xs";
     deleteNameRef.innerText = `Name: ${item.item_desc}`;
@@ -621,17 +628,6 @@ async function setup() {
     });
     addFormRef.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const fields = {
-            name: addNameInputRef.value,
-            price: addPriceInputRef.valueAsNumber,
-            category: addCategoryInputRef.value
-        }
-        const isValid = validateMenuItem(fields);
-        if (isValid != true) {
-            addMsgRef.innerText = isValid;
-            addMsgRef.className = "text-red-600";
-            return;
-        }
         const addCuisineInputFieldRef = document.querySelectorAll(".addCuisineInputField");
         const item = {
             stall_id: stallId,
@@ -643,12 +639,18 @@ async function setup() {
         let cuisines = [];
         addCuisineInputFieldRef.forEach(field => {
             const input = field.querySelector("input");
-            cuisines.push(input.value);
+            if (input && input.value.trim() !== "") {
+                cuisines.push(input.value.trim());
+            }
         });
         const data = await createItem(item, cuisines);
-        if (data) {
-            addMsgRef.classList = "text-green-600";
+        if (data && data.message) {
+            addMsgRef.innerText = data.message;
+            addMsgRef.className = "text-red-600";
+            return;
         }
+        addMsgRef.innerText = "Add successful";
+        addMsgRef.className = "text-green-600";
         addDialogRef.classList.add("hidden");
         loadMenuItems();
     });
@@ -721,27 +723,5 @@ async function loadMenuItems() {
         createCard(item, promos)
     })
 }
-
-function validateMenuItem(fields) {
-    if (fields.name == null || fields.name == "") {
-        return "Name cannot be empty";
-    }
-    if (fields.price < 0 || Number.isNaN(fields.price)) {
-        return "Price cannot be negative";
-    }
-    if (fields.category == null || fields.category == "") {
-        return "Category cannot be empty";
-    }
-    const addCuisineInputFieldRef = document.querySelectorAll(".addCuisineInputField");
-    let validatedCuisine = true;
-    addCuisineInputFieldRef.forEach(field => {
-        const input = field.querySelector('input');
-        if (!input || input.value.trim() === "") {
-            validatedCuisine = false;
-        }
-    });
-    return validatedCuisine ? true : "Cuisine name cannot be empty";
-}
-
 
 await setup();

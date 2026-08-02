@@ -30,8 +30,11 @@ const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
     validateLogin,
-    authenticateToken,
 } = require("./middleware/validate");
+const {
+    validateMenuItemCreate,
+    validateMenuItemUpdate,
+} = require("./middleware/menuItemValidation");
 
 // Create Express app
 const app = express();
@@ -57,8 +60,18 @@ app.post("/loginGuest", accountController.loginGuest);
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);
 
-app.post("/menuitem", authorise("Vendor"), menuItemController.createMenuItem);
-app.put("/menuitem", authorise("Vendor"), menuItemController.updateMenuItem);
+app.post(
+    "/menuitem",
+    authorise("Vendor"),
+    validateMenuItemCreate,
+    menuItemController.createMenuItem,
+);
+app.put(
+    "/menuitem",
+    authorise("Vendor"),
+    validateMenuItemUpdate,
+    menuItemController.updateMenuItem,
+);
 app.delete("/menuitem", authorise("Vendor"), menuItemController.deleteMenuItem);
 app.get(
     "/menuitem",
@@ -68,7 +81,6 @@ app.get(
 app.get(
     "/menuitems",
     authorise("Vendor"),
-    authenticateToken,
     menuItemController.getAllMenuItems,
 );
 app.get(

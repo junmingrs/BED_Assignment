@@ -124,17 +124,22 @@ describe("menuItemController.createMenuItem", () => {
     });
 
     it("should create a menu item and return 201", async () => {
-        const mockNewItem = { menuItem: { stall_id: "1", item_code: "NEW1" }, cuisines: [] };
+        const image = "data:image/png;base64,iVBORw0KGgo=";
+        const mockNewItem = { menuItem: { stall_id: "1", item_code: "NEW1", item_image: image }, cuisines: [] };
         menuItemModel.getAllCuisines.mockResolvedValue([]);
         menuItemModel.createMenuItem.mockResolvedValue(mockNewItem);
 
-        const req = { body: { menuItem: { stall_id: "1" }, cuisines: ["Chinese"] } };
+        const req = { body: { menuItem: { stall_id: "1", item_image: image }, cuisines: ["Chinese"] } };
         const res = { json: jest.fn().mockReturnThis(), status: jest.fn().mockReturnThis() };
 
         await menuItemController.createMenuItem(req, res);
 
         expect(menuItemModel.getAllCuisines).toHaveBeenCalledTimes(1);
         expect(menuItemModel.createMenuItem).toHaveBeenCalledTimes(1);
+        expect(menuItemModel.createMenuItem).toHaveBeenCalledWith(
+            expect.objectContaining({ item_image: image }),
+            ["Chinese"],
+        );
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith(mockNewItem);
     });
@@ -172,17 +177,21 @@ describe("menuItemController.updateMenuItem", () => {
     });
 
     it("should update a menu item and return 201", async () => {
+        const image = "data:image/png;base64,iVBORw0KGgo=";
         const updatedItem = { stall_id: "1", item_code: "A1", item_desc: "Updated" };
         menuItemModel.getAllCuisines.mockResolvedValue([{ cuisine_name: "Chinese" }]);
         menuItemModel.getMenuItemCuisine.mockResolvedValue([{ cuisine_name: "Chinese" }]);
         menuItemModel.updateMenuItem.mockResolvedValue(updatedItem);
 
-        const req = { body: { menuItem: { stall_id: "1", item_code: "A1" }, cuisines: ["Chinese"] } };
+        const req = { body: { menuItem: { stall_id: "1", item_code: "A1", item_image: image }, cuisines: ["Chinese"] } };
         const res = { json: jest.fn().mockReturnThis(), status: jest.fn().mockReturnThis() };
 
         await menuItemController.updateMenuItem(req, res);
 
         expect(menuItemModel.updateMenuItem).toHaveBeenCalledTimes(1);
+        expect(menuItemModel.updateMenuItem).toHaveBeenCalledWith(
+            expect.objectContaining({ item_image: image }),
+        );
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith(updatedItem);
     });

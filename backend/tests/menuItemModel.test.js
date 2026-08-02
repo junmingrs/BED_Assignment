@@ -127,9 +127,10 @@ describe("menuItemModel.createMenuItem", () => {
     });
 
     it("should create a new menu item with cuisines", async () => {
-        const mockMenuItem = { stall_id: "1", item_desc: "New Dish", item_price: 6.00, item_category: "Main" };
+        const image = "data:image/png;base64,iVBORw0KGgo=";
+        const mockMenuItem = { stall_id: "1", item_desc: "New Dish", item_price: 6.00, item_category: "Main", item_image: image };
         const cuisines = ["Chinese", "Spicy"];
-        const createdItem = { stall_id: "1", item_code: "NEW1", item_desc: "New Dish", item_price: 6.00, item_category: "Main" };
+        const createdItem = { stall_id: "1", item_code: "NEW1", item_desc: "New Dish", item_price: 6.00, item_category: "Main", item_image: image };
         const mockCuisine = { stall_id: "1", item_code: "NEW1", cuisine_name: "Chinese" };
 
         const mockRequest = {
@@ -143,6 +144,7 @@ describe("menuItemModel.createMenuItem", () => {
 
         const result = await menuItemModel.createMenuItem(mockMenuItem, cuisines);
 
+        expect(mockRequest.input).toHaveBeenCalledWith("itemImage", image);
         expect(result.menuItem).toEqual(createdItem);
         expect(result.cuisines).toHaveLength(2);
     });
@@ -162,8 +164,9 @@ describe("menuItemModel.updateMenuItem", () => {
     });
 
     it("should update a menu item and return the updated item", async () => {
-        const updateData = { stall_id: "1", item_code: "A1", item_desc: "Updated Dish", item_price: 7.00, item_category: "Main" };
-        const updatedItem = { stall_id: "1", item_code: "A1", item_desc: "Updated Dish", item_price: 7.00, item_category: "Main" };
+        const image = "data:image/png;base64,iVBORw0KGgo=";
+        const updateData = { stall_id: "1", item_code: "A1", item_desc: "Updated Dish", item_price: 7.00, item_category: "Main", item_image: image };
+        const updatedItem = { stall_id: "1", item_code: "A1", item_desc: "Updated Dish", item_price: 7.00, item_category: "Main", item_image: image };
 
         const mockRequest = {
             input: jest.fn().mockReturnThis(),
@@ -176,6 +179,7 @@ describe("menuItemModel.updateMenuItem", () => {
 
         const result = await menuItemModel.updateMenuItem(updateData);
 
+        expect(mockRequest.input).toHaveBeenCalledWith("itemImage", image);
         expect(result).toEqual(updatedItem);
     });
 
@@ -324,7 +328,7 @@ describe("menuItemModel.getAllCuisines", () => {
 
         const cuisines = await menuItemModel.getAllCuisines();
 
-        expect(cuisines).toEqual([mockCuisines]);
+        expect(cuisines).toEqual(mockCuisines);
     });
 
     it("should handle errors", async () => {
