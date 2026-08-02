@@ -29,12 +29,13 @@ const chatbotController = require("./controller/chatbotController.js");
 const googleCalendarController = require("./controller/googleCalendarController");
 const inspectionSchedulingController = require("./controller/inspectionSchedulingController");
 const { authorise } = require("./middleware/auth");
+
+// validation
 const {
     validateRegister,
     validateLogin,
     authenticateToken,
 } = require("./middleware/validate");
-
 const {
     validateGetOrderById,
     validateGetOrdersByCustomer,
@@ -43,6 +44,12 @@ const {
     validateGetOrderByStallId,
     validateCheckoutCart,
 } = require("./middleware/orderValidation.js");
+const {
+    validateGetKPI,
+    validateGetHourlySales,
+    validateGetTopItems,
+    validateGetAISummary,
+} = require("./middleware/analyticsValidation.js");
 
 // Create Express app
 const app = express();
@@ -300,21 +307,25 @@ app.post(
 app.get(
     "/vendor/analytics/kpi/:stallId",
     authorise("Vendor"),
+    validateGetKPI,
     analyticsController.getKPI,
 );
 app.get(
     "/vendor/analytics/hourly-sales/:stallId",
     authorise("Vendor"),
+    validateGetHourlySales,
     analyticsController.getHourlySales,
 );
 app.get(
     "/vendor/analytics/top-items/:stallId",
     authorise("Vendor"),
+    validateGetTopItems,
     analyticsController.getTopItems,
 );
 app.get(
     "/vendor/analytics/ai-summary/:stallId",
     authorise("Vendor"),
+    validateGetAISummary,
     analyticsController.getAISummary,
 );
 
