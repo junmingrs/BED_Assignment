@@ -71,6 +71,7 @@ app.use(express.static(path.join("public")));
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
 app.post("/loginGuest", accountController.loginGuest);
+app.get("/account/:accountId/profile", accountController.getAccountById);
 
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);

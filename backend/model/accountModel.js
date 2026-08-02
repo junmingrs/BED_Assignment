@@ -10,7 +10,7 @@ async function getAccountByEmail(email) {
 }
 
 async function getAccountById(id) {
-    const query = `SELECT account_id, account_email, password_hash, role FROM Account WHERE account_id= @id`;
+    const query = `SELECT account_id, account_email, role FROM Account WHERE account_id= @id`;
     const pool = await poolPromise;
     const result = await pool.request().input("id", id).query(query);
 
