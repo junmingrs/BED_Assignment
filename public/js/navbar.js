@@ -58,7 +58,6 @@ function isItemActive(item, currentPath) {
 }
 
 function renderNavLinks(items, currentPath) {
-    // 获取翻译函数
     const t = window.i18n ? window.i18n.t : (key) => key;
 
     return items
@@ -71,6 +70,7 @@ function renderNavLinks(items, currentPath) {
 
             return `
             <a href="${item.href}" 
+               data-i18n="${item.name}"
                class="py-1.5 text-xl rounded-md transition-colors ${isActive ? activeClasses : inactiveClasses}">
                 ${t(item.name)}
             </a>
@@ -78,6 +78,42 @@ function renderNavLinks(items, currentPath) {
         })
         .join("");
 }
+
+function renderLanguageToggle() {
+    const currentLang = window.i18n ? window.i18n.getCurrentLanguage() : "en";
+
+    const activeClasses = "bg-black text-white border-black";
+    const inactiveClasses =
+        "border-gray-300 hover:bg-gray-100 text-gray-700";
+
+    return `
+        <div class="flex gap-1 ml-4">
+            <button onclick="window.i18n.setLanguage('en'); updateLanguageToggle();"
+                data-lang="en"
+                class="lang-btn px-3 py-1 text-sm font-medium rounded border transition ${currentLang === "en" ? activeClasses : inactiveClasses}">
+                EN
+            </button>
+            <button onclick="window.i18n.setLanguage('zh'); updateLanguageToggle();"
+                data-lang="zh"
+                class="lang-btn px-3 py-1 text-sm font-medium rounded border transition ${currentLang === "zh" ? activeClasses : inactiveClasses}">
+                中文
+            </button>
+        </div>
+    `;
+}
+
+function updateLanguageToggle() {
+    const currentLang = window.i18n ? window.i18n.getCurrentLanguage() : "en";
+    const activeClasses = ["bg-black", "text-white", "border-black"];
+    const inactiveClasses = ["border-gray-300", "hover:bg-gray-100", "text-gray-700"];
+
+    document.querySelectorAll(".lang-btn").forEach((btn) => {
+        const isActive = btn.dataset.lang == currentLang;
+        btn.classList.remove(...activeClasses, ...inactiveClasses);
+        btn.classList.add(...(isActive ? activeClasses : inactiveClasses));
+    });
+}
+
 
 function loadNavbar() {
     const currentPath = window.location.pathname;
@@ -92,7 +128,6 @@ function loadNavbar() {
 
     const header = document.createElement("header");
 
-    // 判断是否显示语言按钮（只在 customer 页面显示）
     const showLanguageToggle = role === "customer";
 
     header.innerHTML = `
@@ -105,20 +140,7 @@ function loadNavbar() {
                 <div class="flex items-center gap-7">
                     ${renderNavLinks(rightItems, currentPath)}
                 </div>
-                ${showLanguageToggle
-            ? `
-                <div class="flex gap-1 ml-4">
-                    <button onclick="window.i18n.setLanguage('en')"
-                        class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
-                        EN
-                    </button>
-                    <button onclick="window.i18n.setLanguage('zh')"
-                        class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
-                        中文
-                    </button>
-                </div>`
-            : ""
-        }
+                ${showLanguageToggle ? renderLanguageToggle() : ""}
             </div>
         </nav>
     `;
