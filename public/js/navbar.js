@@ -49,6 +49,9 @@ function isItemActive(item, currentPath) {
 }
 
 function renderNavLinks(items, currentPath) {
+    // 获取翻译函数
+    const t = window.i18n ? window.i18n.t : (key) => key;
+
     return items
         .map((item) => {
             const isActive = isItemActive(item, currentPath);
@@ -60,7 +63,7 @@ function renderNavLinks(items, currentPath) {
             return `
             <a href="${item.href}" 
                class="py-1.5 text-xl rounded-md transition-colors ${isActive ? activeClasses : inactiveClasses}">
-                ${item.name}
+                ${t(item.name)}
             </a>
         `;
         })
@@ -73,11 +76,15 @@ function loadNavbar() {
     const role = currentPath.split("/")[1];
     const navItems = NAV_ITEMS[role];
 
+    if (!navItems) return;
+
     const leftItems = navItems.filter((item) => item.align == "left");
     const rightItems = navItems.filter((item) => item.align == "right");
 
-    // FIX: FIX THE CSS
     const header = document.createElement("header");
+
+    // 判断是否显示语言按钮（只在 customer 页面显示）
+    const showLanguageToggle = role === "customer";
 
     header.innerHTML = `
         <nav class="flex items-center justify-between gap-3">
@@ -89,7 +96,7 @@ function loadNavbar() {
                 <div class="flex items-center gap-7">
                     ${renderNavLinks(rightItems, currentPath)}
                 </div>
-                <!-- language toggle -->
+                ${showLanguageToggle ? `
                 <div class="flex gap-1 ml-4">
                     <button onclick="window.i18n.setLanguage('en')"
                         class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
@@ -99,7 +106,7 @@ function loadNavbar() {
                         class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
                         中文
                     </button>
-                </div>
+                </div>` : ''}
             </div>
         </nav>
     `;
