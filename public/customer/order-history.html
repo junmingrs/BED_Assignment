@@ -1,225 +1,194 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Order History</title>
 
     <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <main class="mx-auto mt-12 max-w-xl px-6">
-      <h1 class="text-2xl font-semibold mb-2" data-i18n="order_history_title">Order History</h1>
-      <p id="guest-note" class="text-sm text-gray-500 mb-6 hidden" data-i18n="guest_note">
-        Guest orders are saved on this device only. Clearing your browser data
-        will remove this history.
-      </p>
-      <div id="order-history" class="space-y-4 mt-6"></div>
-      <p id="message" class="text-sm text-red-600 mt-3"></p>
+        <h1 class="text-2xl font-semibold mb-2" data-i18n="order_history_title">
+            Order History
+        </h1>
+        <p id="guest-note" class="text-sm text-gray-500 mb-6 hidden" data-i18n="guest_note">
+            Guest orders are saved on this device only. Clearing your
+            browser data will remove this history.
+        </p>
+        <div id="order-history" class="space-y-4 mt-6"></div>
+        <p id="message" class="text-sm text-red-600 mt-3"></p>
     </main>
 
     <!-- Rate & Feedback modal -->
-    <div
-      id="rating-modal"
-      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40"
-    >
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-        <h2 class="text-lg font-semibold mb-1" data-i18n="rate_feedback_title">Rate & Feedback</h2>
-        <p class="text-xs text-gray-500 mb-4" data-i18n="rate_feedback_desc">
-          Let the stall know how it went.
-        </p>
+    <div id="rating-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h2 class="text-lg font-semibold mb-1" data-i18n="rate_feedback_title">
+                Rate & Feedback
+            </h2>
+            <p class="text-xs text-gray-500 mb-4" data-i18n="rate_feedback_desc">
+                Let the stall know how it went.
+            </p>
 
-        <div id="star-picker" class="flex gap-1 mb-4">
-          <button
-            type="button"
-            data-value="1"
-            class="star text-3xl text-slate-300"
-          >
-            &#9733;
-          </button>
-          <button
-            type="button"
-            data-value="2"
-            class="star text-3xl text-slate-300"
-          >
-            &#9733;
-          </button>
-          <button
-            type="button"
-            data-value="3"
-            class="star text-3xl text-slate-300"
-          >
-            &#9733;
-          </button>
-          <button
-            type="button"
-            data-value="4"
-            class="star text-3xl text-slate-300"
-          >
-            &#9733;
-          </button>
-          <button
-            type="button"
-            data-value="5"
-            class="star text-3xl text-slate-300"
-          >
-            &#9733;
-          </button>
+            <div id="star-picker" class="flex gap-1 mb-4">
+                <button type="button" data-value="1" class="star text-3xl text-slate-300">
+                    &#9733;
+                </button>
+                <button type="button" data-value="2" class="star text-3xl text-slate-300">
+                    &#9733;
+                </button>
+                <button type="button" data-value="3" class="star text-3xl text-slate-300">
+                    &#9733;
+                </button>
+                <button type="button" data-value="4" class="star text-3xl text-slate-300">
+                    &#9733;
+                </button>
+                <button type="button" data-value="5" class="star text-3xl text-slate-300">
+                    &#9733;
+                </button>
+            </div>
+
+            <textarea id="rating-comment" rows="3" placeholder="Optional comment..."
+                data-i18n-placeholder="optional_comment"
+                class="w-full border border-gray-200 rounded-lg p-3 text-sm mb-1 focus:outline-none focus:ring-1 focus:ring-slate-400"></textarea>
+            <p id="rating-error" class="text-xs text-red-600 mb-3 hidden"></p>
+
+            <div class="flex gap-2 justify-end mt-2">
+                <button id="rating-cancel-btn" type="button"
+                    class="px-4 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50" data-i18n="cancel">
+                    Cancel
+                </button>
+                <button id="rating-submit-btn" type="button"
+                    class="px-4 py-2 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800" data-i18n="submit">
+                    Submit
+                </button>
+            </div>
         </div>
-
-        <textarea
-          id="rating-comment"
-          rows="3"
-          placeholder="Optional comment..."
-          data-i18n-placeholder="optional_comment"
-          class="w-full border border-gray-200 rounded-lg p-3 text-sm mb-1 focus:outline-none focus:ring-1 focus:ring-slate-400"
-        ></textarea>
-        <p id="rating-error" class="text-xs text-red-600 mb-3 hidden"></p>
-
-        <div class="flex gap-2 justify-end mt-2">
-          <button
-            id="rating-cancel-btn"
-            type="button"
-            class="px-4 py-2 text-sm rounded-lg border border-gray-200 hover:bg-gray-50"
-            data-i18n="cancel"
-          >
-            Cancel
-          </button>
-          <button
-            id="rating-submit-btn"
-            type="button"
-            class="px-4 py-2 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800"
-            data-i18n="submit"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
     </div>
 
-    <script src="/js/const.js"></script>
-    <script src="/js/i18n.js"></script>
-    <script src="/js/navbar.js"></script>
     <script type="module">
-      import {
-        getIdFromToken,
-        getIsGuest,
-        statusStyle,
-        formatDate,
-      } from "/js/helper.js";
+        import {
+            getIdFromToken,
+            getIsGuest,
+            statusStyle,
+            formatDate,
+        } from "/js/helper.js";
 
-      const t = window.i18n ? window.i18n.t : (key) => key;
+        const t = window.i18n ? window.i18n.t : (key) => key;
 
-      const token = sessionStorage.getItem(SS_KEYS.accessToken);
-      const container = document.getElementById("order-history");
-      const messageEl = document.getElementById("message");
-      const guestNote = document.getElementById("guest-note");
+        const token = sessionStorage.getItem(SS_KEYS.accessToken);
+        const container = document.getElementById("order-history");
+        const messageEl = document.getElementById("message");
+        const guestNote = document.getElementById("guest-note");
 
-      function renderMemberOrder(order) {
-        return `
+        function renderMemberOrder(order) {
+            return `
                 <div class="rounded-xl border bg-white p-6 shadow-sm">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs text-gray-500">${t('queue_number')}</p>
+                            <p class="text-xs text-gray-500">${t("queue_number")}</p>
                             <p class="text-2xl font-bold">${order.queue_number}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            ${
-                              order.status === "Completed"
-                                ? `<button class="rate-btn flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1 text-xs font-medium hover:bg-gray-50" data-stall-id="${order.stall_id}">
-                                    <span class="text-amber-400">&#9733;</span> ${t('rate_feedback_btn')}
+                            ${order.status === "Completed"
+                    ? `<button class="rate-btn flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1 text-xs font-medium hover:bg-gray-50" data-stall-id="${order.stall_id}">
+                                    <span class="text-amber-400">&#9733;</span> ${t("rate_feedback_btn")}
                                 </button>`
-                                : ""
-                            }
+                    : ""
+                }
                             <span class="rounded-full px-3 py-1 text-xs font-medium ${statusStyle(order.status)}">
                                 ${t(order.status.toLowerCase()) || order.status}
                             </span>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">${t('ordered_at')} ${formatDate(order.order_date)}</p>
+                    <p class="text-xs text-gray-500 mt-2">${t("ordered_at")} ${formatDate(order.order_date)}</p>
 
                     <div class="mt-4 pt-4 border-t">
                         ${order.items
-                          .map(
-                            (item) => `
+                    .map(
+                        (item) => `
                             <div class="flex justify-between text-sm py-1">
                                 <span>${item.item_desc} <span class="text-gray-400">x${item.quantity}</span></span>
                                 <span>$${Number(item.item_price).toFixed(2)}</span>
                             </div>
                         `,
-                          )
-                          .join("")}
+                    )
+                    .join("")}
                     </div>
 
                     <div class="mt-3 pt-3 border-t flex justify-between items-center">
-                        <p class="text-xs text-gray-500">${t('total_label')}</p>
+                        <p class="text-xs text-gray-500">${t("total_label")}</p>
                         <p class="text-lg font-bold">$${Number(order.total_amount).toFixed(2)}</p>
                     </div>
                 </div>
             `;
-      }
-
-      async function loadMemberOrderHistory() {
-        const customerId = getIdFromToken(token);
-
-        try {
-          const response = await fetch(
-            `/customer/${customerId}/orders?status=Completed&status=Cancelled`,
-            {
-              method: "GET",
-              headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
-
-          const orders = await response.json();
-
-          if (!response.ok) {
-            messageEl.textContent = orders.message || t('failed_load_orders');
-            return;
-          }
-
-          if (!orders || orders.length === 0) {
-            container.innerHTML = `<p class="text-sm text-gray-500">${t('no_orders')}</p>`;
-            return;
-          }
-
-          container.innerHTML = orders.map(renderMemberOrder).join("");
-        } catch (err) {
-          console.error(err);
-          messageEl.textContent = t('load_orders_error');
         }
-      }
 
-      function renderGuestOrder(order) {
-        const orderIdList = Object.values(order.orderIds).join(", ");
-        const itemRows = order.items
-          .map(
-            (item) => `
+        async function loadMemberOrderHistory() {
+            const customerId = getIdFromToken(token);
+
+            try {
+                const response = await fetch(
+                    `/customer/${customerId}/orders?status=Completed&status=Cancelled`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                    },
+                );
+
+                const orders = await response.json();
+
+                if (!response.ok) {
+                    messageEl.textContent =
+                        orders.message || t("failed_load_orders");
+                    return;
+                }
+
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `<p class="text-sm text-gray-500">${t("no_orders")}</p>`;
+                    return;
+                }
+
+                container.innerHTML = orders
+                    .map(renderMemberOrder)
+                    .join("");
+            } catch (err) {
+                console.error(err);
+                messageEl.textContent = t("load_orders_error");
+            }
+        }
+
+        function renderGuestOrder(order) {
+            const orderIdList = Object.values(order.orderIds).join(", ");
+            const itemRows = order.items
+                .map(
+                    (item) => `
                 <div class="flex justify-between text-sm py-1">
                     <span>${item.name} <span class="text-gray-400">x${item.quantity}</span></span>
                     <span>$${Number(item.price).toFixed(2)}</span>
                 </div>
             `,
-          )
-          .join("");
+                )
+                .join("");
 
-        const statusBadges = Object.entries(order.statuses || {})
-          .map(([orderId, status]) => {
-            const stallId = Object.keys(order.orderIds).find(
-              (id) => order.orderIds[id] === orderId,
-            );
-            const rateBtn =
-              status === "Completed"
-                ? `<button class="rate-btn flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1 text-xs font-medium hover:bg-gray-50" data-stall-id="${stallId}">
-                            <span class="text-amber-400">&#9733;</span> ${t('rate_feedback_btn')}
+            const statusBadges = Object.entries(order.statuses || {})
+                .map(([orderId, status]) => {
+                    const stallId = Object.keys(order.orderIds).find(
+                        (id) => order.orderIds[id] === orderId,
+                    );
+                    const rateBtn =
+                        status === "Completed"
+                            ? `<button class="rate-btn flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1 text-xs font-medium hover:bg-gray-50" data-stall-id="${stallId}">
+                            <span class="text-amber-400">&#9733;</span> ${t("rate_feedback_btn")}
                         </button>`
-                : "";
-            return `
+                            : "";
+                    return `
                     <div class="flex items-center gap-2">
                         ${rateBtn}
                         <span class="rounded-full px-3 py-1 text-xs font-medium ${statusStyle(status)}">
@@ -227,197 +196,208 @@
                         </span>
                     </div>
                 `;
-          })
-          .join("");
+                })
+                .join("");
 
-        return `
+            return `
                 <div class="rounded-xl border bg-white p-6 shadow-sm">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs text-gray-500">${t('order_id_label')}</p>
+                            <p class="text-xs text-gray-500">${t("order_id_label")}</p>
                             <p class="text-sm font-mono">${orderIdList}</p>
                         </div>
                         <div class="flex flex-col items-end gap-1.5">${statusBadges}</div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">${t('ordered_at')} ${new Date(
-                      order.date,
-                    ).toLocaleString("en-SG", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}</p>
+                    <p class="text-xs text-gray-500 mt-2">${t("ordered_at")} ${new Date(
+                order.date,
+            ).toLocaleString("en-SG", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+            })}</p>
 
                     <div class="mt-4 pt-4 border-t">
                         ${itemRows}
                     </div>
 
                     <div class="mt-3 pt-3 border-t flex justify-between items-center">
-                        <p class="text-xs text-gray-500">${t('total_label')}</p>
+                        <p class="text-xs text-gray-500">${t("total_label")}</p>
                         <p class="text-lg font-bold">$${order.total.toFixed(2)}</p>
                     </div>
                 </div>
             `;
-      }
+        }
 
-      async function refreshGuestStatuses(guestOrders) {
-        let changed = false;
+        async function refreshGuestStatuses(guestOrders) {
+            let changed = false;
 
-        await Promise.all(
-          guestOrders.map(async (order) => {
-            const orderIds = Object.values(order.orderIds);
             await Promise.all(
-              orderIds.map(async (orderId) => {
-                try {
-                  const response = await fetch(`/order/${orderId}`, {
-                    method: "GET",
-                    headers: {
-                      Accept: "application/json",
-                      Authorization: `Bearer ${token}`,
-                    },
-                  });
-                  if (!response.ok) return;
-                  const fresh = await response.json();
-                  if (
-                    fresh?.status &&
-                    order.statuses?.[orderId] !== fresh.status
-                  ) {
-                    order.statuses[orderId] = fresh.status;
-                    changed = true;
-                  }
-                } catch {
-                  // network error, keep last known status
-                }
-              }),
+                guestOrders.map(async (order) => {
+                    const orderIds = Object.values(order.orderIds);
+                    await Promise.all(
+                        orderIds.map(async (orderId) => {
+                            try {
+                                const response = await fetch(
+                                    `/order/${orderId}`,
+                                    {
+                                        method: "GET",
+                                        headers: {
+                                            Accept: "application/json",
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                    },
+                                );
+                                if (!response.ok) return;
+                                const fresh = await response.json();
+                                if (
+                                    fresh?.status &&
+                                    order.statuses?.[orderId] !==
+                                    fresh.status
+                                ) {
+                                    order.statuses[orderId] = fresh.status;
+                                    changed = true;
+                                }
+                            } catch {
+                                // network error, keep last known status
+                            }
+                        }),
+                    );
+                }),
             );
-          }),
-        );
 
-        if (changed) {
-          localStorage.setItem(
-            LS_KEYS.createdOrderIds,
-            JSON.stringify(guestOrders),
-          );
-        }
-      }
-
-      async function loadGuestOrderHistory() {
-        guestNote.classList.remove("hidden");
-
-        const guestOrders = JSON.parse(
-          localStorage.getItem(LS_KEYS.createdOrderIds) ?? "[]",
-        );
-
-        if (!guestOrders.length) {
-          container.innerHTML = `<p class="text-sm text-gray-500">${t('no_guest_orders')}</p>`;
-          return;
+            if (changed) {
+                localStorage.setItem(
+                    LS_KEYS.createdOrderIds,
+                    JSON.stringify(guestOrders),
+                );
+            }
         }
 
-        await refreshGuestStatuses(guestOrders);
+        async function loadGuestOrderHistory() {
+            guestNote.classList.remove("hidden");
 
-        container.innerHTML = guestOrders
-          .slice()
-          .reverse()
-          .map(renderGuestOrder)
-          .join("");
-      }
+            const guestOrders = JSON.parse(
+                localStorage.getItem(LS_KEYS.createdOrderIds) ?? "[]",
+            );
 
-      if (getIsGuest(token)) {
-        await loadGuestOrderHistory();
-      } else {
-        await loadMemberOrderHistory();
-      }
+            if (!guestOrders.length) {
+                container.innerHTML = `<p class="text-sm text-gray-500">${t("no_guest_orders")}</p>`;
+                return;
+            }
 
-      // ---- Rate & Feedback modal ----
-      const modal = document.getElementById("rating-modal");
-      const stars = document.querySelectorAll(".star");
-      const commentInput = document.getElementById("rating-comment");
-      const ratingError = document.getElementById("rating-error");
-      const cancelBtn = document.getElementById("rating-cancel-btn");
-      const submitBtn = document.getElementById("rating-submit-btn");
+            await refreshGuestStatuses(guestOrders);
 
-      let selectedStallId = null;
-      let selectedRating = 0;
+            container.innerHTML = guestOrders
+                .slice()
+                .reverse()
+                .map(renderGuestOrder)
+                .join("");
+        }
 
-      function highlightStars(value) {
+        if (getIsGuest(token)) {
+            await loadGuestOrderHistory();
+        } else {
+            await loadMemberOrderHistory();
+        }
+
+        // ---- Rate & Feedback modal ----
+        const modal = document.getElementById("rating-modal");
+        const stars = document.querySelectorAll(".star");
+        const commentInput = document.getElementById("rating-comment");
+        const ratingError = document.getElementById("rating-error");
+        const cancelBtn = document.getElementById("rating-cancel-btn");
+        const submitBtn = document.getElementById("rating-submit-btn");
+
+        let selectedStallId = null;
+        let selectedRating = 0;
+
+        function highlightStars(value) {
+            stars.forEach((star) => {
+                const starValue = Number(star.dataset.value);
+                star.classList.toggle("text-amber-400", starValue <= value);
+                star.classList.toggle("text-slate-300", starValue > value);
+            });
+        }
+
+        function openModal(stallId) {
+            selectedStallId = stallId;
+            selectedRating = 0;
+            commentInput.value = "";
+            ratingError.classList.add("hidden");
+            highlightStars(0);
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeModal() {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
         stars.forEach((star) => {
-          const starValue = Number(star.dataset.value);
-          star.classList.toggle("text-amber-400", starValue <= value);
-          star.classList.toggle("text-slate-300", starValue > value);
+            star.addEventListener("click", () => {
+                selectedRating = Number(star.dataset.value);
+                highlightStars(selectedRating);
+            });
         });
-      }
 
-      function openModal(stallId) {
-        selectedStallId = stallId;
-        selectedRating = 0;
-        commentInput.value = "";
-        ratingError.classList.add("hidden");
-        highlightStars(0);
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-      }
+        cancelBtn.addEventListener("click", closeModal);
 
-      function closeModal() {
-        modal.classList.add("hidden");
-        modal.classList.remove("flex");
-      }
+        submitBtn.addEventListener("click", async () => {
+            if (!selectedRating) {
+                ratingError.textContent = t("please_select_rating");
+                ratingError.classList.remove("hidden");
+                return;
+            }
 
-      stars.forEach((star) => {
-        star.addEventListener("click", () => {
-          selectedRating = Number(star.dataset.value);
-          highlightStars(selectedRating);
+            try {
+                const response = await fetch(
+                    `/stalls/${selectedStallId}/ratings`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            rating: selectedRating,
+                            comment: commentInput.value.trim() || null,
+                        }),
+                    },
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    ratingError.textContent =
+                        data.error || t("submit_failed");
+                    ratingError.classList.remove("hidden");
+                    return;
+                }
+
+                closeModal();
+                alert(t("thanks_feedback"));
+            } catch (err) {
+                console.error(err);
+                ratingError.textContent = t("submit_failed");
+                ratingError.classList.remove("hidden");
+            }
         });
-      });
 
-      cancelBtn.addEventListener("click", closeModal);
-
-      submitBtn.addEventListener("click", async () => {
-        if (!selectedRating) {
-          ratingError.textContent = t('please_select_rating');
-          ratingError.classList.remove("hidden");
-          return;
-        }
-
-        try {
-          const response = await fetch(`/stalls/${selectedStallId}/ratings`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              rating: selectedRating,
-              comment: commentInput.value.trim() || null,
-            }),
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            ratingError.textContent = data.error || t('submit_failed');
-            ratingError.classList.remove("hidden");
-            return;
-          }
-
-          closeModal();
-          alert(t('thanks_feedback'));
-        } catch (err) {
-          console.error(err);
-          ratingError.textContent = t('submit_failed');
-          ratingError.classList.remove("hidden");
-        }
-      });
-
-      container.addEventListener("click", (e) => {
-        const btn = e.target.closest(".rate-btn");
-        if (!btn) return;
-        openModal(btn.dataset.stallId);
-      });
+        container.addEventListener("click", (e) => {
+            const btn = e.target.closest(".rate-btn");
+            if (!btn) return;
+            openModal(btn.dataset.stallId);
+        });
     </script>
+
+    <script src="/js/const.js"></script>
     <script src="/js/i18n.js"></script>
     <script src="/js/navbar.js"></script>
-  </body>
+</body>
+
 </html>

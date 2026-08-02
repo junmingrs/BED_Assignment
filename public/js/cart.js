@@ -233,7 +233,7 @@ async function renderCartItems() {
 
     // display promo
     if (Object.keys(cartMap).length > 0) {
-        promotionContainer.classList.remove("hidden!")
+        promotionContainer.classList.remove("hidden!");
     }
 }
 
@@ -349,7 +349,7 @@ function deleteItem(stallId, itemCode) {
         delete cartMap[stallId];
     }
     if (Object.keys(cartMap).length === 0) {
-        promotionContainer.classList.add("hidden!")
+        promotionContainer.classList.add("hidden!");
     }
 }
 
