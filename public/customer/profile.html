@@ -1,38 +1,40 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stall</title>
+    <title>Profile</title>
 
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
-</head>
+  </head>
 
-<body>
+  <body>
     <section>
-        <h1 class="text-3xl">Profile</h1>
+      <h1 class="text-3xl">Profile</h1>
     </section>
 
-    <section id="profile" class="flex flex-col border-2 border-black rounded-xl p-6">
-        <div class="flex gap-2">
-            <span>Name:</span><span id="name"></span>
-        </div>
-        <div class="flex gap-2">
-            <span>Points:</span><span id="points"></span>
-        </div>
+    <section
+      id="profile"
+      class="flex flex-col border-2 border-black rounded-xl p-6"
+    >
+      <div class="flex gap-2"><span>Name:</span><span id="name"></span></div>
+      <div class="flex gap-2">
+        <span>Points:</span><span id="points"></span>
+      </div>
     </section>
 
     <section>
-        <button id="signout-btn"
-            class="inline-flex h-10 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50">
-            Sign Out
-        </button>
+      <button
+        id="signout-btn"
+        class="inline-flex h-10 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50"
+      >
+        Sign Out
+      </button>
     </section>
 
     <script src="/js/const.js"></script>
     <script src="/js/navbar.js"></script>
     <script type="module" src="/js/profile.js"></script>
-</body>
-
+  </body>
 </html>
