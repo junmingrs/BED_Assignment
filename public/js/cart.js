@@ -115,7 +115,10 @@ async function renderCartItems() {
             if (isEco) totalAmount += 0.3;
             const itemCards = await Promise.all(
                 stallItems.map(async (item) => {
-                    const menuItem = await getItemById(item.stallId, item.itemCode);
+                    const menuItem = await getItemById(
+                        item.stallId,
+                        item.itemCode,
+                    );
 
                     const cuisineContent = await loadCuisines(
                         item.stallId,
@@ -131,7 +134,8 @@ async function renderCartItems() {
                     let priceHtml;
                     if (matchedPromo) {
                         const discountedPrice =
-                            menuItem.item_price * (1 - matchedPromo.discount / 100);
+                            menuItem.item_price *
+                            (1 - matchedPromo.discount / 100);
                         priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">
                         $${discountedPrice.toFixed(2)}
                         <span class="ml-2 text-sm font-normal text-gray-500 line-through">$${menuItem.item_price.toFixed(2)}</span>
@@ -147,10 +151,11 @@ async function renderCartItems() {
 
                     return `
                     <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+
                       <img
-                        src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
+                        src="${menuItem.item_image ?? "https://placehold.co/600x400?text=Not+Available"}"
                         alt="${menuItem.item_desc}"
-                        class="size-24 rounded-lg object-cover"
+                        class="w-40 h-30 rounded-lg object-cover"
                       />
 
                       <div class="flex-1">
@@ -176,7 +181,7 @@ async function renderCartItems() {
                       </div>
 
                       <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">
-                        ${t('delete')}
+                        ${t("delete")}
                       </button>
                     </div>
                 `;
@@ -197,15 +202,15 @@ async function renderCartItems() {
                     />
                     <div>
                         <p class="text-sm font-medium leading-none">
-                            ${t('eco_friendly')}
+                            ${t("eco_friendly")}
                         </p>
                         <p class="mt-1 text-xs text-gray-500">
-                            ${t('eco_description')}
+                            ${t("eco_description")}
                         </p>
                     </div>
                 </label>
                 <p class="text-sm font-semibold text-gray-900">
-                    ${t('plus_030')}
+                    ${t("plus_030")}
                 </p>
             </div>
         </section>
@@ -215,8 +220,7 @@ async function renderCartItems() {
 
     cartContainer.innerHTML = cards.join("");
     if (cartContainer.innerHTML === "") {
-        cartContainer.innerHTML =
-            `<p class="text-sm text-gray-500 text-center py-8">${t('cart_empty')}</p>`;
+        cartContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-8">${t("cart_empty")}</p>`;
         paymentContainer.classList.add("hidden");
     } else {
         paymentContainer.classList.remove("hidden");
@@ -228,7 +232,7 @@ async function renderCartItems() {
 async function checkout() {
     const customerId = getIdFromToken(token);
     if (Object.keys(cartMap).length == 0) {
-        alert(t('checkout_empty_error'));
+        alert(t("checkout_empty_error"));
         return;
     }
 
@@ -256,7 +260,10 @@ async function checkout() {
                 cartMap[stallId].items.forEach((item) => {
                     itemPromises.push(
                         (async () => {
-                            const menuItem = await getItemById(item.stallId, item.itemCode);
+                            const menuItem = await getItemById(
+                                item.stallId,
+                                item.itemCode,
+                            );
 
                             return {
                                 name: menuItem?.item_desc || "Item",
@@ -268,7 +275,7 @@ async function checkout() {
                 });
                 if (isEco) {
                     itemPromises.push({
-                        name: t('eco_packaging_label'),
+                        name: t("eco_packaging_label"),
                         quantity: 1,
                         price: 0.3,
                     });
@@ -315,7 +322,9 @@ async function checkout() {
 }
 
 function changeQuality(stallId, itemCode, amount) {
-    const item = cartMap[stallId].items.find((item) => item.itemCode == itemCode);
+    const item = cartMap[stallId].items.find(
+        (item) => item.itemCode == itemCode,
+    );
     item.quantity = Math.max(item.quantity + amount, 1);
 }
 
@@ -381,13 +390,13 @@ promotionBtn.addEventListener("click", async () => {
     promotionMsg.classList.add("hidden");
 
     if (!code) {
-        showMsg(t('promo_enter_error'), "error");
+        showMsg(t("promo_enter_error"), "error");
         return;
     }
 
     const allPromos = await getAllPromotions();
     if (!Array.isArray(allPromos)) {
-        showMsg(t('promo_verify_error'), "error");
+        showMsg(t("promo_verify_error"), "error");
         return;
     }
 
@@ -397,12 +406,12 @@ promotionBtn.addEventListener("click", async () => {
     );
 
     if (!matchedPromo) {
-        showMsg(`${code} ${t('promo_invalid')}`, "error");
+        showMsg(`${code} ${t("promo_invalid")}`, "error");
         return;
     }
 
     if (appliedPromos.includes(matchedPromo)) {
-        showMsg(`${code} ${t('promo_already_applied')}`, "error");
+        showMsg(`${code} ${t("promo_already_applied")}`, "error");
         return;
     }
 
@@ -412,12 +421,15 @@ promotionBtn.addEventListener("click", async () => {
     end.setHours(23, 59, 59, 999);
 
     if (today < start || today > end) {
-        showMsg(`${code} ${t('promo_inactive')}`, "error");
+        showMsg(`${code} ${t("promo_inactive")}`, "error");
         return;
     }
 
     appliedPromos.push(matchedPromo);
-    showMsg(`${code} ${t('promo_applied', { discount: matchedPromo.discount })}`, "success");
+    showMsg(
+        `${code} ${t("promo_applied", { discount: matchedPromo.discount })}`,
+        "success",
+    );
     promotionInput.value = "";
     renderCartItems();
 });
