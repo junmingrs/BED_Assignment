@@ -21,8 +21,8 @@ async function getOrdersByCustomer(req, res) {
     const statuses = Array.isArray(req.query.status)
         ? req.query.status
         : req.query.status
-          ? [req.query.status]
-          : [];
+            ? [req.query.status]
+            : [];
 
     try {
         const orders = await orderModel.getOrdersByCustomer(
@@ -136,19 +136,26 @@ async function checkoutCart(req, res) {
                 let stallTotal = 0;
 
                 for (const item of items) {
-                    const menuItemResult = await pool.request()
+                    const menuItemResult = await pool
+                        .request()
                         .input("stallId", stallId)
                         .input("itemCode", item.itemCode)
-                        .query(`SELECT item_desc, item_price FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode`);
+                        .query(
+                            `SELECT item_desc, item_price FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode`,
+                        );
 
                     const menuItem = menuItemResult.recordset[0];
-                    const price = menuItem?.item_price || item.item_price || item.price || 0;
-           
+                    const price =
+                        menuItem?.item_price ||
+                        item.item_price ||
+                        item.price ||
+                        0;
+
                     const qty = item.quantity || 1;
                     stallTotal += price * qty;
 
                     allItems.push({
-                        name: menuItem?.item_desc || "Item",  
+                        name: menuItem?.item_desc || "Item",
                         quantity: qty,
                         price: price,
                     });
@@ -157,10 +164,12 @@ async function checkoutCart(req, res) {
                 if (isEco) stallTotal += 0.3;
                 totalAmount += stallTotal;
             }
-          
-            console.log(' Sending receipt items:', JSON.stringify(allItems, null, 2));
-            console.log(' Total amount:', totalAmount);
-            });
+
+            console.log(
+                " Sending receipt items:",
+                JSON.stringify(allItems, null, 2),
+            );
+            console.log(" Total amount:", totalAmount);
 
             console.log(
                 " Sending receipt items:",

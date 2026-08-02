@@ -99,9 +99,10 @@ CREATE TABLE Inspection
     stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
     nea_id UNIQUEIDENTIFIER NOT NULL REFERENCES NEA(nea_id),
     inspection_date DATETIME DEFAULT GETDATE(),
-    score INT NOT NULL CHECK (score BETWEEN 0 AND 100),
+    score INT NULL CHECK (score BETWEEN 0 AND 100),
     remarks TEXT,
-    hygiene_grade CHAR(1) NOT NULL CHECK (hygiene_grade IN ('A', 'B', 'C', 'D'))
+    hygiene_grade CHAR(1) NULL CHECK (hygiene_grade IN ('A', 'B', 'C', 'D')),
+    status VARCHAR(20) NOT NULL DEFAULT 'Completed' CHECK (status IN ('Scheduled', 'Completed'))
 );
 
 CREATE TABLE MenuItem
