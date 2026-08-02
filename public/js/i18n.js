@@ -53,7 +53,7 @@ const translations = {
         promo_invalid: 'is not a valid promo code',
         promo_already_applied: 'is already applied',
         promo_inactive: 'is not currently active',
-        promo_applied: 'applied — {discount}% off',
+        promo_applied: 'applied',
 
         // ===== complaint.html =====
         submit_complaint: 'Submit a Complaint',
@@ -199,7 +199,7 @@ const translations = {
         promo_invalid: '不是有效的优惠码',
         promo_already_applied: '已使用过此优惠码',
         promo_inactive: '当前不在有效期内',
-        promo_applied: '已使用 — {discount}% 折扣',
+        promo_applied: '已使用',
 
         // complaint.html 
         submit_complaint: '提交投诉',

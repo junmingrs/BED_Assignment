@@ -107,7 +107,7 @@ async function displayQueueNumbers(orders) {
     const queueCards = await Promise.all(
         orders.map(async (order) => {
             const stallInfo = await getStallInfo(order.stall_id);
-            const stallName = stallInfo.stall.stall_name;
+            const stallName = stallInfo.stall_name;
             const statusText = t(order.status.toLowerCase()) || order.status;
 
             return `

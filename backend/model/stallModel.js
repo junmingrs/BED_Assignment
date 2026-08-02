@@ -26,41 +26,6 @@ const getStallInfo = async (stallId) => {
     }
 
     return stallResult.recordset[0];
-
-    // 4. Get ratings
-    const ratingsResult = await pool.request()
-        .input("stallId", stallId)
-        .query(`
-            SELECT 
-                rating_id,
-                rating,
-                comment,
-                created_at
-            FROM Rating
-            WHERE stall_id = @stallId
-            ORDER BY created_at DESC
-        `);
-
-    // 5. Get complaints
-    const complaintsResult = await pool.request()
-        .input("stallId", stallId)
-        .query(`
-            SELECT 
-                complaint_id,
-                subject,
-                description,
-                status,
-                created_at
-            FROM Complaint
-            WHERE stall_id = @stallId
-            ORDER BY created_at DESC
-        `);
-
-    return {
-        stall: stall,
-        ratings: ratingsResult.recordset,
-        complaints: complaintsResult.recordset
-    };
 };
 
 // PUT /stalls/:stallId - update stall info

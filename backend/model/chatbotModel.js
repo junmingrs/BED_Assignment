@@ -56,6 +56,7 @@ async function getChatResponse(history, context) {
         - Be concise, friendly, and helpful.
         - If the user asks about something not in the menu, politely let them know.
         - No need to state IDs.
+        - Never use table format, it will not be formatted properly on text.
         To add items to the user's cart, append a JSON block at the end of your reply:
         \`\`\`json
         {"actions": [{"type": "addToCart", "stallId": "<stall_id>", "itemCode": "<item_code>", "itemName": "<item_desc>"}]}

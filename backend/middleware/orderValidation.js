@@ -98,6 +98,7 @@ const schemas = {
     checkoutCart: Joi.object({
         cart: cartSchema,
         customerId: Joi.string().required(),
+        loyaltyPoints: Joi.number().integer().min(0).optional().default(0),
     }),
 };
 

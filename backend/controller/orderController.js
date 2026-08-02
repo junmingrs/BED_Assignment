@@ -2,6 +2,11 @@ const { wsMessages } = require("../../public/js/const.js");
 const orderModel = require("../model/orderModel");
 const { broadcast } = require("../ws");
 const crypto = require("crypto");
+const {
+    addCustomerLoyaltyPoints,
+    getCustomerByAccountId,
+    subtractCustomerLoyaltyPoints,
+} = require("../model/customerModel.js");
 const { sendReceipt } = require("../model/emailModel.js");
 const { poolPromise } = require("../db");
 
@@ -74,7 +79,7 @@ async function updateOrderStatus(req, res) {
 }
 
 async function checkoutCart(req, res) {
-    const { cart, customerId } = req.body;
+    const { cart, customerId, loyaltyPoints = 0 } = req.body;
     const { isGuest } = req.user;
 
     try {
@@ -126,13 +131,13 @@ async function checkoutCart(req, res) {
         }, {});
 
         // ===== 发送收据邮件 =====
+        let totalAmount = 0;
         if (customerEmail && !isGuest) {
             const allItems = [];
-            let totalAmount = 0;
 
-            for (const stallId of Object.keys(cartMap)) {
-                const items = cartMap[stallId].items;
-                const isEco = cartMap[stallId].isEco || false;
+            for (const stallId of Object.keys(cart)) {
+                const items = cart[stallId].items;
+                const isEco = cart[stallId].isEco || false;
                 let stallTotal = 0;
 
                 for (const item of items) {
@@ -165,6 +170,19 @@ async function checkoutCart(req, res) {
                 totalAmount += stallTotal;
             }
 
+            if (loyaltyPoints > 0) {
+                const customer = await getCustomerByAccountId(customerId);
+                const pointsUsed = Math.min(
+                    loyaltyPoints,
+                    customer?.loyalty_points || 0,
+                );
+                const discount = Math.min(pointsUsed * 0.1, totalAmount);
+                totalAmount -= discount;
+                if (pointsUsed > 0) {
+                    await subtractCustomerLoyaltyPoints(customerId, pointsUsed);
+                }
+            }
+
             console.log(
                 " Sending receipt items:",
                 JSON.stringify(allItems, null, 2),
@@ -189,6 +207,7 @@ async function checkoutCart(req, res) {
                 }
             });
         }
+        await addCustomerLoyaltyPoints(customerId, Math.ceil(totalAmount / 10));
 
         return res.status(200).json({
             message: "Orders placed successfully. Food is now being prepared",

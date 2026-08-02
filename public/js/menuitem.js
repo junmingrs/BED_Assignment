@@ -248,7 +248,7 @@ async function deleteItemRequest(stallId, itemCode) {
     }
 }
 
-stallUnitNoRef.innerText = stallInfo.stall.stall_unit_no;
+stallUnitNoRef.innerText = stallInfo.stall_unit_no;
 
 const displayEditDialog = async (item) => {
     editDialogRef.className =

@@ -54,6 +54,14 @@ const {
     validateGetTopItems,
     validateGetAISummary,
 } = require("./middleware/analyticsValidation.js");
+const {
+    validatePromotionCreate,
+    validatePromotionUpdate,
+    validateDeletePromotion,
+    validateGetPromotionByCode,
+    validateGetPromotionByStallId,
+} = require("./middleware/promotionValidation");
+const { validateChat } = require("./middleware/chatbotValidation");
 
 // Create Express app
 const app = express();
@@ -158,6 +166,7 @@ app.get(
 app.post(
     "/promotion",
     authorise("Vendor"),
+    validatePromotionCreate,
     promotionController.createPromotion,
 );
 app.get(
@@ -168,11 +177,13 @@ app.get(
 app.get(
     "/promotion/code/:promotionCode",
     authorise("Vendor"),
+    validateGetPromotionByCode,
     promotionController.getPromotionByCode,
 );
 app.get(
     "/promotion/stall/:stallId",
     authorise("Vendor"),
+    validateGetPromotionByStallId,
     promotionController.getPromotionByStallId,
 );
 app.get(
@@ -180,10 +191,16 @@ app.get(
     authorise("Vendor"),
     promotionController.getActivePromotions,
 );
-app.put("/promotion", authorise("Vendor"), promotionController.updatePromotion);
+app.put(
+    "/promotion",
+    authorise("Vendor"),
+    validatePromotionUpdate,
+    promotionController.updatePromotion,
+);
 app.delete(
     "/promotion",
     authorise("Vendor"),
+    validateDeletePromotion,
     promotionController.deletePromotion,
 );
 
@@ -384,6 +401,7 @@ app.get(
 app.post(
     "/customer/chatbot/:customerId",
     authorise("Customer"),
+    validateChat,
     chatbotController.chat,
 );
 

@@ -12,11 +12,11 @@ const promotionContainer = document.getElementById("promotion-container");
 const promotionInput = document.getElementById("promotion-input");
 const promotionBtn = document.getElementById("promotion-btn");
 const promotionMsg = document.getElementById("promotion-msg");
-const promotionValids = document.getElementById("promotion-valids");
 
 const token = sessionStorage.getItem(SS_KEYS.accessToken);
 let cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
 let appliedPromos = [];
+let appliedLoyaltyPoints = 0;
 
 async function getItemById(stallId, itemCode) {
     try {
@@ -108,7 +108,7 @@ async function renderCartItems() {
     const cards = await Promise.all(
         Object.keys(cartMap).map(async (stallId) => {
             const stallInfo = await getStallInfo(stallId);
-            const stallName = stallInfo.stall.stall_name;
+            const stallName = stallInfo.stall_name;
             const stallItems = cartMap[stallId].items;
             const isEco = cartMap[stallId].isEco === true;
 
@@ -226,11 +226,13 @@ async function renderCartItems() {
         paymentContainer.classList.remove("hidden");
     }
 
+    if (appliedLoyaltyPoints > 0) {
+        totalAmount -= Math.min(appliedLoyaltyPoints * 0.1, totalAmount);
+    }
     cartTotal.textContent = "$" + totalAmount.toFixed(2);
 
     // display promo
     if (Object.keys(cartMap).length > 0) {
-        console.log(promotionContainer.classList)
         promotionContainer.classList.remove("hidden!")
     }
 }
@@ -253,12 +255,14 @@ async function checkout() {
             body: JSON.stringify({
                 cart: cartMap,
                 customerId,
+                loyaltyPoints: appliedLoyaltyPoints,
             }),
         });
 
         const data = await response.json();
         alert(t(data.message) || data.message);
         if (response.ok) {
+            appliedLoyaltyPoints = 0;
             const itemPromises = [];
 
             Object.keys(cartMap).forEach((stallId) => {
@@ -403,6 +407,40 @@ promotionBtn.addEventListener("click", async () => {
         return;
     }
 
+    if (code === "loyalty") {
+        if (getIsGuest(token)) {
+            showMsg(
+                "Loyalty points are only available for logged-in customers",
+                "error",
+            );
+            return;
+        }
+        if (appliedLoyaltyPoints > 0) {
+            showMsg("Loyalty points already applied", "error");
+            return;
+        }
+
+        const customerId = getIdFromToken(token);
+        const profile = await fetchAPI(
+            `/customer/${customerId}/profile`,
+        );
+        const points = profile?.loyalty_points || 0;
+
+        if (points < 1) {
+            showMsg("You have no loyalty points to use", "error");
+            return;
+        }
+
+        appliedLoyaltyPoints = points;
+        showMsg(
+            `Using ${points} loyalty points ($${(points * 0.1).toFixed(2)} discount)`,
+            "success",
+        );
+        promotionInput.value = "";
+        renderCartItems();
+        return;
+    }
+
     const allPromos = await getAllPromotions();
     if (!Array.isArray(allPromos)) {
         showMsg(t("promo_verify_error"), "error");
@@ -436,7 +474,7 @@ promotionBtn.addEventListener("click", async () => {
 
     appliedPromos.push(matchedPromo);
     showMsg(
-        `${code} ${t("promo_applied", { discount: matchedPromo.discount })}`,
+        `'${code}' promocode ${t("promo_applied")}`,
         "success",
     );
     promotionInput.value = "";

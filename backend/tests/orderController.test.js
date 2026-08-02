@@ -10,14 +10,16 @@ const { broadcast } = require("../ws");
 const { sendReceipt } = require("../model/emailModel");
 const crypto = require("crypto");
 const { wsMessages } = require("../../public/js/const");
+const customerModel = require("../model/customerModel");
 
 jest.mock("../model/orderModel");
+jest.mock("../model/customerModel");
 jest.mock("../ws", () => ({
     initWebServer: jest.fn(),
     broadcast: jest.fn(),
 }));
 
-jest.mock("../email.js", () => ({
+jest.mock("../model/emailModel.js", () => ({
     sendReceipt: jest.fn().mockResolvedValue(true),
 }));
 
@@ -42,6 +44,9 @@ describe("checkoutCart Controller Tests", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockRequest.input.mockReturnThis();
+        mockRequest.query.mockResolvedValue({
+            recordset: [{ item_desc: "Salmon Sushi Set", item_price: 12.5 }],
+        });
 
         req = {
             body: {
@@ -132,6 +137,102 @@ describe("checkoutCart Controller Tests", () => {
         await checkoutCart(req, res);
 
         expect(sendReceipt).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    test("should apply loyalty discount and deduct loyalty points", async () => {
+        req.body.loyaltyPoints = 50;
+
+        mockRequest.query.mockResolvedValueOnce({
+            recordset: [{ account_email: "test@example.com" }],
+        });
+
+        orderModel.getTotalAmount.mockResolvedValueOnce(25.0);
+        orderModel.createOrder.mockResolvedValueOnce("mocked-uuid-1234");
+        orderModel.createOrderItem.mockResolvedValueOnce(true);
+        customerModel.getCustomerByAccountId.mockResolvedValue({
+            loyalty_points: 50,
+        });
+
+        await checkoutCart(req, res);
+
+        // 50 points * $0.10 = $5.00 off the $25.30 total
+        expect(sendReceipt).toHaveBeenCalledWith("test@example.com", {
+            order_id: "mocked-uuid-1234",
+            items: [{ name: "Salmon Sushi Set", quantity: 2, price: 12.5 }],
+            total: 20.3,
+        });
+        expect(customerModel.subtractCustomerLoyaltyPoints).toHaveBeenCalledWith(
+            "cust_1",
+            50,
+        );
+        // Math.ceil(20.3 / 10) = 3 points earned
+        expect(customerModel.addCustomerLoyaltyPoints).toHaveBeenCalledWith(
+            "cust_1",
+            3,
+        );
+        // DB order total is NOT discounted
+        expect(orderModel.createOrder).toHaveBeenCalledWith(
+            "mocked-uuid-1234",
+            "stall_A",
+            "cust_1",
+            25.3,
+            true,
+        );
+        expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    test("should clamp loyalty points to the customer's balance", async () => {
+        req.body.loyaltyPoints = 500;
+
+        mockRequest.query.mockResolvedValueOnce({
+            recordset: [{ account_email: "test@example.com" }],
+        });
+
+        orderModel.getTotalAmount.mockResolvedValueOnce(25.0);
+        orderModel.createOrder.mockResolvedValueOnce("mocked-uuid-1234");
+        orderModel.createOrderItem.mockResolvedValueOnce(true);
+        customerModel.getCustomerByAccountId.mockResolvedValue({
+            loyalty_points: 50,
+        });
+
+        await checkoutCart(req, res);
+
+        expect(
+            customerModel.subtractCustomerLoyaltyPoints,
+        ).toHaveBeenCalledWith("cust_1", 50);
+        expect(sendReceipt).toHaveBeenCalledWith(
+            "test@example.com",
+            expect.objectContaining({ total: 20.3 }),
+        );
+        expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    test("should ignore loyalty points for guest customers", async () => {
+        req.user.isGuest = true;
+        req.body.loyaltyPoints = 50;
+
+        mockRequest.query.mockResolvedValueOnce({
+            recordset: [{ account_email: "guest@example.com" }],
+        });
+
+        orderModel.getTotalAmount.mockResolvedValueOnce(5.0);
+        orderModel.createOrder.mockResolvedValueOnce("mocked-uuid-1234");
+        customerModel.getCustomerByAccountId.mockResolvedValue({
+            loyalty_points: 50,
+        });
+
+        await checkoutCart(req, res);
+
+        expect(customerModel.getCustomerByAccountId).not.toHaveBeenCalled();
+        expect(
+            customerModel.subtractCustomerLoyaltyPoints,
+        ).not.toHaveBeenCalled();
+        expect(sendReceipt).not.toHaveBeenCalled();
+        expect(customerModel.addCustomerLoyaltyPoints).toHaveBeenCalledWith(
+            "cust_1",
+            0,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
     });
 
