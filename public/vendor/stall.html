@@ -1,127 +1,109 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vendor Stall</title>
     <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <!-- ===== MAIN CONTENT ===== -->
     <main class="mx-auto max-w-4xl p-8 pb-32">
-      <h1 class="text-3xl font-bold mb-6 text-gray-800">Stall Management</h1>
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">
+            Stall Management
+        </h1>
 
-      <!-- ===== TABS ===== -->
-      <div class="flex gap-1 border-b border-gray-200 mb-6">
-        <button
-          id="tab-info"
-          class="px-4 py-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 transition"
-        >
-          Stall Information
-        </button>
-        <button
-          id="tab-inspections"
-          class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 transition"
-        >
-          Inspection History
-        </button>
-      </div>
-
-      <!-- ===== TAB 1: STALL INFORMATION ===== -->
-      <section id="panel-info" class="space-y-6">
-        <div
-          class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition"
-        >
-          <h2 class="text-xl font-semibold mb-4 text-gray-700">
-            Stall Details
-          </h2>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-500"
-                >Stall Name</label
-              >
-              <p id="stall-name" class="text-lg font-medium text-gray-800">
-                Loading...
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500"
-                >Unit Number</label
-              >
-              <p id="stall-unit" class="text-lg font-medium text-gray-800">
-                Loading...
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500"
-                >Hawker Centre</label
-              >
-              <p id="hawker-centre" class="text-lg font-medium text-gray-800">
-                Loading...
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500"
-                >Vendor ID</label
-              >
-              <p id="vendor-id" class="text-lg font-medium text-gray-800">
-                Loading...
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500"
-                >Vendor Email</label
-              >
-              <p id="vendor-email" class="text-lg font-medium text-gray-800">
-                Loading...
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500"
-                >Current Rental</label
-              >
-              <p
-                id="rental-agreement"
-                class="text-lg font-medium text-gray-800"
-              >
-                Loading...
-              </p>
-            </div>
-          </div>
+        <!-- ===== TABS ===== -->
+        <div class="flex gap-1 border-b border-gray-200 mb-6">
+            <button id="tab-info"
+                class="px-4 py-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 transition">
+                Stall Information
+            </button>
+            <button id="tab-inspections"
+                class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 transition">
+                Inspection History
+            </button>
         </div>
-      </section>
 
-      <!-- ===== TAB 2: INSPECTION HISTORY ===== -->
-      <section id="panel-inspections" class="hidden space-y-6">
-        <div
-          class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition"
-        >
-          <div
-            class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-          >
-            <h2 class="text-xl font-semibold text-gray-700">
-              <span
-                class="inline-block w-1 h-6 bg-blue-500 rounded-full mr-2 align-middle"
-              ></span>
-              Inspection History
-            </h2>
-            <span
-              class="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full"
-              id="inspection-count"
-              >0 records</span
-            >
-          </div>
-          <div id="inspection-container">
-            <p class="text-sm text-gray-500">Loading inspection records...</p>
-          </div>
-        </div>
-      </section>
+        <!-- ===== TAB 1: STALL INFORMATION ===== -->
+        <section id="panel-info" class="space-y-6">
+            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">
+                    Stall Details
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Stall Name</label>
+                        <p id="stall-name" class="text-lg font-medium text-gray-800">
+                            Loading...
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Unit Number</label>
+                        <p id="stall-unit" class="text-lg font-medium text-gray-800">
+                            Loading...
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Hawker Centre</label>
+                        <p id="hawker-centre" class="text-lg font-medium text-gray-800">
+                            Loading...
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Vendor ID</label>
+                        <p id="vendor-id" class="text-lg font-medium text-gray-800">
+                            Loading...
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Vendor Email</label>
+                        <p id="vendor-email" class="text-lg font-medium text-gray-800">
+                            Loading...
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Current Rental</label>
+                        <p id="rental-agreement" class="text-lg font-medium text-gray-800">
+                            Loading...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== TAB 2: INSPECTION HISTORY ===== -->
+        <section id="panel-inspections" class="hidden space-y-6">
+            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+                <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <h2 class="text-xl font-semibold text-gray-700">
+                        <span class="inline-block w-1 h-6 bg-blue-500 rounded-full mr-2 align-middle"></span>
+                        Inspection History
+                    </h2>
+                    <span class="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full"
+                        id="inspection-count">0 records</span>
+                </div>
+                <div id="inspection-container">
+                    <p class="text-sm text-gray-500">
+                        Loading inspection records...
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <button id="signout-btn"
+                class="inline-flex h-10 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50" />
+            Sign Out </button>
+        </section>
     </main>
 
     <script src="/js/const.js"></script>
     <script src="/js/navbar.js"></script>
-    <script src="/js/vendor-stall.js"></script>
-  </body>
+    <script type="module" src="/js/vendor-stall.js"></script>
+</body>
+
 </html>

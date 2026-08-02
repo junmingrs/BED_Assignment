@@ -13,6 +13,29 @@ export function getIsGuest(token) {
     }
 }
 
+export function signOut() {
+    sessionStorage.removeItem(SS_KEYS.accessToken);
+    window.location.href = "/";
+}
+
+export async function getAccount(token) {
+    const accountId = getIdFromToken(token);
+
+    try {
+        const response = await fetch(`/account/${accountId}/profile`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (e) {
+        console.error("Error: ", e);
+    }
+}
+
 export function statusStyle(status) {
     switch (status) {
         case "Pending":
