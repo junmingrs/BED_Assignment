@@ -21,11 +21,14 @@ async function getOrdersByCustomer(req, res) {
     const statuses = Array.isArray(req.query.status)
         ? req.query.status
         : req.query.status
-            ? [req.query.status]
-            : [];
+          ? [req.query.status]
+          : [];
 
     try {
-        const orders = await orderModel.getOrdersByCustomer(customerId, statuses);
+        const orders = await orderModel.getOrdersByCustomer(
+            customerId,
+            statuses,
+        );
         return res.status(200).json(orders);
     } catch (err) {
         console.error(err);
@@ -73,7 +76,6 @@ async function updateOrderStatus(req, res) {
 async function checkoutCart(req, res) {
     const { cart, customerId } = req.body;
     const { isGuest } = req.user;
-    const cartMap = typeof cart == "string" ? JSON.parse(cart) : cart;
 
     try {
         const pool = await poolPromise;
@@ -85,16 +87,21 @@ async function checkoutCart(req, res) {
             );
 
         const customerEmail = customerResult.recordset[0]?.account_email;
-        const orderPromises = Object.keys(cartMap).map(async (stallId) => {
+        const orderPromises = Object.keys(cart).map(async (stallId) => {
             const orderId = crypto.randomUUID();
-            const items = cartMap[stallId].items;
-            const isEco = cartMap[stallId].isEco || false;
+            const items = cart[stallId].items;
+            const isEco = cart[stallId].isEco || false;
 
-            
             let total = await orderModel.getTotalAmount(items);
             if (isEco) total += 0.3;
 
-            await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
+            await orderModel.createOrder(
+                orderId,
+                stallId,
+                customerId,
+                total,
+                isEco,
+            );
 
             const itemPromises = items.map(async (item) => {
                 await orderModel.createOrderItem(orderId, { ...item, stallId });
@@ -136,11 +143,12 @@ async function checkoutCart(req, res) {
 
                     const menuItem = menuItemResult.recordset[0];
                     const price = menuItem?.item_price || item.item_price || item.price || 0;
+           
                     const qty = item.quantity || 1;
                     stallTotal += price * qty;
 
                     allItems.push({
-                        name: menuItem?.item_desc || "Item",  // ✅ 从数据库获取商品名称
+                        name: menuItem?.item_desc || "Item",  
                         quantity: qty,
                         price: price,
                     });
@@ -152,6 +160,13 @@ async function checkoutCart(req, res) {
           
             console.log(' Sending receipt items:', JSON.stringify(allItems, null, 2));
             console.log(' Total amount:', totalAmount);
+            });
+
+            console.log(
+                " Sending receipt items:",
+                JSON.stringify(allItems, null, 2),
+            );
+            console.log(" Total amount:", totalAmount);
 
             sendReceipt(customerEmail, {
                 order_id: Object.values(ordersMap).join(", "),
