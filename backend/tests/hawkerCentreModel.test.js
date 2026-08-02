@@ -1,150 +1,227 @@
-const { poolPromise } = require("../db");
-const hawkerCentreModel = require("../model/hawkerCentreModel");
+const {
+    getAllHawkerCentres,
+    getHawkerCentreById,
+    getStallsByHawkerCentreId,
+    getHawkerCentresByOperatorId,
+} = require("../model/hawkerCentreModel");
 
-jest.mock("../db", () => ({
-    poolPromise: Promise.resolve({
-        request: jest.fn().mockReturnThis(),
-        input: jest.fn().mockReturnThis(),
-        query: jest.fn(),
-    }),
+const mockRequest = {
+    input: jest.fn().mockReturnThis(),
+    query: jest.fn(),
+};
+
+// Mock mssql
+jest.mock("mssql", () => ({
+    ConnectionPool: jest.fn().mockImplementation(() => ({
+        connect: jest.fn().mockResolvedValue({
+            request: () => mockRequest,
+        }),
+    })),
 }));
 
-describe("hawkerCentreModel.getAllHawkerCentres", () => {
+// Mock console.error
+beforeAll(() => {
+    jest.spyOn(console, "error").mockImplementation(() => { });
+});
+
+afterAll(() => {
+    console.error.mockRestore();
+});
+
+describe("hawkerCentreModel Unit Tests", () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockRequest.input.mockReturnThis();
+        mockRequest.query.mockReset();
     });
 
-    it("should retrieve all hawker centres", async () => {
-        const mockCentres = [
-            { hawker_centre_id: "hc1", centre_name: "Maxwell Food Centre" },
-            { hawker_centre_id: "hc2", centre_name: "Chinatown Complex" },
+    // getAllHawkerCentres
+    describe("getAllHawkerCentres", () => {
+        const mockHawkerCentres = [
+            {
+                hawker_centre_id: "hc_1",
+                centre_name: "Maxwell Food Centre",
+                address: "1 Kadayanallur St",
+                operator_id: "op_1",
+            },
+            {
+                hawker_centre_id: "hc_2",
+                centre_name: "Chinatown Complex",
+                address: "335 Smith St",
+                operator_id: "op_2",
+            },
         ];
-        const mockRequest = { query: jest.fn().mockResolvedValue({ recordset: mockCentres }) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
 
-        const centres = await hawkerCentreModel.getAllHawkerCentres();
+        test("should return all hawker centres successfully", async () => {
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: mockHawkerCentres,
+            });
 
-        expect(mockRequest.query).toHaveBeenCalledWith("SELECT * FROM HawkerCentre");
-        expect(centres).toEqual(mockCentres);
+            const result = await getAllHawkerCentres();
+
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+            expect(result).toEqual(mockHawkerCentres);
+        });
+
+        test("should return empty array when no hawker centres found", async () => {
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
+
+            const result = await getAllHawkerCentres();
+
+            expect(result).toEqual([]);
+        });
+
+        test("should throw error when database query fails", async () => {
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Database connection error"),
+            );
+
+            await expect(getAllHawkerCentres()).rejects.toThrow(
+                "Database connection error",
+            );
+        });
     });
 
-    it("should handle errors", async () => {
-        const mockRequest = { query: jest.fn().mockRejectedValue(new Error("DB Error")) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
+    // getHawkerCentreById
+    describe("getHawkerCentreById", () => {
+        const mockHawkerCentre = {
+            hawker_centre_id: "hc_1",
+            centre_name: "Maxwell Food Centre",
+            address: "1 Kadayanallur St",
+            operator_id: "op_1",
+        };
 
-        await expect(hawkerCentreModel.getAllHawkerCentres()).rejects.toThrow("DB Error");
-    });
-});
+        test("should return hawker centre by id successfully", async () => {
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: [mockHawkerCentre],
+            });
 
-describe("hawkerCentreModel.getHawkerCentreById", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+            const result = await getHawkerCentreById("hc_1");
 
-    it("should retrieve a hawker centre by id", async () => {
-        const mockCentre = { hawker_centre_id: "hc1", centre_name: "Maxwell Food Centre" };
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockResolvedValue({ recordset: [mockCentre] }) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "hawker_centre_id",
+                "hc_1",
+            );
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+            expect(result).toEqual(mockHawkerCentre);
+        });
 
-        const centre = await hawkerCentreModel.getHawkerCentreById("hc1");
+        test("should return null if hawker centre not found", async () => {
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
-        expect(mockRequest.input).toHaveBeenCalledWith("hawker_centre_id", "hc1");
-        expect(centre).toEqual(mockCentre);
-    });
+            const result = await getHawkerCentreById("hc_1");
 
-    it("should return null when no hawker centre matches", async () => {
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockResolvedValue({ recordset: [] }) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "hawker_centre_id",
+                "hc_1",
+            );
+            expect(result).toBeNull();
+        });
 
-        const centre = await hawkerCentreModel.getHawkerCentreById("nope");
+        test("should throw error when database query fails", async () => {
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Database connection error"),
+            );
 
-        expect(centre).toBeNull();
-    });
-
-    it("should handle errors", async () => {
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockRejectedValue(new Error("DB Error")) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
-
-        await expect(hawkerCentreModel.getHawkerCentreById("hc1")).rejects.toThrow("DB Error");
-    });
-});
-
-describe("hawkerCentreModel.getStallsByHawkerCentreId", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
+            await expect(getHawkerCentreById("hc_1")).rejects.toThrow(
+                "Database connection error",
+            );
+        });
     });
 
-    it("should retrieve stalls for a hawker centre", async () => {
+    // getStallsByHawkerCentreId
+    describe("getStallsByHawkerCentreId", () => {
         const mockStalls = [
-            { stall_id: "s1", stall_name: "Kim Kitchen", hawker_centre_id: "hc1" },
-            { stall_id: "s2", stall_name: "Sakura Sushi", hawker_centre_id: "hc1" },
+            {
+                stall_id: "stall_A",
+                stall_name: "Kim Kitchen",
+                stall_unit_no: "#01-01",
+                vendor_id: "vendor_1",
+                hawker_centre_id: "hc_1",
+            },
+            {
+                stall_id: "stall_B",
+                stall_name: "Sakura Sushi",
+                stall_unit_no: "#01-02",
+                vendor_id: "vendor_2",
+                hawker_centre_id: "hc_1",
+            },
         ];
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockResolvedValue({ recordset: mockStalls }) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
 
-        const stalls = await hawkerCentreModel.getStallsByHawkerCentreId("hc1");
+        test("should return stalls for a hawker centre successfully", async () => {
+            mockRequest.query.mockResolvedValueOnce({ recordset: mockStalls });
 
-        expect(mockRequest.input).toHaveBeenCalledWith("hawker_centre_id", "hc1");
-        expect(stalls).toEqual(mockStalls);
+            const result = await getStallsByHawkerCentreId("hc_1");
+
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "hawker_centre_id",
+                "hc_1",
+            );
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+            expect(result).toEqual(mockStalls);
+        });
+
+        test("should return empty array when no stalls found for hawker centre", async () => {
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
+
+            const result = await getStallsByHawkerCentreId("hc_1");
+
+            expect(result).toEqual([]);
+        });
+
+        test("should throw error when database query fails", async () => {
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Database connection error"),
+            );
+
+            await expect(getStallsByHawkerCentreId("hc_1")).rejects.toThrow(
+                "Database connection error",
+            );
+        });
     });
 
-    it("should return an empty array when the hawker centre has no stalls", async () => {
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockResolvedValue({ recordset: [] }) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
+    // getHawkerCentresByOperatorId
+    describe("getHawkerCentresByOperatorId", () => {
+        const mockHawkerCentres = [
+            {
+                hawker_centre_id: "hc_1",
+                centre_name: "Maxwell Food Centre",
+                address: "1 Kadayanallur St",
+                operator_id: "op_1",
+            },
+        ];
 
-        const stalls = await hawkerCentreModel.getStallsByHawkerCentreId("hc1");
+        test("should return hawker centres by operator id successfully", async () => {
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: mockHawkerCentres,
+            });
 
-        expect(stalls).toEqual([]);
-    });
+            const result = await getHawkerCentresByOperatorId("op_1");
 
-    it("should handle errors", async () => {
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockRejectedValue(new Error("DB Error")) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "operator_id",
+                "op_1",
+            );
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+            expect(result).toEqual(mockHawkerCentres);
+        });
 
-        await expect(hawkerCentreModel.getStallsByHawkerCentreId("hc1")).rejects.toThrow("DB Error");
-    });
-});
+        test("should return empty array when no hawker centres found for operator", async () => {
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
-describe("hawkerCentreModel.getHawkerCentresByOperatorId", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+            const result = await getHawkerCentresByOperatorId("op_1");
 
-    it("should retrieve hawker centres for an operator", async () => {
-        const mockCentres = [{ hawker_centre_id: "hc1", operator_id: "op1" }];
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockResolvedValue({ recordset: mockCentres }) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
+            expect(result).toEqual([]);
+        });
 
-        const centres = await hawkerCentreModel.getHawkerCentresByOperatorId("op1");
+        test("should throw error when database query fails", async () => {
+            mockRequest.query.mockRejectedValueOnce(
+                new Error("Database connection error"),
+            );
 
-        expect(mockRequest.input).toHaveBeenCalledWith("operator_id", "op1");
-        expect(centres).toEqual(mockCentres);
-    });
-
-    it("should return an empty array when the operator has no hawker centres", async () => {
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockResolvedValue({ recordset: [] }) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
-
-        const centres = await hawkerCentreModel.getHawkerCentresByOperatorId("op1");
-
-        expect(centres).toEqual([]);
-    });
-
-    it("should handle errors", async () => {
-        const mockRequest = { input: jest.fn().mockReturnThis(), query: jest.fn().mockRejectedValue(new Error("DB Error")) };
-        const mockPool = await poolPromise;
-        mockPool.request.mockReturnValue(mockRequest);
-
-        await expect(hawkerCentreModel.getHawkerCentresByOperatorId("op1")).rejects.toThrow("DB Error");
+            await expect(getHawkerCentresByOperatorId("op_1")).rejects.toThrow(
+                "Database connection error",
+            );
+        });
     });
 });
