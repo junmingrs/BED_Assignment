@@ -119,6 +119,8 @@ const translations = {
         // profile.html 
         profile_title: 'Profile',
         name_label: 'Name:',
+        email_label: "Email Address: ",
+        id_label: "Account Id: ",
         points_label: 'Points:',
         sign_out: 'Sign Out',
         login_btn: 'Login',
@@ -145,6 +147,22 @@ const translations = {
         eco_description: 'Use paper containers and reduce plastic where possible.',
         plus_030: '+$0.30',
         delete: 'Delete',
+
+        // customer/index.js
+        greeting_hi: "Hi",
+        greeting_guest: "Hi, Guest!",
+        no_active_orders: "No active orders.",
+        queue_number: "Queue Number",
+        ordered_at: "Ordered at",
+        eco_packaging_label: "Eco-friendly packaging",
+        total_label: "Total",
+        cancel_order_btn: "Cancel Order",
+        cancel_order_confirm: "Are you sure you want to cancel this order?",
+        cancel_order_success: "Order cancelled successfully",
+        cancel_order_failed: "Unable to cancel order, please try again later.",
+        status_pending: "Pending",
+        status_preparing: "Preparing",
+        status_ready: "Ready",
     },
     zh: {
         // nav
@@ -268,6 +286,8 @@ const translations = {
         // profile.html 
         profile_title: '个人资料',
         name_label: '姓名：',
+        email_label: "邮箱：",
+        id_label: "账户ID：",
         points_label: '积分：',
         sign_out: '登出',
         login_btn: '登录',
@@ -308,6 +328,22 @@ const translations = {
         eco_description: '使用纸制容器，尽可能减少塑料使用。',
         plus_030: '+$0.30',
         delete: '删除',
+        
+        // customer-index.js
+        greeting_hi: "你好",
+        greeting_guest: "你好，访客！",
+        no_active_orders: "暂无进行中的订单。",
+        queue_number: "排队号码",
+        ordered_at: "下单时间",
+        eco_packaging_label: "环保包装",
+        total_label: "总计",
+        cancel_order_btn: "取消订单",
+        cancel_order_confirm: "您确定要取消此订单吗？",
+        cancel_order_success: "订单已成功取消",
+        cancel_order_failed: "无法取消订单，请稍后重试。",
+        status_pending: "待处理",
+        status_preparing: "准备中",
+        status_ready: "已完成",
     }
 };
 

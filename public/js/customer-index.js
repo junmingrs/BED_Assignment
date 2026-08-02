@@ -5,6 +5,7 @@ import {
     statusStyle,
 } from "./helper.js";
 import { getSocket } from "./websocket.js";
+
 const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const customerId = getIdFromToken(token);
 
@@ -12,11 +13,13 @@ const ordersContainer = document.getElementById("orders-container");
 const greetingElement = document.getElementById("greeting");
 
 const isGuest = getIsGuest(token);
-if (isGuest) {
-    greetingElement.textContent = "Hi, Guest!";
-} else {
-    const customer = await fetchCustomer();
-    greetingElement.textContent = `Hi, ${customer.customer_name}!`;
+async function renderGreeting() {
+    if (isGuest) {
+        greetingElement.textContent = t("greeting_guest");
+    } else {
+        const customer = await fetchCustomer();
+        greetingElement.textContent = `${t("greeting_hi")}, ${customer.customer_name}!`;
+    }
 }
 
 async function fetchCustomer() {
@@ -36,17 +39,6 @@ async function fetchCustomer() {
         console.log(e);
     }
 }
-
-await loadOrders();
-
-const socket = getSocket();
-socket.addEventListener("message", async (event) => {
-    const msg = JSON.parse(event.data);
-
-    if (msg.type == wsMessages.updateOrder && msg.customerId == customerId)
-        await loadOrders();
-});
-
 async function getOrders() {
     try {
         const params = new URLSearchParams();
@@ -84,7 +76,7 @@ function loadItems(items) {
 }
 
 async function cancelOrder(orderId) {
-    if (!confirm("Are you sure you want to cancel this order?")) return;
+    if (!confirm(t("cancel_order_confirm"))) return;
     try {
         const response = await fetch(`/orders/${orderId}/Cancelled`, {
             method: "PATCH",
@@ -96,14 +88,23 @@ async function cancelOrder(orderId) {
 
         const data = await response.json();
         if (response.ok) {
-            alert("Order cancelled successfully");
+            alert(t("cancel_order_success"));
         } else {
             console.error(data.message);
-            alert("Unable to cancel order, please try again later.");
+            alert(t("cancel_order_failed"));
         }
     } catch (err) {
         console.error(err);
     }
+}
+
+function statusLabel(status) {
+    const map = {
+        Pending: t("status_pending"),
+        Preparing: t("status_preparing"),
+        Ready: t("status_ready"),
+    };
+    return map[status] || status;
 }
 
 async function loadOrders() {
@@ -112,7 +113,7 @@ async function loadOrders() {
         ordersContainer.innerHTML = `
             <div class="flex items-center justify-center rounded-xl border border-dashed py-12">
                 <p class="text-sm text-gray-500">
-                    No active orders.
+                    ${t("no_active_orders")}
                 </p>
             </div>
         `;
@@ -128,15 +129,15 @@ async function loadOrders() {
             <div class="border-b p-6">
                 <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-sm text-gray-500">Queue Number</p>
+                        <p class="text-sm text-gray-500">${t("queue_number")}</p>
                         <h3 class="mt-1 text-3xl font-bold">${order.queue_number}</h3>
                     </div>
                 <span class="inline-block mt-3 text-xs font-medium px-2 py-1 rounded-xl ${statusStyle(order.status)}">
-                    ${order.status}
+                    ${statusLabel(order.status)}
                 </span>
                 </div>
 
-                <p class="mt-3 text-sm text-gray-500">Ordered at ${formatDate(order.order_date)}</p>
+                <p class="mt-3 text-sm text-gray-500">${t("ordered_at")} ${formatDate(order.order_date)}</p>
             </div>
 
             <div class="space-y-3 p-6">
@@ -145,7 +146,7 @@ async function loadOrders() {
                 ? `
                 <div class="border-t pt-4">
                     <div class="flex items-center justify-between text-sm">
-                        <span>Eco-friendly packaging</span>
+                        <span>${t("eco_packaging_label")}</span>
                         <span class="font-medium">$0.30</span>
                     </div>
                 </div>
@@ -155,7 +156,7 @@ async function loadOrders() {
             </div>
             <div class="flex justify-between border-t bg-gray-50 px-6 py-4 rounded-b-xl">
                 <div>
-                    <p class="text-sm text-gray-500">Total</p>
+                    <p class="text-sm text-gray-500">${t("total_label")}</p>
                     <p class="text-xl font-bold">$${order.total_amount.toFixed(2)}</p>
                 </div>
 
@@ -166,7 +167,7 @@ async function loadOrders() {
                             class="rounded-lg bg-red-600 px-3 py-0 text-sm font-medium text-white transition hover:bg-red-700"
                             onclick="cancelOrder('${order.order_id}')"
                         >
-                            Cancel Order
+                            ${t("cancel_order_btn")}
                         </button>
                         `
                 : ""
@@ -180,3 +181,20 @@ async function loadOrders() {
 }
 
 window.cancelOrder = cancelOrder;
+
+window.addEventListener("languageChanged", async () => {
+    await renderGreeting();
+    await loadOrders();
+});
+
+await renderGreeting();
+await loadOrders();
+
+const socket = getSocket();
+socket.addEventListener("message", async (event) => {
+    const msg = JSON.parse(event.data);
+
+    if (msg.type == wsMessages.updateOrder && msg.customerId == customerId)
+        await loadOrders();
+});
+
