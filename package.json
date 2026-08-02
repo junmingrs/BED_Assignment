@@ -28,7 +28,6 @@
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
         "googleapis": "^173.0.0",
-        "jest": "^30.4.2",
         "joi": "^18.2.3",
         "jsonwebtoken": "^9.0.3",
         "jwt-decode": "^4.0.0",
@@ -43,6 +42,7 @@
     },
     "devDependencies": {
         "@tailwindcss/cli": "^4.3.3",
+        "jest": "^30.4.2",
         "swagger-autogen": "^2.23.7",
         "tailwindcss": "^4.3.3"
     }

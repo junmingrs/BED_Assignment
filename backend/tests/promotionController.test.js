@@ -189,6 +189,24 @@ describe("promotionController.createPromotion", () => {
         expect(res.json).toHaveBeenCalledWith(mockPromo);
     });
 
+    it("should create a promotion with no customers to email", async () => {
+        const mockPromo = { promo_code: "NEWCODE", stall_id: "1", item_code: "A1", discount: 15 };
+        promotionModel.createPromotion.mockResolvedValue(mockPromo);
+        customerModel.getAllCustomers.mockResolvedValue([]); // no customers
+        stallModel.getStallById.mockResolvedValue({ stall_name: "Best Stall", hawker_centre_id: "hc1" });
+        hawkerCentreModel.getHawkerCentreById.mockResolvedValue({ centre_name: "Central Hawker" });
+        menuItemModel.getMenuItemsByStallIdAndItemCode.mockResolvedValue({ item_desc: "Chicken Rice" });
+
+        const req = { body: { promotion: { promotionCode: "NEWCODE", stallId: "1", itemCode: "A1", discount: 15 } } };
+        const res = { json: jest.fn().mockReturnThis(), status: jest.fn().mockReturnThis() };
+
+        await promotionController.createPromotion(req, res);
+
+        expect(email.sendPromotion).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.json).toHaveBeenCalledWith(mockPromo);
+    });
+
     it("should return 400 if promotion body is missing", async () => {
         const req = { body: {} };
         const res = { json: jest.fn().mockReturnThis(), status: jest.fn().mockReturnThis() };
