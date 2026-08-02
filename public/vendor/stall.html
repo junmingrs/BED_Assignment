@@ -5,13 +5,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vendor Stall</title>
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
 </head>
 
 <body>
     <!-- ===== MAIN CONTENT ===== -->
     <main class="mx-auto max-w-4xl p-8 pb-32">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">Stall Management</h1>
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">
+            Stall Management
+        </h1>
 
         <!-- ===== TABS ===== -->
         <div class="flex gap-1 border-b border-gray-200 mb-6">
@@ -84,15 +87,23 @@
                         id="inspection-count">0 records</span>
                 </div>
                 <div id="inspection-container">
-                    <p class="text-sm text-gray-500">Loading inspection records...</p>
+                    <p class="text-sm text-gray-500">
+                        Loading inspection records...
+                    </p>
                 </div>
             </div>
+        </section>
+
+        <section>
+            <button id="signout-btn"
+                class="inline-flex h-10 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50" />
+            Sign Out </button>
         </section>
     </main>
 
     <script src="/js/const.js"></script>
     <script src="/js/navbar.js"></script>
-    <script src="/js/vendor-stall.js"></script>
+    <script type="module" src="/js/vendor-stall.js"></script>
 </body>
 
 </html>

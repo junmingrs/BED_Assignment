@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEA Profile</title>
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
+    <link rel="stylesheet" href="../css/output.css" />
+</head>
+
+<body>
+    <section>
+        <h1 class="text-3xl font-bold">Profile</h1>
+    </section>
+    <section class="grid gap-5">
+        <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Account ID
+            </label>
+            <p id="user-id" class="mt-1 text-base font-medium text-slate-900">
+                ID
+            </p>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Email Address
+            </label>
+            <p id="user-email" class="mt-1 text-base font-medium text-slate-900">
+                user@example.com
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <button id="signout-btn"
+            class="inline-flex h-10 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50" />
+        Sign Out </button>
+    </section>
+
+    <script src="/js/const.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script type="module" src="/js/nea-profile.js"></script>
+</body>
+
+</html>

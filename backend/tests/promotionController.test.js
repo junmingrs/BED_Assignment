@@ -5,7 +5,7 @@ const accountModel = require("../model/accountModel");
 const stallModel = require("../model/stallModel");
 const hawkerCentreModel = require("../model/hawkerCentreModel");
 const menuItemModel = require("../model/menuItemModel");
-const email = require("../config/email");
+const email = require("../model/emailModel.js");
 
 jest.mock("../db", () => ({
     poolPromise: Promise.resolve({
@@ -20,7 +20,9 @@ jest.mock("../model/accountModel");
 jest.mock("../model/stallModel");
 jest.mock("../model/hawkerCentreModel");
 jest.mock("../model/menuItemModel");
-jest.mock("../config/email");
+jest.mock("../model/emailModel", () => ({
+    sendPromotion: jest.fn(),
+}));
 
 describe("promotionController.getAllPromotions", () => {
     beforeEach(() => {

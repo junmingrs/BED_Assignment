@@ -5,11 +5,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stall</title>
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
 </head>
 
 <body>
-    <section class="space-y-1">
+    <section class="mb-3!">
+        <button type="button" onclick="history.back()"
+            class="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 transition-colors">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Back</span>
+        </button>
+    </section>
+
+    <section class="space-y-1 mt-3!">
         <div class="flex items-center gap-3">
             <h1 id="stallName" class="text-3xl font-bold">Stall 1</h1>
             <span id="stallUnitNo"
@@ -25,18 +34,25 @@
     <hr class="border-slate-200" />
 
     <section class="space-y-6">
-        <h2 class="text-2xl font-bold tracking-tight text-slate-900">
-            Menu Items
-        </h2>
+      <h2 class="text-2xl font-bold tracking-tight text-slate-900" data-i18n="menu_items">
+        Menu Items
+      </h2>
 
-        <div id="menuContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <div
+        id="menuContainer"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      ></div>
     </section>
 
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Initialize Lucide icons if not already initialized elsewhere
+        lucide.createIcons();
+    </script>
     <script src="/js/const.js"></script>
+    <script src="/js/i18n.js"></script>
     <script src="/js/navbar.js"></script>
     <script type="module" src="/js/stall.js"></script>
     <script type="module" src="/js/chatbot.js"></script>
-</body>
-
+  </body>
 </html>

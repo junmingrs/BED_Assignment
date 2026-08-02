@@ -4,33 +4,54 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stall</title>
+    <title>Profile</title>
 
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
 </head>
 
 <body>
     <section>
-        <h1 class="text-3xl">Profile</h1>
+        <h1 class="text-3xl font-bold" data-i18n="profile_title">
+            Profile
+        </h1>
     </section>
-
-    <section id="profile" class="flex flex-col border-2 border-black rounded-xl p-6">
-        <div class="flex gap-2">
-            <span>Name:</span><span id="name"></span>
+    <section id="profile" class="grid gap-5">
+        <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500" data-i18n="name_label">
+                Name:
+            </label>
+            <p id="name" class="mt-1 text-base font-medium text-slate-900"></p>
         </div>
-        <div class="flex gap-2">
-            <span>Points:</span><span id="points"></span>
+        <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500" data-i18n="email_label">
+                Email Address
+            </label>
+            <p id="email" class="mt-1 text-base font-medium text-slate-900"></p>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500" data-i18n="id_label">
+                Account ID
+            </label>
+            <p id="id" class="mt-1 text-base font-medium text-slate-900"></p>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500" data-i18n="points_label">
+                Points:
+            </label>
+            <p id="points" class="mt-1 text-base font-medium text-slate-900"></p>
         </div>
     </section>
-
     <section>
         <button id="signout-btn"
-            class="inline-flex h-10 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50">
+            class="inline-flex h-10 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50"
+            data-i18n="sign_out">
             Sign Out
         </button>
     </section>
 
     <script src="/js/const.js"></script>
+    <script src="/js/i18n.js"></script>
     <script src="/js/navbar.js"></script>
     <script type="module" src="/js/profile.js"></script>
 </body>

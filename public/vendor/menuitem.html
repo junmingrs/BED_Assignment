@@ -1,142 +1,323 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Menu Board — Stall Vendor</title>
 
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
-</head>
+  </head>
 
-<body>
-    <header class="my-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div class="space-y-1">
-            <p class="text-sm text-slate-500">Stall Unit No — <span id="stallUnitNo" class="font-medium text-slate-700"></span></p>
-            <h1 class="text-3xl">Your Menu Items</h1>
-        </div>
-        <button id="addItemBtn" class="h-9 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950">
-            + Add Item
-        </button>
+  <body>
+    <header
+      class="my-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+    >
+      <div class="space-y-1">
+        <p class="text-sm text-slate-500">
+          Stall Unit No —
+          <span id="stallUnitNo" class="font-medium text-slate-700"></span>
+        </p>
+        <h1 class="text-3xl">Your Menu Items</h1>
+      </div>
+      <button
+        id="addItemBtn"
+        class="h-9 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+      >
+        + Add Item
+      </button>
     </header>
     <div class="flex mt-5 min-h-150 w-full h-full">
-        <div id="card-container" class="flex flex-col md:grid md:grid-cols-3 w-full gap-4 auto-rows-min">
-            <!-- card -->
-        </div>
+      <div
+        id="card-container"
+        class="flex flex-col md:grid md:grid-cols-3 w-full gap-4 auto-rows-min"
+      >
+        <!-- card -->
+      </div>
     </div>
-    <div id="addDialog" class="absolute flex inset-0 h-screen items-center justify-center hidden">
-        <form id="addForm"
-            class="flex flex-col mx-2 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4">
-            <h2 class="text-lg font-semibold text-slate-900">New Menu Item</h2>
-            <div class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950">
-                <span class="text-slate-500 shrink-0">Name:</span>
-                <input id="addNameInput" type="text" class="w-full focus:outline-none" placeholder="Item Name" />
-            </div>
-            <div class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950">
-                <span class="text-slate-500 shrink-0">$</span>
-                <input id="addPriceInput" type="number" class="w-full focus:outline-none" placeholder="Item Price" />
-            </div>
-            <div class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950">
-                <span class="text-slate-500 shrink-0">Category:</span>
-                <select name="category" id="addCategorySelect" class="w-full focus:outline-none bg-transparent">
-                    <option value="Main">Main</option>
-                    <option value="Drinks">Drinks</option>
-                    <option value="Dessert">Dessert</option>
-                </select>
-            </div>
-            <div id="addCuisineInputContainer" class="flex flex-col gap-2">
-                <div class="addCuisineInputField flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm">
-                    <span class="text-slate-500 shrink-0">Cuisine:</span>
-                    <input id="addCuisineInput" type="text" class="w-full focus:outline-none"
-                        placeholder="Cuisine Name" />
-                </div>
-            </div>
-            <button id="addCuisineBtn" type="button" class="self-start rounded-md border border-slate-200 bg-white px-3 py-1 text-sm hover:bg-slate-50 transition-colors">
-                + Add Cuisine
-            </button>
-            <div id="addImagePicker" class="relative aspect-video border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 overflow-hidden transition-colors">
-                <input id="addImageInput" type="file" accept="image/*" class="hidden" />
-                <div id="addImagePlaceholder" class="flex flex-col items-center text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span class="text-sm">Add Image</span>
-                </div>
-                <img id="addImagePreview" class="absolute inset-0 w-full h-full object-cover hidden" />
-            </div>
-            <div class="flex gap-2">
-                <button id="addCreatebtn" type="submit" class="flex-1 rounded-md bg-slate-900 text-white px-4 py-1.5 text-sm hover:bg-slate-800 transition-colors">
-                    Create
-                </button>
-                <button id="addCancelBtn" type="button" class="flex-1 rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm hover:bg-slate-50 transition-colors">
-                    Cancel
-                </button>
-            </div>
-            <span id="addMsg" class="text-green-600 hidden text-sm">Add successful</span>
-        </form>
-    </div>
-    <div id="editDialog" class="absolute flex inset-0 h-screen items-center justify-center hidden">
-        <form id="editForm"
-            class="flex flex-col mx-2 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4">
-            <h2 class="text-lg font-semibold text-slate-900">Edit Menu Item</h2>
-            <div class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950">
-                <span class="text-slate-500 shrink-0">Name:</span>
-                <input id="editNameInput" type="text" class="w-full focus:outline-none" placeholder="Item Name" />
-            </div>
-            <div class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950">
-                <span class="text-slate-500 shrink-0">$</span>
-                <input id="editPriceInput" type="number" class="w-full focus:outline-none" placeholder="Item Price" />
-            </div>
-            <div id="editCuisineInputContainer" class="flex flex-col gap-2">
-                <div class="editCuisineInputField flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm">
-                    <span class="text-slate-500 shrink-0">Cuisine:</span>
-                    <input id="editCuisineInput" type="text" class="w-full focus:outline-none"
-                        placeholder="Cuisine Name" />
-                </div>
-            </div>
-            <button id="editCuisineBtn" type="button" class="rounded-md border border-slate-200 bg-white px-3 py-1 w-full text-sm hover:bg-slate-50 transition-colors">
-                + Add Cuisine
-            </button>
-            <div id="editImagePicker" class="relative aspect-video border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 overflow-hidden transition-colors">
-                <input id="editImageInput" type="file" accept="image/*" class="hidden" />
-                <div id="editImagePlaceholder" class="flex flex-col items-center text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span class="text-sm">Change Image</span>
-                </div>
-                <img id="editImagePreview" class="absolute inset-0 w-full h-full object-cover hidden" />
-            </div>
-            <div class="flex gap-2">
-                <button id="editSaveBtn" type="submit" class="flex-1 rounded-md bg-slate-900 text-white px-4 py-1.5 text-sm hover:bg-slate-800 transition-colors">
-                    Save
-                </button>
-                <button id="editCancelBtn" type="button" class="flex-1 rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm hover:bg-slate-50 transition-colors">
-                    Cancel
-                </button>
-            </div>
-            <span id="editMsg" class="text-green-600 hidden text-sm">Edit successful</span>
-        </form>
-    </div>
-    <div id="deleteDialog" class="absolute flex inset-0 h-screen items-center justify-center hidden">
+    <div
+      id="addDialog"
+      class="absolute flex inset-0 h-screen items-center justify-center hidden"
+    >
+      <form
+        id="addForm"
+        class="flex flex-col mx-2 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4"
+      >
+        <h2 class="text-lg font-semibold text-slate-900">New Menu Item</h2>
         <div
-            class="flex flex-col mx-2 w-full max-w-sm rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4">
-            <h2 class="text-lg font-semibold text-slate-900">Delete Menu Item</h2>
-            <p class="text-sm text-slate-500">Are you sure you want to delete this item?</p>
-            <div class="rounded-lg border border-slate-100 bg-slate-50/50 p-3 space-y-1">
-                <span id="deleteName" class="block text-sm font-medium text-slate-900">Item Name</span>
-                <span id="deletePrice" class="block text-sm text-slate-500">Item Price</span>
-            </div>
-            <div class="flex gap-2">
-                <button id="deleteConfirmBtn" class="flex-1 rounded-md bg-red-600 text-white px-4 py-1.5 text-sm hover:bg-red-700 transition-colors">
-                    Delete
-                </button>
-                <button id="deleteCancelBtn" class="flex-1 rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm hover:bg-slate-50 transition-colors">
-                    Cancel
-                </button>
-            </div>
-            <span id="deleteErrorMsg" class="text-red-600 hidden text-sm">Unable to delete item: There are still orders with this item</span>
+          class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950"
+        >
+          <span class="text-slate-500 shrink-0">Name:</span>
+          <input
+            id="addNameInput"
+            type="text"
+            class="w-full focus:outline-none"
+            placeholder="Item Name"
+          />
         </div>
+        <div
+          class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950"
+        >
+          <span class="text-slate-500 shrink-0">$</span>
+          <input
+            id="addPriceInput"
+            type="number"
+            step="0.01"
+            class="w-full focus:outline-none"
+            placeholder="Item Price"
+          />
+        </div>
+        <div
+          class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950"
+        >
+          <span class="text-slate-500 shrink-0">Category:</span>
+          <select
+            name="category"
+            id="addCategorySelect"
+            class="w-full focus:outline-none bg-transparent"
+          >
+            <option value="Main">Main</option>
+            <option value="Drinks">Drinks</option>
+            <option value="Dessert">Dessert</option>
+          </select>
+        </div>
+        <div id="addCuisineInputContainer" class="flex flex-col gap-2">
+          <div
+            class="addCuisineInputField flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm"
+          >
+            <span class="text-slate-500 shrink-0">Cuisine:</span>
+            <input
+              id="addCuisineInput"
+              type="text"
+              class="w-full focus:outline-none"
+              placeholder="Cuisine Name"
+            />
+          </div>
+        </div>
+        <button
+          id="addCuisineBtn"
+          type="button"
+          class="rounded-md border bg-slate-900 px-3 py-1 text-sm text-white hover:bg-slate-800 transition-colors"
+        >
+          + Add Cuisine
+        </button>
+        <div
+          id="addImagePicker"
+          class="relative aspect-video border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 overflow-hidden transition-colors"
+        >
+          <input
+            id="addImageInput"
+            type="file"
+            accept="image/*"
+            class="hidden"
+          />
+          <div
+            id="addImagePlaceholder"
+            class="flex flex-col items-center text-slate-400"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span class="text-sm">Add Image</span>
+          </div>
+          <img
+            id="addImagePreview"
+            class="absolute inset-0 w-full h-full object-cover hidden"
+          />
+        </div>
+        <div class="flex gap-2">
+          <button
+            id="addCreatebtn"
+            type="submit"
+            class="flex-1 rounded-md bg-slate-900 text-white px-4 py-1.5 text-sm hover:bg-slate-800 transition-colors"
+          >
+            Create
+          </button>
+          <button
+            id="addCancelBtn"
+            type="button"
+            class="flex-1 rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+        <span id="addMsg" class="text-green-600 hidden text-sm"
+          >Add successful</span
+        >
+      </form>
+    </div>
+    <div
+      id="editDialog"
+      class="absolute flex inset-0 h-screen items-center justify-center hidden"
+    >
+      <form
+        id="editForm"
+        class="flex flex-col mx-2 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4"
+      >
+        <h2 class="text-lg font-semibold text-slate-900">Edit Menu Item</h2>
+        <div
+          class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950"
+        >
+          <span class="text-slate-500 shrink-0">Name:</span>
+          <input
+            id="editNameInput"
+            type="text"
+            class="w-full focus:outline-none"
+            placeholder="Item Name"
+          />
+        </div>
+        <div
+          class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950"
+        >
+          <span class="text-slate-500 shrink-0">$</span>
+          <input
+            id="editPriceInput"
+            type="number"
+            step="0.01"
+            class="w-full focus:outline-none"
+            placeholder="Item Price"
+          />
+        </div>
+        <div
+          class="flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm focus-within:ring-1 focus-within:ring-slate-950"
+        >
+          <span class="text-slate-500 shrink-0">Category:</span>
+          <select
+            name="category"
+            id="editCategorySelect"
+            class="w-full focus:outline-none bg-transparent"
+          >
+            <option value="Main">Main</option>
+            <option value="Drinks">Drinks</option>
+            <option value="Dessert">Dessert</option>
+          </select>
+        </div>
+        <div id="editCuisineInputContainer" class="flex flex-col gap-2">
+          <div
+            class="editCuisineInputField flex gap-2 items-center rounded-md border border-slate-200 px-3 py-1.5 text-sm"
+          >
+            <span class="text-slate-500 shrink-0">Cuisine:</span>
+            <input
+              id="editCuisineInput"
+              type="text"
+              class="w-full focus:outline-none"
+              placeholder="Cuisine Name"
+            />
+          </div>
+        </div>
+        <button
+          id="editCuisineBtn"
+          type="button"
+          class="rounded-md border border-slate-200 bg-white px-3 py-1 w-full text-sm hover:bg-slate-50 transition-colors"
+        >
+          + Add Cuisine
+        </button>
+        <div
+          id="editImagePicker"
+          class="relative aspect-video border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer bg-slate-50 hover:bg-slate-100 overflow-hidden transition-colors"
+        >
+          <input
+            id="editImageInput"
+            type="file"
+            accept="image/*"
+            class="hidden"
+          />
+          <div
+            id="editImagePlaceholder"
+            class="flex flex-col items-center text-slate-400"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span class="text-sm">Change Image</span>
+          </div>
+          <img
+            id="editImagePreview"
+            class="absolute inset-0 w-full h-full object-cover hidden"
+          />
+        </div>
+        <div class="flex gap-2">
+          <button
+            id="editSaveBtn"
+            type="submit"
+            class="flex-1 rounded-md bg-slate-900 text-white px-4 py-1.5 text-sm hover:bg-slate-800 transition-colors"
+          >
+            Save
+          </button>
+          <button
+            id="editCancelBtn"
+            type="button"
+            class="flex-1 rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+        <span id="editMsg" class="text-green-600 hidden text-sm"
+          >Edit successful</span
+        >
+      </form>
+    </div>
+    <div
+      id="deleteDialog"
+      class="absolute flex inset-0 h-screen items-center justify-center hidden"
+    >
+      <div
+        class="flex flex-col mx-2 w-full max-w-sm rounded-xl border border-slate-200 bg-white shadow-sm p-6 space-y-4"
+      >
+        <h2 class="text-lg font-semibold text-slate-900">Delete Menu Item</h2>
+        <p class="text-sm text-slate-500">
+          Are you sure you want to delete this item?
+        </p>
+        <div
+          class="rounded-lg border border-slate-100 bg-slate-50/50 p-3 space-y-1"
+        >
+          <span id="deleteName" class="block text-sm font-medium text-slate-900"
+            >Item Name</span
+          >
+          <span id="deletePrice" class="block text-sm text-slate-500"
+            >Item Price</span
+          >
+        </div>
+        <div class="flex gap-2">
+          <button
+            id="deleteConfirmBtn"
+            class="flex-1 rounded-md bg-red-600 text-white px-4 py-1.5 text-sm hover:bg-red-700 transition-colors"
+          >
+            Delete
+          </button>
+          <button
+            id="deleteCancelBtn"
+            class="flex-1 rounded-md border border-slate-200 bg-white px-4 py-1.5 text-sm hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+        <span id="deleteErrorMsg" class="text-red-600 hidden text-sm"
+          >Unable to delete item: There are still orders with this item</span
+        >
+      </div>
     </div>
     <script src="/js/const.js"></script>
     <script src="/js/navbar.js"></script>
@@ -144,8 +325,7 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        lucide.createIcons();
+      lucide.createIcons();
     </script>
-</body>
-
+  </body>
 </html>

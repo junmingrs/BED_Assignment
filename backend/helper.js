@@ -32,4 +32,10 @@ function getTimeFilter(timeframe, dateProperty) {
     return timeFilter;
 }
 
-module.exports = { getTimeFilter };
+// for validation file
+function handleValidationError(res, error) {
+    const errorMessage = error.details.map((detail) => detail.message).join(", ");
+    return res.status(400).json({ message: errorMessage });
+}
+
+module.exports = { getTimeFilter, handleValidationError };

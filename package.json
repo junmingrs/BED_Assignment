@@ -6,7 +6,6 @@
     "scripts": {
         "test": "jest",
         "dev": "nodemon backend/app.js 3000",
-        "d1": "nodemon backend/app.js 3001",
         "swagger": "node backend/swagger.js"
     },
     "repository": {
@@ -38,6 +37,7 @@
         "nodemailer": "^9.0.3",
         "nodemon": "^3.1.14",
         "ollama": "^0.6.3",
+        "resend": "^6.18.1",
         "swagger-ui-express": "^5.0.1",
         "ws": "^8.21.1"
     },

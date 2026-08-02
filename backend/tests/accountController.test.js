@@ -6,6 +6,7 @@ const {
     loginUser,
     loginGuest,
     refreshJWTToken,
+    getAccountById,
 } = require("../controller/accountController");
 
 jest.mock("mssql", () => ({
@@ -147,7 +148,10 @@ describe("Account Controller Unit Tests", () => {
     });
 
     describe("loginUser", () => {
-        const loginData = { email: "john@example.com", password: "password123" };
+        const loginData = {
+            email: "john@example.com",
+            password: "password123",
+        };
 
         test("should return 401 if user email is not found", async () => {
             req.body = loginData;
@@ -284,7 +288,8 @@ describe("Account Controller Unit Tests", () => {
     });
 
     describe("refreshJWTToken", () => {
-        const mockCookie = "otherCookie=123; refreshToken=valid_refresh_token_abc";
+        const mockCookie =
+            "otherCookie=123; refreshToken=valid_refresh_token_abc";
 
         test("should return null if refresh token does not exist in DB", async () => {
             accountModel.findRefreshToken.mockResolvedValueOnce(0);
@@ -327,6 +332,52 @@ describe("Account Controller Unit Tests", () => {
             const result = await refreshJWTToken(mockCookie);
 
             expect(result).toBeNull();
+        });
+    });
+
+    describe("getAccountById", () => {
+        test("should return 200 and the account if found", async () => {
+            req.params = { accountId: "acc-123" };
+            const mockAccount = {
+                account_id: "acc-123",
+                account_email: "john@example.com",
+                role: "Customer",
+            };
+            accountModel.getAccountById.mockResolvedValueOnce(mockAccount);
+
+            await getAccountById(req, res);
+
+            expect(accountModel.getAccountById).toHaveBeenCalledWith(
+                "acc-123",
+            );
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(mockAccount);
+        });
+
+        test("should return 404 if account is not found", async () => {
+            req.params = { accountId: "acc-does-not-exist" };
+            accountModel.getAccountById.mockResolvedValueOnce(null);
+
+            await getAccountById(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({
+                message: "Account not found",
+            });
+        });
+
+        test("should return 500 when accountModel.getAccountById throws", async () => {
+            req.params = { accountId: "acc-123" };
+            accountModel.getAccountById.mockRejectedValueOnce(
+                new Error("DB error"),
+            );
+
+            await getAccountById(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({
+                message: "Internal server error",
+            });
         });
     });
 });

@@ -1,9 +1,42 @@
-import { formatDate, getIdFromToken, statusStyle } from "./helper.js";
+import {
+    getIsGuest,
+    formatDate,
+    getIdFromToken,
+    statusStyle,
+} from "./helper.js";
 import { getSocket } from "./websocket.js";
 const token = sessionStorage.getItem(SS_KEYS.accessToken);
 const customerId = getIdFromToken(token);
 
 const ordersContainer = document.getElementById("orders-container");
+const greetingElement = document.getElementById("greeting");
+
+const isGuest = getIsGuest(token);
+if (isGuest) {
+    greetingElement.textContent = "Hi, Guest!";
+} else {
+    const customer = await fetchCustomer();
+    greetingElement.textContent = `Hi, ${customer.customer_name}!`;
+}
+
+async function fetchCustomer() {
+    const accountId = getIdFromToken(token);
+
+    try {
+        const response = await fetch(`/customer/${accountId}/profile`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 await loadOrders();
 
 const socket = getSocket();

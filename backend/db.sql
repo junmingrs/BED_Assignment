@@ -99,9 +99,10 @@ CREATE TABLE Inspection
     stall_id UNIQUEIDENTIFIER NOT NULL REFERENCES Stall(stall_id),
     nea_id UNIQUEIDENTIFIER NOT NULL REFERENCES NEA(nea_id),
     inspection_date DATETIME DEFAULT GETDATE(),
-    score INT NOT NULL CHECK (score BETWEEN 0 AND 100),
+    score INT NULL CHECK (score BETWEEN 0 AND 100),
     remarks TEXT,
-    hygiene_grade CHAR(1) NOT NULL CHECK (hygiene_grade IN ('A', 'B', 'C', 'D'))
+    hygiene_grade CHAR(1) NULL CHECK (hygiene_grade IN ('A', 'B', 'C', 'D')),
+    status VARCHAR(20) NOT NULL DEFAULT 'Completed' CHECK (status IN ('Scheduled', 'Completed'))
 );
 
 CREATE TABLE MenuItem
@@ -303,16 +304,55 @@ VALUES
     (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '66666666-6666-6666-6666-666666666666', '2026-07-12 11:00:00', 92, 'Excellent cleanliness and food handling.', 'A'),
     (NEWID(), 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', '66666666-6666-6666-6666-666666666666', '2026-06-20 09:30:00', 68, 'Poor hygiene. Floors dirty and improper waste disposal.', 'D');
 
-INSERT INTO MenuItem
-    (stall_id, item_code, item_desc, item_price, item_category)
-VALUES
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
     ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Kimchi Fried Rice', 7.50, 'Main'),
     ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Bibimbap', 8.50, 'Main'),
-    ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD3-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Korean Iced Tea', 2.00, 'Drinks'),
+    ('DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD3-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Korean Iced Tea', 2.00, 'Drinks');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD1-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Salmon Sushi Set', 12.50, 'Main'),
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Chicken Katsu', 9.00, 'Main'),
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD3-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Matcha Latte', 3.50, 'Drinks'),
     ('DDDDDDD2-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'DDDDDDD4-DDDD-DDDD-DDDD-DDDDDDDDDDDD', 'Mochi', 4.00, 'Dessert');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
+    ('FFFFFFF1-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000001-0000-0000-0000-000000000001', 'Chicken Curry Rice', 6.00, 'Main'),
+    ('FFFFFFF1-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000001-0000-0000-0000-000000000002', 'Roti Prata Set', 4.00, 'Main'),
+    ('FFFFFFF1-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000001-0000-0000-0000-000000000003', 'Teh Tarik', 1.80, 'Drinks');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
+    ('FFFFFFF2-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000002-0000-0000-0000-000000000001', 'Signature Wanton Noodle', 5.00, 'Main'),
+    ('FFFFFFF2-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000002-0000-0000-0000-000000000002', 'Dumpling Soup', 4.50, 'Sides'),
+    ('FFFFFFF2-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000002-0000-0000-0000-000000000003', 'Fried Wanton (10pcs)', 5.50, 'Sides'),
+    ('FFFFFFF2-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000002-0000-0000-0000-000000000004', 'Iced Grass Jelly', 2.00, 'Drinks');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
+    ('FFFFFFF3-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000003-0000-0000-0000-000000000001', 'Plain Porridge', 1.00, 'Main'),
+    ('FFFFFFF3-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000003-0000-0000-0000-000000000002', 'Braised Duck Portion', 6.00, 'Sides'),
+    ('FFFFFFF3-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000003-0000-0000-0000-000000000003', 'Steamed Fish', 8.00, 'Sides');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
+    ('FFFFFFF4-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000004-0000-0000-0000-000000000001', 'Roasted Duck Rice', 6.50, 'Main'),
+    ('FFFFFFF4-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000004-0000-0000-0000-000000000002', 'Char Siew Rice', 5.50, 'Main'),
+    ('FFFFFFF4-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000004-0000-0000-0000-000000000003', 'Roasted Pork Belly Rice', 6.00, 'Main'),
+    ('FFFFFFF4-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000004-0000-0000-0000-000000000004', 'Barley Water', 1.80, 'Drinks');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
+    ('FFFFFFF5-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000005-0000-0000-0000-000000000001', 'Chwee Kueh (4pcs)', 3.00, 'Main'),
+    ('FFFFFFF5-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000005-0000-0000-0000-000000000002', 'Chee Cheong Fun', 3.00, 'Main'),
+    ('FFFFFFF5-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000005-0000-0000-0000-000000000003', 'Soya Bean Milk', 1.80, 'Drinks');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
+    ('FFFFFFF6-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000006-0000-0000-0000-000000000001', 'Traditional Lor Mee', 5.00, 'Main'),
+    ('FFFFFFF6-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000006-0000-0000-0000-000000000002', 'Fried Fish Lor Mee', 6.50, 'Main'),
+    ('FFFFFFF6-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000006-0000-0000-0000-000000000003', 'Crispy Chicken Cutlet', 3.50, 'Sides');
+
+INSERT INTO MenuItem (stall_id, item_code, item_desc, item_price, item_category) VALUES
+    ('FFFFFFF7-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000007-0000-0000-0000-000000000001', 'Fresh Watermelon Juice', 3.00, 'Drinks'),
+    ('FFFFFFF7-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000007-0000-0000-0000-000000000002', 'Avocado Shake', 4.50, 'Drinks'),
+    ('FFFFFFF7-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000007-0000-0000-0000-000000000003', 'Mango Ice Dessert', 4.00, 'Dessert'),
+    ('FFFFFFF7-FFFF-FFFF-FFFF-FFFFFFFFFFFF', 'A0000007-0000-0000-0000-000000000004', 'Cut Fruit Platter', 3.50, 'Dessert');
+
 
 INSERT INTO Cuisine
 VALUES

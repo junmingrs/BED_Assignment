@@ -46,9 +46,13 @@ async function registerUser(req, res) {
         }
 
         const token = generateToken(accountId, role);
-        const refreshToken = jwt.sign({ accountId, role }, process.env.REFRESH_TOKEN_SECRET_KEY, {
-            expiresIn: "7d" // 7 days in seconds
-        });
+        const refreshToken = jwt.sign(
+            { accountId, role },
+            process.env.REFRESH_TOKEN_SECRET_KEY,
+            {
+                expiresIn: "7d", // 7 days in seconds
+            },
+        );
         await accountModel.createRefreshToken(accountId, refreshToken);
 
         return res.status(201).json({
@@ -174,4 +178,24 @@ async function refreshJWTToken(cookie) {
     }
 }
 
-module.exports = { registerUser, loginUser, refreshJWTToken, loginGuest };
+async function getAccountById(req, res) {
+    const { accountId } = req.params;
+    try {
+        const account = await accountModel.getAccountById(accountId);
+        if (!account) {
+            return res.status(404).json({ message: "Account not found" });
+        }
+        return res.status(200).json(account);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+module.exports = {
+    registerUser,
+    loginUser,
+    refreshJWTToken,
+    loginGuest,
+    getAccountById,
+};
