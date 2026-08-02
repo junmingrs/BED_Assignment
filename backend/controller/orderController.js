@@ -2,7 +2,7 @@ const { wsMessages } = require("../../public/js/const.js");
 const orderModel = require("../model/orderModel");
 const { broadcast } = require("../ws");
 const crypto = require("crypto");
-const { sendReceipt } = require("../config/email");
+const { sendReceipt } = require("../model/emailModel.js");
 const { poolPromise } = require("../db");
 
 async function getOrderById(req, res) {
@@ -25,7 +25,10 @@ async function getOrdersByCustomer(req, res) {
             : [];
 
     try {
-        const orders = await orderModel.getOrdersByCustomer(customerId, statuses);
+        const orders = await orderModel.getOrdersByCustomer(
+            customerId,
+            statuses,
+        );
         return res.status(200).json(orders);
     } catch (err) {
         console.error(err);
@@ -73,7 +76,6 @@ async function updateOrderStatus(req, res) {
 async function checkoutCart(req, res) {
     const { cart, customerId } = req.body;
     const { isGuest } = req.user;
-    const cartMap = typeof cart == "string" ? JSON.parse(cart) : cart;
 
     try {
         const pool = await poolPromise;
@@ -85,31 +87,35 @@ async function checkoutCart(req, res) {
             );
 
         const customerEmail = customerResult.recordset[0]?.account_email;
-        const orderPromises = Object.keys(cartMap).map(async (stallId) => {
+        const orderPromises = Object.keys(cart).map(async (stallId) => {
             const orderId = crypto.randomUUID();
-            const items = cartMap[stallId].items; // []
-            const isEco = cartMap[stallId].isEco || false;
-            let total = await orderModel.getTotalAmount(items);
-            if (isEco) total += 0.3; // extra fee for eco friendly packaging
+            const items = cart[stallId].items;
+            const isEco = cart[stallId].isEco || false;
 
-            await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
+            let total = await orderModel.getTotalAmount(items);
+            if (isEco) total += 0.3;
+
+            await orderModel.createOrder(
+                orderId,
+                stallId,
+                customerId,
+                total,
+                isEco,
+            );
 
             const itemPromises = items.map(async (item) => {
                 await orderModel.createOrderItem(orderId, { ...item, stallId });
             });
 
-            // to avoid timing issues from async
             await Promise.all(itemPromises);
 
             return { stallId, orderId };
         });
 
         const createdOrders = await Promise.all(orderPromises);
-        // {stallId: orderId}
         const ordersMap = createdOrders.reduce((map, current) => {
             map[current.stallId] = current.orderId;
 
-            // broadcast to web socket
             broadcast({
                 type: wsMessages.newOrder,
                 stallId: current.stallId,
@@ -118,30 +124,58 @@ async function checkoutCart(req, res) {
 
             return map;
         }, {});
+
+        // ===== 发送收据邮件 =====
         if (customerEmail && !isGuest) {
             const allItems = [];
-            Object.keys(cartMap).forEach((stallId) => {
-                cartMap[stallId].items.forEach((item) => {
-                    allItems.push({
-                        name: item.item_desc || item.name || "Item",
-                        quantity: item.quantity || 1,
-                        price: item.item_price || item.price || 0,
-                    });
-                });
-            });
-
             let totalAmount = 0;
-            Object.keys(cartMap).forEach((stallId) => {
+
+            for (const stallId of Object.keys(cartMap)) {
                 const items = cartMap[stallId].items;
                 const isEco = cartMap[stallId].isEco || false;
                 let stallTotal = 0;
-                items.forEach((item) => {
-                    stallTotal +=
-                        (item.item_price || item.price || 0) * (item.quantity || 1);
-                });
+
+                for (const item of items) {
+                    const menuItemResult = await pool
+                        .request()
+                        .input("stallId", stallId)
+                        .input("itemCode", item.itemCode)
+                        .query(
+                            `SELECT item_desc, item_price FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode`,
+                        );
+
+                    const menuItem = menuItemResult.recordset[0];
+                    const price =
+                        menuItem?.item_price ||
+                        item.item_price ||
+                        item.price ||
+                        0;
+
+                    const qty = item.quantity || 1;
+                    stallTotal += price * qty;
+
+                    allItems.push({
+                        name: menuItem?.item_desc || "Item",
+                        quantity: qty,
+                        price: price,
+                    });
+                }
+
                 if (isEco) stallTotal += 0.3;
                 totalAmount += stallTotal;
-            });
+            }
+
+            console.log(
+                " Sending receipt items:",
+                JSON.stringify(allItems, null, 2),
+            );
+            console.log(" Total amount:", totalAmount);
+
+            console.log(
+                " Sending receipt items:",
+                JSON.stringify(allItems, null, 2),
+            );
+            console.log(" Total amount:", totalAmount);
 
             sendReceipt(customerEmail, {
                 order_id: Object.values(ordersMap).join(", "),
@@ -149,9 +183,9 @@ async function checkoutCart(req, res) {
                 total: totalAmount,
             }).then((result) => {
                 if (result) {
-                    console.log("✅ Receipt sent to:", customerEmail);
+                    console.log(" Receipt sent to:", customerEmail);
                 } else {
-                    console.log("❌ Failed to send receipt");
+                    console.log(" Failed to send receipt");
                 }
             });
         }

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vendor Calendar</title>
+    <link rel="stylesheet" href="../css/output.css" />
+</head>
+
+<body>
+    <header class="my-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="space-y-2">
+            <h1 class="text-3xl">Calendar</h1>
+            <p class="text-sm text-slate-500">
+                Your synced Google Calendar events.
+            </p>
+        </div>
+    </header>
+
+    <!-- Google not connected banner -->
+    <section id="connect-prompt" class="hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <i data-lucide="calendar-off" class="size-5 text-slate-400"></i>
+            <p class="text-sm text-slate-600">Connect your Google Calendar to sync personal events here too.</p>
+        </div>
+        <button id="connect-btn"
+            class="inline-flex items-center gap-2 rounded-lg bg-slate-900 text-white px-4 py-2 text-xs font-medium hover:bg-slate-800 flex-shrink-0">
+            <i data-lucide="link" class="size-3.5"></i>
+            Connect Google Calendar
+        </button>
+    </section>
+    <p id="connect-error" class="text-xs text-red-600 mb-3 hidden"></p>
+
+    <!-- Calendar grid: always visible, shows inspections regardless of Google connection -->
+    <section id="calendar-section" class="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between p-6 pb-4">
+            <div class="flex items-center gap-3">
+                <button id="prev-month" class="rounded-md border border-slate-200 p-1.5 hover:bg-slate-50">
+                    <i data-lucide="chevron-left" class="size-4"></i>
+                </button>
+                <h2 id="month-label" class="text-lg font-semibold w-40 text-center"></h2>
+                <button id="next-month" class="rounded-md border border-slate-200 p-1.5 hover:bg-slate-50">
+                    <i data-lucide="chevron-right" class="size-4"></i>
+                </button>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                    <span class="size-2.5 rounded-full bg-slate-400"></span> Google
+                </span>
+                <span class="flex items-center gap-1.5 text-xs text-slate-500">
+                    <span class="size-2.5 rounded-full bg-amber-500"></span> NEA Inspection
+                </span>
+                <span id="connected-badge" class="hidden items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                    <i data-lucide="check-circle" class="size-3.5"></i>
+                    Connected
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-7 border-t border-slate-200 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">
+            <div class="py-2 border-r border-slate-100">Sun</div>
+            <div class="py-2 border-r border-slate-100">Mon</div>
+            <div class="py-2 border-r border-slate-100">Tue</div>
+            <div class="py-2 border-r border-slate-100">Wed</div>
+            <div class="py-2 border-r border-slate-100">Thu</div>
+            <div class="py-2 border-r border-slate-100">Fri</div>
+            <div class="py-2">Sat</div>
+        </div>
+
+        <div id="calendar-grid" class="grid grid-cols-7 border-t border-slate-200"></div>
+    </section>
+
+    <script src="/js/const.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script type="module">
+        import { getIdFromToken, getStallId } from "/js/helper.js";
+
+        const token = sessionStorage.getItem(SS_KEYS.accessToken);
+        const vendorId = getIdFromToken(token);
+
+        const connectPrompt = document.getElementById("connect-prompt");
+        const connectBtn = document.getElementById("connect-btn");
+        const connectError = document.getElementById("connect-error");
+        const connectedBadge = document.getElementById("connected-badge");
+        const monthLabel = document.getElementById("month-label");
+        const calendarGrid = document.getElementById("calendar-grid");
+        const prevBtn = document.getElementById("prev-month");
+        const nextBtn = document.getElementById("next-month");
+
+        let currentDate = new Date();
+        let allEvents = [];
+        let stallId = null;
+
+        async function fetchAPI(url) {
+            try {
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                return { ok: response.ok, data: await response.json() };
+            } catch (err) {
+                console.error(err);
+                return { ok: false, data: null };
+            }
+        }
+
+        function groupEventsByDate(events) {
+            const map = {};
+            events.forEach((event) => {
+                const dateKey = new Date(event.start).toDateString();
+                if (!map[dateKey]) map[dateKey] = [];
+                map[dateKey].push(event);
+            });
+            return map;
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            monthLabel.textContent = currentDate.toLocaleDateString("en-SG", {
+                month: "long",
+                year: "numeric",
+            });
+
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const startWeekday = firstDayOfMonth.getDay();
+            const totalDays = lastDayOfMonth.getDate();
+
+            const eventsByDate = groupEventsByDate(allEvents);
+            const today = new Date();
+
+            let cellsHtml = "";
+
+            // leading blank cells
+            for (let i = 0; i < startWeekday; i++) {
+                cellsHtml += `<div class="min-h-24 border-r border-b border-slate-100 bg-slate-50/30"></div>`;
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const cellDate = new Date(year, month, day);
+                const dateKey = cellDate.toDateString();
+                const dayEvents = eventsByDate[dateKey] || [];
+                const isToday = cellDate.toDateString() === today.toDateString();
+
+                const eventPills = dayEvents
+                    .slice(0, 3)
+                    .map((event) => {
+                        const pillClass =
+                            event.source === "inspection"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-slate-100 text-slate-700";
+                        return `
+                        <div class="truncate rounded ${pillClass} px-1.5 py-0.5 text-[10px] font-medium" title="${event.title}">
+                            ${event.title}
+                        </div>
+                    `;
+                    })
+                    .join("");
+
+                const moreLabel =
+                    dayEvents.length > 3
+                        ? `<div class="text-[10px] text-slate-400 px-1.5">+${dayEvents.length - 3} more</div>`
+                        : "";
+
+                cellsHtml += `
+                    <div class="min-h-24 border-r border-b border-slate-100 p-1.5 space-y-1">
+                        <span class="inline-flex items-center justify-center size-6 rounded-full text-xs ${
+                            isToday ? "bg-slate-900 text-white font-semibold" : "text-slate-700"
+                        }">
+                            ${day}
+                        </span>
+                        <div class="space-y-1">
+                            ${eventPills}
+                            ${moreLabel}
+                        </div>
+                    </div>
+                `;
+            }
+
+            calendarGrid.innerHTML = cellsHtml;
+        }
+
+        async function loadGoogleEvents() {
+            const { ok, data } = await fetchAPI("/vendor/calendar/events");
+            if (ok) {
+                return data;
+            }
+            return [];
+        }
+
+        async function loadInspectionEvents() {
+            if (!stallId) return [];
+
+            const { ok, data } = await fetchAPI(`/stalls/${stallId}/inspections/scheduled`);
+            if (!ok || !Array.isArray(data)) return [];
+
+            return data.map((inspection) => ({
+                id: inspection.inspection_id,
+                title: "NEA Inspection",
+                start: inspection.inspection_date,
+                end: inspection.inspection_date,
+                source: "inspection",
+            }));
+        }
+
+        async function checkConnectionAndLoad() {
+            stallId = await getStallId(vendorId, token);
+
+            const { ok, data } = await fetchAPI("/vendor/calendar/status");
+            const isConnected = ok && data.connected;
+
+            if (isConnected) {
+                connectPrompt.classList.add("hidden");
+                connectedBadge.classList.remove("hidden");
+                connectedBadge.classList.add("flex");
+            } else {
+                connectPrompt.classList.remove("hidden");
+                connectPrompt.classList.add("flex");
+                connectedBadge.classList.add("hidden");
+            }
+
+            const [googleEvents, inspectionEvents] = await Promise.all([
+                isConnected ? loadGoogleEvents() : Promise.resolve([]),
+                loadInspectionEvents(),
+            ]);
+
+            allEvents = [...googleEvents, ...inspectionEvents];
+            renderCalendar();
+
+            lucide.createIcons();
+        }
+
+        connectBtn.addEventListener("click", () => {
+            window.location.href = `/auth/google?vendorId=${vendorId}`;
+        });
+
+        prevBtn.addEventListener("click", () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+            lucide.createIcons();
+        });
+
+        nextBtn.addEventListener("click", () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+            lucide.createIcons();
+        });
+
+        // handle redirect back from Google
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("connected") === "false") {
+            connectError.textContent = "Failed to connect Google Calendar. Please try again.";
+            connectError.classList.remove("hidden");
+        }
+
+        checkConnectionAndLoad();
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

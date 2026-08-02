@@ -86,7 +86,10 @@ async function createNEA(account_id) {
 async function findRefreshToken(refresh_token) {
     const query = `SELECT COUNT(*) AS n FROM RefreshToken WHERE refresh_token = @refresh_token`;
     const pool = await poolPromise;
-    const exists = await pool.request().input("refresh_token", refresh_token).query(query);
+    const exists = await pool
+        .request()
+        .input("refresh_token", refresh_token)
+        .query(query);
     return exists.recordset[0].n;
 }
 

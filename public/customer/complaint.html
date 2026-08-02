@@ -1,207 +1,202 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Submit Complaint</title>
+    <link rel="icon" type="image/x-icon" href="/assets/logo.jpg" />
     <link rel="stylesheet" href="../css/output.css" />
-</head>
+  </head>
 
-<body>
-    <!-- 导航栏由 navbar.js 自动生成，此处不需要手动写 -->
-
+  <body>
     <!-- ===== MAIN CONTENT ===== -->
     <main class="mx-auto max-w-2xl p-8 pb-32">
-        <h1 class="text-3xl font-bold mb-2">Submit a Complaint</h1>
-        <p class="text-sm text-gray-500 mb-6">Submit a formal complaint about a stall's food quality or service.</p>
+      <h1 class="text-3xl font-bold mb-2" data-i18n="submit_complaint">Submit a Complaint</h1>
+      <p class="text-sm text-gray-500 mb-6" data-i18n="complaint_desc">
+        Submit a formal complaint about a stall's food quality or service.
+      </p>
 
+      <!-- ===== COMPLAINT FORM ===== -->
+      <section class="rounded-xl border bg-white p-6 shadow-sm">
         <form id="complaint-form" class="space-y-5">
-            <!-- Hawker Centre 选择 -->
-            <div>
-                <label for="hawkerSelect" class="block text-sm font-medium text-gray-700">
-                    Select Hawker Centre
-                </label>
-                <select id="hawkerSelect" required
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option value="">Loading hawker centres...</option>
-                </select>
-            </div>
+          <!-- Stall Selection -->
+          <div>
+            <label
+              for="stallSelect"
+              class="block text-sm font-medium text-gray-700"
+              data-i18n="select_stall"
+            >
+              Select Stall
+            </label>
+            <select
+              id="stallSelect"
+              required
+              class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+            >
+              <option value="" data-i18n="loading_stalls">Loading stalls...</option>
+            </select>
+          </div>
 
-            <!-- Stall 选择 -->
-            <div>
-                <label for="stallSelect" class="block text-sm font-medium text-gray-700">
-                    Select Stall
-                </label>
-                <select id="stallSelect" required
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <option value="">Please select a hawker centre first</option>
-                </select>
-            </div>
+          <!-- Subject -->
+          <div>
+            <label
+              for="subject"
+              class="block text-sm font-medium text-gray-700"
+              data-i18n="subject"
+            >
+              Subject
+            </label>
+            <input
+              type="text"
+              id="subject"
+              required
+              placeholder="e.g. Food was undercooked"
+              data-i18n-placeholder="subject_placeholder"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+            />
+          </div>
 
-            <!-- 主题 -->
-            <div>
-                <label for="subject" class="block text-sm font-medium text-gray-700">
-                    Subject
-                </label>
-                <input type="text" id="subject" required placeholder="e.g. Food was undercooked"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-            </div>
+          <!-- Description -->
+          <div>
+            <label
+              for="description"
+              class="block text-sm font-medium text-gray-700"
+              data-i18n="description"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              rows="5"
+              required
+              placeholder="Describe your issue in detail..."
+              data-i18n-placeholder="description_placeholder"
+              class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+            ></textarea>
+          </div>
 
-            <!-- 描述 -->
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700">
-                    Description
-                </label>
-                <textarea id="description" rows="5" required placeholder="Describe your issue in detail..."
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
-            </div>
-
-            <!-- 提交按钮 -->
-            <button type="submit"
-                class="w-full rounded-lg bg-black px-6 py-3 font-medium text-white transition hover:bg-gray-800">
-                Submit Complaint
-            </button>
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="w-full rounded-lg bg-black px-6 py-3 font-medium text-white transition hover:bg-gray-800"
+            data-i18n="submit_btn"
+          >
+            Submit Complaint
+          </button>
         </form>
 
-        <!-- 状态消息 -->
-        <div id="status-message" class="hidden mt-4 rounded-lg p-4 text-center"></div>
+        <!-- Status Message -->
+        <div
+          id="status-message"
+          class="hidden mt-4 rounded-lg p-4 text-center"
+        ></div>
+      </section>
     </main>
 
+    <!-- ===== FOOTER ===== -->
+    <footer
+      class="fixed bottom-0 left-0 right-0 border-t bg-white/95 backdrop-blur"
+    >
+      <div class="mx-auto flex max-w-5xl items-center justify-between p-5">
+        <p class="text-sm text-gray-500" data-i18n="copyright">© 2026 Hawker Centre</p>
+        <p class="text-sm text-gray-500" data-i18n="enjoy_your_meal">Enjoy your meal!</p>
+      </div>
+    </footer>
+
     <script src="/js/const.js"></script>
+    <script src="/js/i18n.js"></script>
     <script src="/js/navbar.js"></script>
     <script>
-        // ===== DOM Elements =====
-        const token = sessionStorage.getItem(SS_KEYS.accessToken);
-        const hawkerSelect = document.getElementById('hawkerSelect');
-        const stallSelect = document.getElementById('stallSelect');
-        const form = document.getElementById('complaint-form');
-        const statusMsg = document.getElementById('status-message');
+      const token = sessionStorage.getItem(SS_KEYS.accessToken);
+      const stallSelect = document.getElementById("stallSelect");
+      const form = document.getElementById("complaint-form");
+      const statusMsg = document.getElementById("status-message");
 
-        let allStalls = [];
+      // get翻译function
+      const t = window.i18n ? window.i18n.t : (key) => key;
 
-        // ===== Load Hawker Centres =====
-        async function loadHawkerCentres() {
-            try {
-                const res = await fetch('/hawkercentre', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const hawkerCentres = await res.json();
+      // ===== Load stalls =====
+      async function loadStalls() {
+        try {
+          const res = await fetch("/stalls", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const stalls = await res.json();
 
-                hawkerSelect.innerHTML = '<option value="">Select a hawker centre...</option>';
-                hawkerCentres.forEach(hc => {
-                    const option = document.createElement('option');
-                    option.value = hc.hawker_centre_id;
-                    option.textContent = hc.centre_name;
-                    hawkerSelect.appendChild(option);
-                });
+          stallSelect.innerHTML = "";
+          if (stalls.length === 0) {
+            stallSelect.innerHTML =
+              `<option value="">${t('no_stalls_available')}</option>`;
+            return;
+          }
 
-                await loadAllStalls();
+          stalls.forEach((stall) => {
+            const option = document.createElement("option");
+            option.value = stall.stall_id;
+            option.textContent = `${stall.stall_name} (${stall.stall_unit_no})`;
+            stallSelect.appendChild(option);
+          });
+        } catch (err) {
+          console.error("Failed to load stalls:", err);
+          stallSelect.innerHTML =
+            `<option value="">${t('failed_load_stalls')}</option>`;
+        }
+      }
 
-            } catch (err) {
-                console.error('Failed to load hawker centres:', err);
-                hawkerSelect.innerHTML = '<option value="">Failed to load hawker centres</option>';
-            }
+      // ===== Submit complaint =====
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const stallId = stallSelect.value;
+        const subject = document.getElementById("subject").value.trim();
+        const description = document.getElementById("description").value.trim();
+
+        if (!stallId || !subject || !description) {
+          showMessage(t('fill_all_fields'), "red");
+          return;
         }
 
-        // ===== Load All Stalls =====
-        async function loadAllStalls() {
-            try {
-                const res = await fetch('/stalls', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                allStalls = await res.json();
-                updateStallDropdown();
-            } catch (err) {
-                console.error('Failed to load stalls:', err);
-                stallSelect.innerHTML = '<option value="">Failed to load stalls</option>';
-            }
+        try {
+          const res = await fetch(`/stalls/${stallId}/complaints`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ subject, description }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            showMessage(t('complaint_success'), "green");
+            form.reset();
+            loadStalls();
+          } else {
+            showMessage(
+              `❌ ${data.error || data.message || t('complaint_failed')}`,
+              "red",
+            );
+          }
+        } catch (err) {
+          showMessage(t('network_error'), "red");
+          console.error(err);
         }
+      });
 
-        // ===== Update Stall Dropdown =====
-        function updateStallDropdown() {
-            const selectedHawkerId = hawkerSelect.value;
-            const filteredStalls = allStalls.filter(stall => stall.hawker_centre_id === selectedHawkerId);
+      function showMessage(msg, type) {
+        statusMsg.textContent = msg;
+        statusMsg.className = `rounded-lg p-4 text-center ${
+          type === "green"
+            ? "bg-green-100 text-green-700"
+            : "bg-red-100 text-red-700"
+        }`;
+        statusMsg.classList.remove("hidden");
+        setTimeout(() => statusMsg.classList.add("hidden"), 5000);
+      }
 
-            stallSelect.innerHTML = '';
-
-            if (filteredStalls.length === 0) {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = selectedHawkerId ? 'No stalls in this hawker centre' : 'Please select a hawker centre first';
-                stallSelect.appendChild(option);
-                return;
-            }
-
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select a stall...';
-            stallSelect.appendChild(defaultOption);
-
-            filteredStalls.forEach(stall => {
-                const option = document.createElement('option');
-                option.value = stall.stall_id;
-                option.textContent = `${stall.stall_name} (${stall.stall_unit_no || '-'})`;
-                stallSelect.appendChild(option);
-            });
-        }
-
-        // ===== Hawker Centre change → update stalls =====
-        hawkerSelect.addEventListener('change', updateStallDropdown);
-
-        // ===== Submit Complaint =====
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const stallId = stallSelect.value;
-            const subject = document.getElementById('subject').value.trim();
-            const description = document.getElementById('description').value.trim();
-
-            if (!stallId) {
-                showMessage('Please select a stall.', 'red');
-                return;
-            }
-            if (!subject || !description) {
-                showMessage('Please fill in all fields.', 'red');
-                return;
-            }
-
-            try {
-                const res = await fetch(`/stalls/${stallId}/complaints`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ subject, description })
-                });
-
-                const data = await res.json();
-
-                if (res.ok) {
-                    showMessage('✅ Complaint submitted successfully!', 'green');
-                    form.reset();
-                    hawkerSelect.value = '';
-                    stallSelect.innerHTML = '<option value="">Please select a hawker centre first</option>';
-                } else {
-                    showMessage(`❌ Failed: ${data.error || data.message || 'Unknown error'}`, 'red');
-                }
-            } catch (err) {
-                showMessage('❌ Network error. Please try again.', 'red');
-                console.error(err);
-            }
-        });
-
-        function showMessage(msg, type) {
-            statusMsg.textContent = msg;
-            statusMsg.className = `rounded-lg p-4 text-center ${type === 'green' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
-            statusMsg.classList.remove('hidden');
-            setTimeout(() => statusMsg.classList.add('hidden'), 5000);
-        }
-
-        // ===== Init =====
-        loadHawkerCentres();
+      // ===== Init =====
+      loadStalls();
     </script>
-</body>
-
+  </body>
 </html>
