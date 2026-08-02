@@ -13,6 +13,7 @@ const getInspectionsByStallId = async (stallId) => {
                 i.score,
                 i.remarks,
                 i.hygiene_grade,
+                i.status,
                 a.account_email AS nea_email
             FROM Inspection i
             JOIN NEA n ON i.nea_id = n.nea_id
