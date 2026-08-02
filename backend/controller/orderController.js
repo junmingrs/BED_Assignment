@@ -130,26 +130,36 @@ async function checkoutCart(req, res) {
             const allItems = [];
             let totalAmount = 0;
 
-            Object.keys(cart).forEach((stallId) => {
-                const items = cart[stallId].items;
-                const isEco = cart[stallId].isEco || false;
+            for (const stallId of Object.keys(cartMap)) {
+                const items = cartMap[stallId].items;
+                const isEco = cartMap[stallId].isEco || false;
                 let stallTotal = 0;
 
-                items.forEach((item) => {
-                    const price =
-                        item.itemPrice || item.item_price || item.price || 0;
+                for (const item of items) {
+                    const menuItemResult = await pool.request()
+                        .input("stallId", stallId)
+                        .input("itemCode", item.itemCode)
+                        .query(`SELECT item_desc, item_price FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode`);
+
+                    const menuItem = menuItemResult.recordset[0];
+                    const price = menuItem?.item_price || item.item_price || item.price || 0;
+           
                     const qty = item.quantity || 1;
                     stallTotal += price * qty;
 
                     allItems.push({
-                        name: item.item_desc || item.name || "Item",
+                        name: menuItem?.item_desc || "Item",  
                         quantity: qty,
                         price: price,
                     });
-                });
+                }
 
                 if (isEco) stallTotal += 0.3;
                 totalAmount += stallTotal;
+            }
+          
+            console.log(' Sending receipt items:', JSON.stringify(allItems, null, 2));
+            console.log(' Total amount:', totalAmount);
             });
 
             console.log(
