@@ -6,7 +6,6 @@
     "scripts": {
         "test": "jest",
         "dev": "nodemon backend/app.js 3000",
-        "d1": "nodemon backend/app.js 3001",
         "swagger": "node backend/swagger.js"
     },
     "repository": {
@@ -28,6 +27,7 @@
         "bcrypt": "^6.0.0",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
+        "googleapis": "^173.0.0",
         "jest": "^30.4.2",
         "joi": "^18.2.3",
         "jsonwebtoken": "^9.0.3",

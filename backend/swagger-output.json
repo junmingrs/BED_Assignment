@@ -86,6 +86,19 @@
         }
       }
     },
+    "/loginGuest": {
+      "post": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/refresh": {
       "post": {
         "description": "",
@@ -325,8 +338,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created"
           },
           "401": {
             "description": "Unauthorized"
@@ -446,6 +459,43 @@
           {
             "name": "status",
             "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/customer/{customerId}/profile": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
             "type": "string"
           }
         ],
@@ -588,127 +638,6 @@
             "description": "Internal Server Error"
           }
         }
-      },
-      "put": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "stallId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "cookie",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "stall_name": {
-                  "example": "any"
-                },
-                "stall_unit_no": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/stalls": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "cookie",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/vendors/{vendorId}/stall": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "vendorId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "cookie",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
       }
     },
     "/promotion": {
@@ -731,22 +660,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "promotionCode": {
-                  "example": "any"
-                },
-                "stallId": {
-                  "example": "any"
-                },
-                "itemCode": {
-                  "example": "any"
-                },
-                "discount": {
-                  "example": "any"
-                },
-                "startDate": {
-                  "example": "any"
-                },
-                "endDate": {
+                "promotion": {
                   "example": "any"
                 }
               }
@@ -786,11 +700,17 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -882,6 +802,364 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/promotion/code/{promotionCode}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "promotionCode",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/promotion/stall/{stallId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "stallId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/promotionActive/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/stalls": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/rentalagreement": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "stallId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stallId": {
+                  "example": "any"
+                },
+                "operatorId": {
+                  "example": "any"
+                },
+                "startDate": {
+                  "example": "any"
+                },
+                "endDate": {
+                  "example": "any"
+                },
+                "rentalFee": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "rentalAgreementId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/rentalagreement/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/vendors/{vendorId}/stall": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1688,6 +1966,330 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/menuitem/likes/{customerId}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stallId": {
+                  "example": "any"
+                },
+                "itemCode": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stallId": {
+                  "example": "any"
+                },
+                "itemCode": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/customer/chatbot/{customerId}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "history": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/vendor/calendar/status": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/vendor/calendar/events": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/vendor/calendar/disconnect": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
