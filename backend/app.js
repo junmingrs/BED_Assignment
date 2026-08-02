@@ -34,8 +34,9 @@ const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
     validateLogin,
+    validateGetAccountById,
     authenticateToken,
-} = require("./middleware/validate");
+} = require("./middleware/accountValidation.js");
 const {
     validateGetOrderById,
     validateGetOrdersByCustomer,
@@ -70,8 +71,12 @@ app.use(express.static(path.join("public")));
 // Routes
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
-app.post("/loginGuest", accountController.loginGuest);
-app.get("/account/:accountId/profile", accountController.getAccountById);
+app.post("/loginGuest", accountController.loginGuest); // no need validation
+app.get(
+    "/account/:accountId/profile",
+    validateGetAccountById,
+    accountController.getAccountById,
+);
 
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);
