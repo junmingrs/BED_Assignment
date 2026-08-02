@@ -24,6 +24,16 @@ jest.mock("mssql", () => {
     };
 });
 
+beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
+});
+
+afterAll(() => {
+    console.log.mockRestore();
+    console.error.mockRestore();
+});
+
 describe("orderModel Unit Tests", () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -62,7 +72,10 @@ describe("orderModel Unit Tests", () => {
 
             // for create order
             expect(mockRequest.input).toHaveBeenCalledWith("order_id", orderId);
-            expect(mockRequest.input).toHaveBeenCalledWith("customer_id", customerId);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "customer_id",
+                customerId,
+            );
             expect(mockRequest.input).toHaveBeenCalledWith(
                 "total_amount",
                 totalAmount,
@@ -134,12 +147,18 @@ describe("orderModel Unit Tests", () => {
 
             // verify that the inputs are correct
             expect(mockRequest.input).toHaveBeenCalledWith("order_id", orderId);
-            expect(mockRequest.input).toHaveBeenCalledWith("stall_id", item.stallId);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "stall_id",
+                item.stallId,
+            );
             expect(mockRequest.input).toHaveBeenCalledWith(
                 "item_code",
                 item.itemCode,
             );
-            expect(mockRequest.input).toHaveBeenCalledWith("quantity", item.quantity);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "quantity",
+                item.quantity,
+            );
 
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
         });
@@ -247,8 +266,16 @@ describe("orderModel Unit Tests", () => {
         test("should return orders with items without filtering by status", async () => {
             const customerId = "cust_1";
             const mockOrders = [
-                { order_id: "order_1", customer_id: customerId, total_amount: 15.0 },
-                { order_id: "order_2", customer_id: customerId, total_amount: 20.0 },
+                {
+                    order_id: "order_1",
+                    customer_id: customerId,
+                    total_amount: 15.0,
+                },
+                {
+                    order_id: "order_2",
+                    customer_id: customerId,
+                    total_amount: 20.0,
+                },
             ];
             const mockItemsOrder1 = [{ item_code: "item_a", quantity: 1 }];
             const mockItemsOrder2 = [{ item_code: "item_b", quantity: 2 }];
@@ -264,10 +291,19 @@ describe("orderModel Unit Tests", () => {
             const result = await getOrdersByCustomer(customerId);
 
             expect(result).toHaveLength(2);
-            expect(result[0]).toEqual({ ...mockOrders[0], items: mockItemsOrder1 });
-            expect(result[1]).toEqual({ ...mockOrders[1], items: mockItemsOrder2 });
+            expect(result[0]).toEqual({
+                ...mockOrders[0],
+                items: mockItemsOrder1,
+            });
+            expect(result[1]).toEqual({
+                ...mockOrders[1],
+                items: mockItemsOrder2,
+            });
 
-            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "customerId",
+                customerId,
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(3);
         });
 
@@ -275,7 +311,11 @@ describe("orderModel Unit Tests", () => {
             const customerId = "cust_1";
             const statuses = ["Pending", "Preparing"];
             const mockOrders = [
-                { order_id: "order_1", customer_id: customerId, status: "Pending" },
+                {
+                    order_id: "order_1",
+                    customer_id: customerId,
+                    status: "Pending",
+                },
             ];
             const mockItems = [{ item_code: "item_a", quantity: 1 }];
 
@@ -286,9 +326,18 @@ describe("orderModel Unit Tests", () => {
             const result = await getOrdersByCustomer(customerId, statuses);
 
             expect(result).toEqual([{ ...mockOrders[0], items: mockItems }]);
-            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
-            expect(mockRequest.input).toHaveBeenCalledWith("status0", "Pending");
-            expect(mockRequest.input).toHaveBeenCalledWith("status1", "Preparing");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "customerId",
+                customerId,
+            );
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "status0",
+                "Pending",
+            );
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "status1",
+                "Preparing",
+            );
         });
 
         test("should return null if no orders are found for the customer", async () => {
@@ -343,8 +392,14 @@ describe("orderModel Unit Tests", () => {
             const result = await getOrderByStallId(stallId);
 
             expect(result).toHaveLength(2);
-            expect(result[0]).toEqual({ ...mockOrders[0], items: mockItemsOrder1 });
-            expect(result[1]).toEqual({ ...mockOrders[1], items: mockItemsOrder2 });
+            expect(result[0]).toEqual({
+                ...mockOrders[0],
+                items: mockItemsOrder1,
+            });
+            expect(result[1]).toEqual({
+                ...mockOrders[1],
+                items: mockItemsOrder2,
+            });
 
             expect(mockRequest.input).toHaveBeenCalledWith("id", stallId);
             expect(mockRequest.query).toHaveBeenCalledTimes(3);

@@ -4,18 +4,25 @@ const {
     deleteFeedback,
 } = require("../controller/feedbackController");
 const feedbackModel = require("../model/feedbackModel");
-const { poolPromise } = require("../db");
 
-// Mock dependencies
 jest.mock("../model/feedbackModel");
-jest.mock("../db", () => ({
-    poolPromise: jest.fn(),
+
+const mockRequest = {
+    input: jest.fn().mockReturnThis(),
+    query: jest.fn(),
+};
+
+jest.mock("mssql", () => ({
+    ConnectionPool: jest.fn().mockImplementation(() => ({
+        connect: jest.fn().mockResolvedValue({
+            request: () => mockRequest,
+        }),
+    })),
 }));
 
-// Mock console.log and console.error
 beforeAll(() => {
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
@@ -28,6 +35,7 @@ describe("feedbackController Unit Tests", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockRequest.input.mockReturnThis();
 
         req = {
             params: {},
@@ -46,8 +54,16 @@ describe("feedbackController Unit Tests", () => {
     describe("getFeedback", () => {
         test("should return feedback for a stall successfully", async () => {
             const mockFeedback = [
-                { feedback_id: "f1", description: "Great food!", created_at: "2026-08-01" },
-                { feedback_id: "f2", description: "Loved it", created_at: "2026-07-31" },
+                {
+                    feedback_id: "f1",
+                    description: "Great food!",
+                    created_at: "2026-08-01",
+                },
+                {
+                    feedback_id: "f2",
+                    description: "Loved it",
+                    created_at: "2026-07-31",
+                },
             ];
             feedbackModel.getFeedbackByStallId.mockResolvedValue(mockFeedback);
             req.params.stallId = "stall_A";
@@ -117,14 +133,9 @@ describe("feedbackController Unit Tests", () => {
             req.body.description = "Great food!";
             req.user.id = "cust_1";
 
-            const mockPool = {
-                request: jest.fn().mockReturnThis(),
-                input: jest.fn().mockReturnThis(),
-                query: jest.fn().mockResolvedValue({
-                    recordset: [{ stall_id: "stall_A" }],
-                }),
-            };
-            poolPromise.mockResolvedValue(mockPool);
+            mockRequest.query.mockResolvedValue({
+                recordset: [{ stall_id: "stall_A" }],
+            });
 
             feedbackModel.createFeedback.mockResolvedValue(mockCreatedFeedback);
         });
@@ -166,12 +177,7 @@ describe("feedbackController Unit Tests", () => {
         });
 
         test("should return 404 if stall does not exist", async () => {
-            const mockPool = {
-                request: jest.fn().mockReturnThis(),
-                input: jest.fn().mockReturnThis(),
-                query: jest.fn().mockResolvedValue({ recordset: [] }),
-            };
-            poolPromise.mockResolvedValue(mockPool);
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
             await submitFeedback(req, res);
 

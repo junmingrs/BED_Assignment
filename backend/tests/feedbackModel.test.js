@@ -24,12 +24,13 @@ jest.mock("mssql", () => ({
     })),
 }));
 
-// Mock console.error
 beforeAll(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
+    console.log.mockRestore();
     console.error.mockRestore();
 });
 
@@ -62,7 +63,10 @@ describe("feedbackModel Unit Tests", () => {
 
             const result = await getFeedbackByStallId(stallId, "this_week");
 
-            expect(getTimeFilter).toHaveBeenCalledWith("this_week", "created_at");
+            expect(getTimeFilter).toHaveBeenCalledWith(
+                "this_week",
+                "created_at",
+            );
             expect(mockRequest.input).toHaveBeenCalledWith("stallId", stallId);
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
             expect(result).toEqual(mockFeedback);
@@ -71,7 +75,11 @@ describe("feedbackModel Unit Tests", () => {
         test("should use empty timeFilter when timeframe is null", async () => {
             const stallId = "stall_A";
             const mockFeedback = [
-                { feedback_id: "fb_1", description: "Test", created_at: "2026-08-01" },
+                {
+                    feedback_id: "fb_1",
+                    description: "Test",
+                    created_at: "2026-08-01",
+                },
             ];
 
             getTimeFilter.mockReturnValue("");
@@ -97,7 +105,9 @@ describe("feedbackModel Unit Tests", () => {
         test("should throw error when database query fails", async () => {
             const stallId = "stall_A";
             getTimeFilter.mockReturnValue("");
-            mockRequest.query.mockRejectedValue(new Error("Database connection error"));
+            mockRequest.query.mockRejectedValue(
+                new Error("Database connection error"),
+            );
 
             await expect(getFeedbackByStallId(stallId)).rejects.toThrow(
                 "Database connection error",
@@ -124,12 +134,22 @@ describe("feedbackModel Unit Tests", () => {
                 .mockResolvedValueOnce({ rowsAffected: [1] })
                 .mockResolvedValueOnce({ recordset: [mockNewFeedback] });
 
-            const result = await createFeedback(stallId, customerId, description);
+            const result = await createFeedback(
+                stallId,
+                customerId,
+                description,
+            );
 
             // Verify INSERT
             expect(mockRequest.input).toHaveBeenCalledWith("stallId", stallId);
-            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
-            expect(mockRequest.input).toHaveBeenCalledWith("description", description);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "customerId",
+                customerId,
+            );
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "description",
+                description,
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(2);
 
             expect(result).toEqual(mockNewFeedback);
@@ -160,16 +180,26 @@ describe("feedbackModel Unit Tests", () => {
 
             const result = await deleteFeedback(feedbackId, customerId);
 
-            expect(mockRequest.input).toHaveBeenCalledWith("feedbackId", feedbackId);
-            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "feedbackId",
+                feedbackId,
+            );
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "customerId",
+                customerId,
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(2);
-            expect(result).toEqual({ message: "Feedback deleted successfully" });
+            expect(result).toEqual({
+                message: "Feedback deleted successfully",
+            });
         });
 
         test("should throw error if feedback not found", async () => {
             mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
-            await expect(deleteFeedback(feedbackId, customerId)).rejects.toThrow(
+            await expect(
+                deleteFeedback(feedbackId, customerId),
+            ).rejects.toThrow(
                 "Feedback not found or you are not authorized to delete it",
             );
 
@@ -179,7 +209,9 @@ describe("feedbackModel Unit Tests", () => {
         test("should throw error if feedback belongs to another customer", async () => {
             mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
-            await expect(deleteFeedback(feedbackId, "wrong_customer")).rejects.toThrow(
+            await expect(
+                deleteFeedback(feedbackId, "wrong_customer"),
+            ).rejects.toThrow(
                 "Feedback not found or you are not authorized to delete it",
             );
         });
@@ -189,9 +221,9 @@ describe("feedbackModel Unit Tests", () => {
                 new Error("Database connection error"),
             );
 
-            await expect(deleteFeedback(feedbackId, customerId)).rejects.toThrow(
-                "Database connection error",
-            );
+            await expect(
+                deleteFeedback(feedbackId, customerId),
+            ).rejects.toThrow("Database connection error");
         });
     });
 });

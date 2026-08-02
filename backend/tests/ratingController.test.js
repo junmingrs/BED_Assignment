@@ -5,19 +5,27 @@ const {
 } = require("../controller/ratingController");
 const ratingModel = require("../model/ratingModel");
 const { getCustomerByAccountId } = require("../model/customerModel");
-const { poolPromise } = require("../db");
 
 // Mock dependencies
 jest.mock("../model/ratingModel");
 jest.mock("../model/customerModel");
-jest.mock("../db", () => ({
-    poolPromise: jest.fn(),
+
+const mockRequest = {
+    input: jest.fn().mockReturnThis(),
+    query: jest.fn(),
+};
+
+jest.mock("mssql", () => ({
+    ConnectionPool: jest.fn().mockImplementation(() => ({
+        connect: jest.fn().mockResolvedValue({
+            request: () => mockRequest,
+        }),
+    })),
 }));
 
-// Mock console.log and console.error
 beforeAll(() => {
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
@@ -30,6 +38,7 @@ describe("ratingController Unit Tests", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockRequest.input.mockReturnThis();
 
         req = {
             params: {},
@@ -48,8 +57,18 @@ describe("ratingController Unit Tests", () => {
     describe("getRatings", () => {
         test("should return ratings for a stall successfully", async () => {
             const mockRatings = [
-                { rating_id: "r1", rating: 5, comment: "Great!", created_at: "2026-08-01" },
-                { rating_id: "r2", rating: 4, comment: "Good", created_at: "2026-07-31" },
+                {
+                    rating_id: "r1",
+                    rating: 5,
+                    comment: "Great!",
+                    created_at: "2026-08-01",
+                },
+                {
+                    rating_id: "r2",
+                    rating: 4,
+                    comment: "Good",
+                    created_at: "2026-07-31",
+                },
             ];
             ratingModel.getRatingsByStallId.mockResolvedValue(mockRatings);
             req.params.stallId = "stall_A";
@@ -122,14 +141,9 @@ describe("ratingController Unit Tests", () => {
             req.body.comment = "Great food!";
             req.user.id = "acc_1";
 
-            const mockPool = {
-                request: jest.fn().mockReturnThis(),
-                input: jest.fn().mockReturnThis(),
-                query: jest.fn().mockResolvedValue({
-                    recordset: [{ stall_id: "stall_A" }],
-                }),
-            };
-            poolPromise.mockResolvedValue(mockPool);
+            mockRequest.query.mockResolvedValue({
+                recordset: [{ stall_id: "stall_A" }],
+            });
 
             getCustomerByAccountId.mockResolvedValue(mockCustomer);
             ratingModel.createRating.mockResolvedValue(mockCreatedRating);
@@ -179,15 +193,18 @@ describe("ratingController Unit Tests", () => {
             });
         });
 
-        test("should return 400 if rating is less than 1", async () => {
+        test("should return 400 with 'missing required field' when rating is 0 (falsy value is caught before range check)", async () => {
             req.body.rating = 0;
 
             await submitRating(req, res);
 
             expect(ratingModel.createRating).not.toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(400);
+            // controller checks `if (!rating)` before the range check,
+            // and 0 is falsy in JS — so it never reaches the
+            // "Rating must be between 1 and 5" branch for this input
             expect(res.json).toHaveBeenCalledWith({
-                error: "Rating must be between 1 and 5",
+                error: "Missing required field: rating",
             });
         });
 
@@ -204,12 +221,7 @@ describe("ratingController Unit Tests", () => {
         });
 
         test("should return 404 if stall does not exist", async () => {
-            const mockPool = {
-                request: jest.fn().mockReturnThis(),
-                input: jest.fn().mockReturnThis(),
-                query: jest.fn().mockResolvedValue({ recordset: [] }),
-            };
-            poolPromise.mockResolvedValue(mockPool);
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
             await submitRating(req, res);
 

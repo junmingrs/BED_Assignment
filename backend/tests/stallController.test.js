@@ -1,3 +1,4 @@
+// stallController.test.js
 const {
     getStallInfo,
     getStallIdByVendorId,
@@ -7,12 +8,20 @@ const {
 const stallModel = require("../model/stallModel");
 
 // Mock dependencies
+// Must mock "../db" too — jest.mock("../model/stallModel") below is an
+// automock (no factory), which requires Jest to load the REAL model file to
+// introspect its shape. That real file requires the real db.js, which tries
+// to construct a real mssql.ConnectionPool with no test DB config and crashes
+// the whole worker before any test runs. This stub prevents that.
+jest.mock("../db", () => ({
+    poolPromise: Promise.resolve({}),
+}));
 jest.mock("../model/stallModel");
 
 // Mock console.log and console.error
 beforeAll(() => {
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
@@ -85,7 +94,9 @@ describe("stallController Unit Tests", () => {
 
             await getStallIdByVendorId(req, res);
 
-            expect(stallModel.getStallIdByVendorId).toHaveBeenCalledWith("vendor_1");
+            expect(stallModel.getStallIdByVendorId).toHaveBeenCalledWith(
+                "vendor_1",
+            );
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith("stall_A");
         });
@@ -108,8 +119,16 @@ describe("stallController Unit Tests", () => {
     // getAllStalls
     describe("getAllStalls", () => {
         const mockStalls = [
-            { stall_id: "stall_A", stall_name: "Kim Kitchen", stall_unit_no: "#01-01" },
-            { stall_id: "stall_B", stall_name: "Sakura Sushi", stall_unit_no: "#01-02" },
+            {
+                stall_id: "stall_A",
+                stall_name: "Kim Kitchen",
+                stall_unit_no: "#01-01",
+            },
+            {
+                stall_id: "stall_B",
+                stall_name: "Sakura Sushi",
+                stall_unit_no: "#01-02",
+            },
         ];
 
         test("should return all stalls successfully", async () => {

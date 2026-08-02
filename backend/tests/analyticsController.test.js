@@ -25,6 +25,16 @@ jest.mock("mssql", () => ({
     })),
 }));
 
+beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
+});
+
+afterAll(() => {
+    console.log.mockRestore();
+    console.error.mockRestore();
+});
+
 describe("Analytics Controller Unit Tests", () => {
     let req, res;
 
@@ -76,13 +86,18 @@ describe("Analytics Controller Unit Tests", () => {
 
             await getKPI(req, res);
 
-            expect(analyticsModel.getKPI).toHaveBeenCalledWith("stall_123", "today");
+            expect(analyticsModel.getKPI).toHaveBeenCalledWith(
+                "stall_123",
+                "today",
+            );
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(mockStats);
         });
 
         test("should return 500 when analyticsModel.getKPI throws an error", async () => {
-            analyticsModel.getKPI.mockRejectedValueOnce(new Error("Database error"));
+            analyticsModel.getKPI.mockRejectedValueOnce(
+                new Error("Database error"),
+            );
 
             await getKPI(req, res);
 
@@ -100,11 +115,15 @@ describe("Analytics Controller Unit Tests", () => {
                 { sales_hour: 12, totalRevenue: 400 },
             ];
 
-            analyticsModel.getHourlySales.mockResolvedValueOnce(mockHourlySales);
+            analyticsModel.getHourlySales.mockResolvedValueOnce(
+                mockHourlySales,
+            );
 
             await getHourlySales(req, res);
 
-            expect(analyticsModel.getHourlySales).toHaveBeenCalledWith("stall_123");
+            expect(analyticsModel.getHourlySales).toHaveBeenCalledWith(
+                "stall_123",
+            );
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(mockHourlySales);
         });
@@ -183,7 +202,8 @@ describe("Analytics Controller Unit Tests", () => {
             const mockSummary = {
                 highlights: "Sales are up this week.",
                 flags: "Everything is looking good! No warnings or complaints flagged.",
-                actions: "Everything is on track. No urgent action required today.",
+                actions:
+                    "Everything is on track. No urgent action required today.",
             };
 
             // mock model responses for Promise.all
@@ -191,7 +211,9 @@ describe("Analytics Controller Unit Tests", () => {
             complaintModel.getComplaintsByStallId.mockResolvedValueOnce(
                 mockComplaints,
             );
-            feedbackModel.getFeedbackByStallId.mockResolvedValueOnce(mockFeedback);
+            feedbackModel.getFeedbackByStallId.mockResolvedValueOnce(
+                mockFeedback,
+            );
             orderModel.getOrderByStallId.mockResolvedValueOnce(mockOrders);
 
             analyticsModel.getAISummary.mockResolvedValueOnce(mockSummary);

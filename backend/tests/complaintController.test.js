@@ -5,58 +5,68 @@ const {
 } = require("../controller/complaintController");
 const complaintModel = require("../model/complaintModel");
 const { getCustomerByAccountId } = require("../model/customerModel");
-const { poolPromise } = require("../db");
 const { broadcast } = require("../ws");
 
-// Mock dependencies
 jest.mock("../model/complaintModel");
 jest.mock("../model/customerModel");
-jest.mock("../db", () => ({
-    poolPromise: jest.fn(),
-}));
 jest.mock("../ws", () => ({
     broadcast: jest.fn(),
 }));
 
-// Mock console.log 和 console.error
-beforeAll(() => {
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    jest.spyOn(console, "error").mockImplementation(() => {});
-});
+const mockRequest = {
+    input: jest.fn().mockReturnThis(),
+    query: jest.fn(),
+};
 
-afterAll(() => {
-    console.log.mockRestore();
-    console.error.mockRestore();
-});
+jest.mock("mssql", () => ({
+    ConnectionPool: jest.fn().mockImplementation(() => ({
+        connect: jest.fn().mockResolvedValue({
+            request: () => mockRequest,
+        }),
+    })),
+}));
 
 describe("complaintController Unit Tests", () => {
     let req, res;
 
-    // 每次测试前重置 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockRequest.input.mockReturnThis();
 
         req = {
             params: {},
-            body: {},
-            user: { id: "cust_1" },
             query: {},
+            body: {},
+            user: {},
         };
 
         res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn().mockReturnThis(),
         };
+
+        jest.spyOn(console, "log").mockImplementation(() => { });
+        jest.spyOn(console, "error").mockImplementation(() => { });
     });
 
-    // 测试 getComplaints
+    afterEach(() => {
+        console.log.mockRestore();
+        console.error.mockRestore();
+    });
+
     describe("getComplaints", () => {
         test("should return complaints for a stall successfully", async () => {
             const mockComplaints = [
                 { complaint_id: "c1", subject: "Hair found", status: "Open" },
-                { complaint_id: "c2", subject: "Overcharged", status: "Resolved" },
+                {
+                    complaint_id: "c2",
+                    subject: "Overcharged",
+                    status: "Resolved",
+                },
             ];
-            complaintModel.getComplaintsByStallId.mockResolvedValue(mockComplaints);
+            complaintModel.getComplaintsByStallId.mockResolvedValue(
+                mockComplaints,
+            );
             req.params.stallId = "stall_A";
             req.query.timeframe = "this_week";
 
@@ -99,7 +109,6 @@ describe("complaintController Unit Tests", () => {
         });
     });
 
-    // 测试 submitComplaint
     describe("submitComplaint", () => {
         const mockCustomer = { customer_id: "cust_1", account_id: "acc_1" };
         const mockCreatedComplaint = {
@@ -114,20 +123,16 @@ describe("complaintController Unit Tests", () => {
             req.params.stallId = "stall_A";
             req.body.subject = "Bad service";
             req.body.description = "Rude staff";
-            req.user.id = "acc_1";
+            req.user = { id: "acc_1" };
 
-            // Mock poolPromise
-            const mockPool = {
-                request: jest.fn().mockReturnThis(),
-                input: jest.fn().mockReturnThis(),
-                query: jest.fn().mockResolvedValue({
-                    recordset: [{ stall_id: "stall_A" }],
-                }),
-            };
-            poolPromise.mockResolvedValue(mockPool);
+            mockRequest.query.mockResolvedValue({
+                recordset: [{ stall_id: "stall_A" }],
+            });
 
             getCustomerByAccountId.mockResolvedValue(mockCustomer);
-            complaintModel.createComplaint.mockResolvedValue(mockCreatedComplaint);
+            complaintModel.createComplaint.mockResolvedValue(
+                mockCreatedComplaint,
+            );
         });
 
         test("should submit complaint successfully and broadcast", async () => {
@@ -178,12 +183,7 @@ describe("complaintController Unit Tests", () => {
         });
 
         test("should return 404 if stall does not exist", async () => {
-            const mockPool = {
-                request: jest.fn().mockReturnThis(),
-                input: jest.fn().mockReturnThis(),
-                query: jest.fn().mockResolvedValue({ recordset: [] }),
-            };
-            poolPromise.mockResolvedValue(mockPool);
+            mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
             await submitComplaint(req, res);
 
@@ -222,8 +222,6 @@ describe("complaintController Unit Tests", () => {
         });
     });
 
-    
-    // 测试 deleteComplaint
     describe("deleteComplaint", () => {
         beforeEach(() => {
             req.params.complaintId = "comp_123";

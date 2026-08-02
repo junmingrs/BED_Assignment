@@ -20,6 +20,16 @@ jest.mock("../googleAuth", () => ({
 
 jest.mock("../model/googleTokenModel");
 
+beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
+});
+
+afterAll(() => {
+    console.log.mockRestore();
+    console.error.mockRestore();
+});
+
 // mock client instance returned by `new google.auth.OAuth2(...)`
 const mockClientInstance = {
     setCredentials: jest.fn(),
@@ -66,7 +76,9 @@ describe("googleCalendarController.connectGoogle", () => {
     });
 
     it("should generate an auth URL and redirect when vendorId is provided", () => {
-        oauth2Client.generateAuthUrl.mockReturnValue("https://accounts.google.com/o/oauth2/auth?mock=1");
+        oauth2Client.generateAuthUrl.mockReturnValue(
+            "https://accounts.google.com/o/oauth2/auth?mock=1",
+        );
 
         const req = { query: { vendorId: "vendor-1" } };
         const res = mockRes();
@@ -80,7 +92,9 @@ describe("googleCalendarController.connectGoogle", () => {
                 state: "vendor-1",
             }),
         );
-        expect(res.redirect).toHaveBeenCalledWith("https://accounts.google.com/o/oauth2/auth?mock=1");
+        expect(res.redirect).toHaveBeenCalledWith(
+            "https://accounts.google.com/o/oauth2/auth?mock=1",
+        );
     });
 });
 
@@ -96,7 +110,9 @@ describe("googleCalendarController.googleCallback", () => {
         await googleCalendarController.googleCallback(req, res);
 
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.send).toHaveBeenCalledWith("Missing code or vendor reference.");
+        expect(res.send).toHaveBeenCalledWith(
+            "Missing code or vendor reference.",
+        );
     });
 
     it("should exchange the code, save tokens, and redirect on success", async () => {
@@ -110,8 +126,13 @@ describe("googleCalendarController.googleCallback", () => {
         await googleCalendarController.googleCallback(req, res);
 
         expect(oauth2Client.getToken).toHaveBeenCalledWith("abc");
-        expect(googleTokenModel.saveTokens).toHaveBeenCalledWith("vendor-1", mockTokens);
-        expect(res.redirect).toHaveBeenCalledWith("/vendor/calendar.html?connected=true");
+        expect(googleTokenModel.saveTokens).toHaveBeenCalledWith(
+            "vendor-1",
+            mockTokens,
+        );
+        expect(res.redirect).toHaveBeenCalledWith(
+            "/vendor/calendar.html?connected=true",
+        );
     });
 
     it("should redirect with connected=false when the exchange fails", async () => {
@@ -122,7 +143,9 @@ describe("googleCalendarController.googleCallback", () => {
 
         await googleCalendarController.googleCallback(req, res);
 
-        expect(res.redirect).toHaveBeenCalledWith("/vendor/calendar.html?connected=false");
+        expect(res.redirect).toHaveBeenCalledWith(
+            "/vendor/calendar.html?connected=false",
+        );
     });
 });
 
@@ -183,7 +206,9 @@ describe("googleCalendarController.getGoogleEvents", () => {
         await googleCalendarController.getGoogleEvents(req, res);
 
         expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({ error: "Google Calendar not connected" });
+        expect(res.json).toHaveBeenCalledWith({
+            error: "Google Calendar not connected",
+        });
     });
 
     it("should fetch, merge, and sort events across all calendars", async () => {
@@ -279,7 +304,9 @@ describe("googleCalendarController.getGoogleEvents", () => {
         await googleCalendarController.getGoogleEvents(req, res);
 
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ error: "Failed to fetch Google Calendar events" });
+        expect(res.json).toHaveBeenCalledWith({
+            error: "Failed to fetch Google Calendar events",
+        });
     });
 });
 
@@ -298,7 +325,9 @@ describe("googleCalendarController.disconnectGoogle", () => {
 
         expect(googleTokenModel.deleteTokens).toHaveBeenCalledWith("vendor-1");
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({ message: "Google Calendar disconnected" });
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Google Calendar disconnected",
+        });
     });
 
     it("should handle errors and return 500", async () => {

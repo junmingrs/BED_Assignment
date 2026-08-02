@@ -26,7 +26,7 @@ jest.mock("mssql", () => ({
 
 // Mock console.error
 beforeAll(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
@@ -64,7 +64,10 @@ describe("ratingModel Unit Tests", () => {
 
             const result = await getRatingsByStallId(stallId, "this_week");
 
-            expect(getTimeFilter).toHaveBeenCalledWith("this_week", "created_at");
+            expect(getTimeFilter).toHaveBeenCalledWith(
+                "this_week",
+                "created_at",
+            );
             expect(mockRequest.input).toHaveBeenCalledWith("stallId", stallId);
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
             expect(result).toEqual(mockRatings);
@@ -73,7 +76,12 @@ describe("ratingModel Unit Tests", () => {
         test("should use empty timeFilter when timeframe is null", async () => {
             const stallId = "stall_A";
             const mockRatings = [
-                { rating_id: "r_1", rating: 5, comment: "Great", created_at: "2026-08-01" },
+                {
+                    rating_id: "r_1",
+                    rating: 5,
+                    comment: "Great",
+                    created_at: "2026-08-01",
+                },
             ];
 
             getTimeFilter.mockReturnValue("");
@@ -99,7 +107,9 @@ describe("ratingModel Unit Tests", () => {
         test("should throw error when database query fails", async () => {
             const stallId = "stall_A";
             getTimeFilter.mockReturnValue("");
-            mockRequest.query.mockRejectedValue(new Error("Database connection error"));
+            mockRequest.query.mockRejectedValue(
+                new Error("Database connection error"),
+            );
 
             await expect(getRatingsByStallId(stallId)).rejects.toThrow(
                 "Database connection error",
@@ -128,10 +138,18 @@ describe("ratingModel Unit Tests", () => {
                 .mockResolvedValueOnce({ rowsAffected: [1] })
                 .mockResolvedValueOnce({ recordset: [mockNewRating] });
 
-            const result = await createRating(stallId, customerId, rating, comment);
+            const result = await createRating(
+                stallId,
+                customerId,
+                rating,
+                comment,
+            );
 
             expect(mockRequest.input).toHaveBeenCalledWith("stallId", stallId);
-            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "customerId",
+                customerId,
+            );
             expect(mockRequest.input).toHaveBeenCalledWith("rating", rating);
             expect(mockRequest.input).toHaveBeenCalledWith("comment", comment);
             expect(mockRequest.query).toHaveBeenCalledTimes(2);
@@ -145,7 +163,12 @@ describe("ratingModel Unit Tests", () => {
                     recordset: [{ ...mockNewRating, comment: null }],
                 });
 
-            const result = await createRating(stallId, customerId, rating, undefined);
+            const result = await createRating(
+                stallId,
+                customerId,
+                rating,
+                undefined,
+            );
 
             expect(mockRequest.input).toHaveBeenCalledWith("comment", null);
             expect(result.comment).toBeNull();
@@ -176,8 +199,14 @@ describe("ratingModel Unit Tests", () => {
 
             const result = await deleteRating(ratingId, customerId);
 
-            expect(mockRequest.input).toHaveBeenCalledWith("ratingId", ratingId);
-            expect(mockRequest.input).toHaveBeenCalledWith("customerId", customerId);
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "ratingId",
+                ratingId,
+            );
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "customerId",
+                customerId,
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(2);
             expect(result).toEqual({ message: "Rating deleted successfully" });
         });
@@ -195,7 +224,9 @@ describe("ratingModel Unit Tests", () => {
         test("should throw error if rating belongs to another customer", async () => {
             mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
-            await expect(deleteRating(ratingId, "wrong_customer")).rejects.toThrow(
+            await expect(
+                deleteRating(ratingId, "wrong_customer"),
+            ).rejects.toThrow(
                 "Rating not found or you are not authorized to delete it",
             );
         });

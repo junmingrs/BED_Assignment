@@ -22,7 +22,7 @@ jest.mock("mssql", () => ({
 
 // Mock console.error
 beforeAll(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
@@ -45,34 +45,26 @@ describe("stallModel Unit Tests", () => {
             vendor_id: "vendor_1",
             vendor_email: "kim@email.com",
         };
-        const mockRatings = [
-            { rating_id: "r1", rating: 5, comment: "Great!", created_at: "2026-08-01" },
-        ];
-        const mockComplaints = [
-            { complaint_id: "c1", subject: "Hair found", status: "Open", created_at: "2026-08-01" },
-        ];
 
-        test("should return stall info with ratings and complaints successfully", async () => {
-            mockRequest.query
-                .mockResolvedValueOnce({ recordset: [mockStall] })
-                .mockResolvedValueOnce({ recordset: mockRatings })
-                .mockResolvedValueOnce({ recordset: mockComplaints });
+        test("should return stall info successfully", async () => {
+            mockRequest.query.mockResolvedValueOnce({ recordset: [mockStall] });
 
             const result = await getStallInfo("stall_A");
 
-            expect(mockRequest.input).toHaveBeenCalledWith("stallId", "stall_A");
-            expect(mockRequest.query).toHaveBeenCalledTimes(3);
-            expect(result).toEqual({
-                stall: mockStall,
-                ratings: mockRatings,
-                complaints: mockComplaints,
-            });
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "stallId",
+                "stall_A",
+            );
+            expect(mockRequest.query).toHaveBeenCalledTimes(1);
+            expect(result).toEqual(mockStall);
         });
 
         test("should throw error if stall not found", async () => {
             mockRequest.query.mockResolvedValueOnce({ recordset: [] });
 
-            await expect(getStallInfo("stall_A")).rejects.toThrow("Stall not found");
+            await expect(getStallInfo("stall_A")).rejects.toThrow(
+                "Stall not found",
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
         });
 
@@ -86,7 +78,6 @@ describe("stallModel Unit Tests", () => {
             );
         });
     });
-
     // getStallById
     describe("getStallById", () => {
         const mockStall = {
@@ -102,7 +93,10 @@ describe("stallModel Unit Tests", () => {
 
             const result = await getStallById("stall_A");
 
-            expect(mockRequest.input).toHaveBeenCalledWith("stall_id", "stall_A");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "stall_id",
+                "stall_A",
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
             expect(result).toEqual(mockStall);
         });
@@ -141,7 +135,7 @@ describe("stallModel Unit Tests", () => {
         test("should update stall name successfully", async () => {
             mockRequest.query
                 .mockResolvedValueOnce({
-                    recordset: [{ stall_id: stallId, vendor_id: accountId }],
+                    recordset: [{ stall_id: stallId, account_id: accountId }],
                 })
                 .mockResolvedValueOnce({ rowsAffected: [1] })
                 .mockResolvedValueOnce({ recordset: [mockUpdatedStall] });
@@ -151,7 +145,10 @@ describe("stallModel Unit Tests", () => {
             });
 
             expect(mockRequest.input).toHaveBeenCalledWith("stallId", stallId);
-            expect(mockRequest.input).toHaveBeenCalledWith("stallName", "Kim Kitchen 2.0");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "stallName",
+                "Kim Kitchen 2.0",
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(3);
             expect(result).toEqual(mockUpdatedStall);
         });
@@ -160,7 +157,7 @@ describe("stallModel Unit Tests", () => {
             const updated = { ...mockUpdatedStall, stall_unit_no: "#01-03" };
             mockRequest.query
                 .mockResolvedValueOnce({
-                    recordset: [{ stall_id: stallId, vendor_id: accountId }],
+                    recordset: [{ stall_id: stallId, account_id: accountId }],
                 })
                 .mockResolvedValueOnce({ rowsAffected: [1] })
                 .mockResolvedValueOnce({ recordset: [updated] });
@@ -169,7 +166,10 @@ describe("stallModel Unit Tests", () => {
                 stall_unit_no: "#01-03",
             });
 
-            expect(mockRequest.input).toHaveBeenCalledWith("stallUnitNo", "#01-03");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "stallUnitNo",
+                "#01-03",
+            );
             expect(result.stall_unit_no).toBe("#01-03");
         });
 
@@ -177,7 +177,7 @@ describe("stallModel Unit Tests", () => {
             const updated = { ...mockUpdatedStall, stall_unit_no: "#01-03" };
             mockRequest.query
                 .mockResolvedValueOnce({
-                    recordset: [{ stall_id: stallId, vendor_id: accountId }],
+                    recordset: [{ stall_id: stallId, account_id: accountId }],
                 })
                 .mockResolvedValueOnce({ rowsAffected: [1] })
                 .mockResolvedValueOnce({ recordset: [updated] });
@@ -187,8 +187,14 @@ describe("stallModel Unit Tests", () => {
                 stall_unit_no: "#01-03",
             });
 
-            expect(mockRequest.input).toHaveBeenCalledWith("stallName", "Kim Kitchen 2.0");
-            expect(mockRequest.input).toHaveBeenCalledWith("stallUnitNo", "#01-03");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "stallName",
+                "Kim Kitchen 2.0",
+            );
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "stallUnitNo",
+                "#01-03",
+            );
             expect(result.stall_name).toBe("Kim Kitchen 2.0");
             expect(result.stall_unit_no).toBe("#01-03");
         });
@@ -202,9 +208,9 @@ describe("stallModel Unit Tests", () => {
         });
 
         test("should throw error if stall belongs to another vendor", async () => {
-            // vendor_id mismatch
+            // account_id mismatch
             mockRequest.query.mockResolvedValueOnce({
-                recordset: [{ stall_id: stallId, vendor_id: "wrong_vendor" }],
+                recordset: [{ stall_id: stallId, account_id: "wrong_account" }],
             });
 
             await expect(
@@ -214,12 +220,12 @@ describe("stallModel Unit Tests", () => {
 
         test("should throw error if no fields to update", async () => {
             mockRequest.query.mockResolvedValueOnce({
-                recordset: [{ stall_id: stallId, vendor_id: accountId }],
+                recordset: [{ stall_id: stallId, account_id: accountId }],
             });
 
-            await expect(
-                updateStall(stallId, accountId, {}),
-            ).rejects.toThrow("No fields to update");
+            await expect(updateStall(stallId, accountId, {})).rejects.toThrow(
+                "No fields to update",
+            );
         });
 
         test("should throw error when database query fails", async () => {
@@ -232,7 +238,6 @@ describe("stallModel Unit Tests", () => {
             ).rejects.toThrow("Database connection error");
         });
     });
-
     // getAllStalls
     describe("getAllStalls", () => {
         const mockStalls = [
@@ -274,7 +279,9 @@ describe("stallModel Unit Tests", () => {
                 new Error("Database connection error"),
             );
 
-            await expect(getAllStalls()).rejects.toThrow("Database connection error");
+            await expect(getAllStalls()).rejects.toThrow(
+                "Database connection error",
+            );
         });
     });
 
@@ -287,7 +294,10 @@ describe("stallModel Unit Tests", () => {
 
             const result = await getStallIdByVendorId("vendor_1");
 
-            expect(mockRequest.input).toHaveBeenCalledWith("vendorId", "vendor_1");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "vendorId",
+                "vendor_1",
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
             expect(result).toEqual({ stall_id: "stall_A" });
         });

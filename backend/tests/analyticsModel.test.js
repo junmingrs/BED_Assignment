@@ -27,6 +27,16 @@ jest.mock("ollama", () => ({
     })),
 }));
 
+beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
+});
+
+afterAll(() => {
+    console.log.mockRestore();
+    console.error.mockRestore();
+});
+
 describe("Analytics Model Unit Tests", () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -51,7 +61,9 @@ describe("Analytics Model Unit Tests", () => {
                 averageOrderValue: 20.02,
             };
 
-            mockRequest.query.mockResolvedValueOnce({ recordset: [mockKpiData] });
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: [mockKpiData],
+            });
 
             const result = await getKPI(stallId, timeframe);
 
@@ -81,7 +93,9 @@ describe("Analytics Model Unit Tests", () => {
                 { sales_hour: 12, totalRevenue: 350.5 },
             ];
 
-            mockRequest.query.mockResolvedValueOnce({ recordset: mockHourlyData });
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: mockHourlyData,
+            });
 
             const result = await getHourlySales(stallId);
 
@@ -104,11 +118,17 @@ describe("Analytics Model Unit Tests", () => {
             const stallId = "stall_123";
             const timeframe = "this_month";
             const mockTopItems = [
-                { itemName: "Chicken Rice", totalSold: 50, totalRevenue: 250.0 },
+                {
+                    itemName: "Chicken Rice",
+                    totalSold: 50,
+                    totalRevenue: 250.0,
+                },
                 { itemName: "Laksa", totalSold: 30, totalRevenue: 180.0 },
             ];
 
-            mockRequest.query.mockResolvedValueOnce({ recordset: mockTopItems });
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: mockTopItems,
+            });
 
             const result = await getTopItems(stallId, timeframe);
 
@@ -142,7 +162,8 @@ describe("Analytics Model Unit Tests", () => {
             const expectedSummary = {
                 highlights: "Revenue grew by 20% this week.",
                 flags: "Everything is looking good! No warnings or complaints flagged.",
-                actions: "Everything is on track. No urgent action required today.",
+                actions:
+                    "Everything is on track. No urgent action required today.",
             };
 
             mockChat.mockResolvedValueOnce({
@@ -202,13 +223,16 @@ describe("Analytics Model Unit Tests", () => {
                 highlights:
                     "Cannot generate AI summary at this time. Please try again.",
                 flags: "Cannot generate AI summary at this time. Please try again.",
-                actions: "Cannot generate AI summary at this time. Please try again.",
+                actions:
+                    "Cannot generate AI summary at this time. Please try again.",
             });
             expect(console.error).toHaveBeenCalled();
         });
 
         test("should return fallback object when Ollama API call throws an error", async () => {
-            mockChat.mockRejectedValueOnce(new Error("Ollama connection failed"));
+            mockChat.mockRejectedValueOnce(
+                new Error("Ollama connection failed"),
+            );
 
             const result = await getAISummary(mockInputData);
 
@@ -216,7 +240,8 @@ describe("Analytics Model Unit Tests", () => {
                 highlights:
                     "Cannot generate AI summary at this time. Please try again.",
                 flags: "Cannot generate AI summary at this time. Please try again.",
-                actions: "Cannot generate AI summary at this time. Please try again.",
+                actions:
+                    "Cannot generate AI summary at this time. Please try again.",
             });
             expect(console.error).toHaveBeenCalled();
         });

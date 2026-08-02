@@ -36,6 +36,16 @@ jest.mock("mssql", () => ({
     })),
 }));
 
+beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
+});
+
+afterAll(() => {
+    console.log.mockRestore();
+    console.error.mockRestore();
+});
+
 jest.spyOn(crypto, "randomUUID").mockReturnValue("mocked-uuid-1234");
 
 describe("checkoutCart Controller Tests", () => {
@@ -54,7 +64,11 @@ describe("checkoutCart Controller Tests", () => {
                 cart: {
                     stall_A: {
                         items: [
-                            { item_desc: "Salmon Sushi Set", item_price: 12.5, quantity: 2 },
+                            {
+                                item_desc: "Salmon Sushi Set",
+                                item_price: 12.5,
+                                quantity: 2,
+                            },
                         ],
                         isEco: true,
                     },
@@ -162,10 +176,9 @@ describe("checkoutCart Controller Tests", () => {
             items: [{ name: "Salmon Sushi Set", quantity: 2, price: 12.5 }],
             total: 20.3,
         });
-        expect(customerModel.subtractCustomerLoyaltyPoints).toHaveBeenCalledWith(
-            "cust_1",
-            50,
-        );
+        expect(
+            customerModel.subtractCustomerLoyaltyPoints,
+        ).toHaveBeenCalledWith("cust_1", 50);
         // Math.ceil(20.3 / 10) = 3 points earned
         expect(customerModel.addCustomerLoyaltyPoints).toHaveBeenCalledWith(
             "cust_1",
@@ -245,7 +258,9 @@ describe("checkoutCart Controller Tests", () => {
         await checkoutCart(req, res);
 
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Internal server error",
+        });
     });
 });
 
@@ -290,7 +305,9 @@ describe("getOrderById Controller Tests", () => {
 
         await getOrderById(req, res);
 
-        expect(orderModel.getOrderById).toHaveBeenCalledWith(req.params.orderId);
+        expect(orderModel.getOrderById).toHaveBeenCalledWith(
+            req.params.orderId,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(mockOrder);
     });
@@ -300,7 +317,9 @@ describe("getOrderById Controller Tests", () => {
 
         await getOrderById(req, res);
 
-        expect(orderModel.getOrderById).toHaveBeenCalledWith(req.params.orderId);
+        expect(orderModel.getOrderById).toHaveBeenCalledWith(
+            req.params.orderId,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(null);
     });
@@ -312,9 +331,13 @@ describe("getOrderById Controller Tests", () => {
 
         await getOrderById(req, res);
 
-        expect(orderModel.getOrderById).toHaveBeenCalledWith(req.params.orderId);
+        expect(orderModel.getOrderById).toHaveBeenCalledWith(
+            req.params.orderId,
+        );
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Internal server error",
+        });
     });
 });
 
@@ -340,12 +363,17 @@ describe("getOrdersByCustomer Controller Tests", () => {
     });
 
     test("should fetch orders with an empty status array when no query param is provided", async () => {
-        const mockOrders = [{ order_id: "order_1", total_amount: 15.0, items: [] }];
+        const mockOrders = [
+            { order_id: "order_1", total_amount: 15.0, items: [] },
+        ];
         orderModel.getOrdersByCustomer.mockResolvedValueOnce(mockOrders);
 
         await getOrdersByCustomer(req, res);
 
-        expect(orderModel.getOrdersByCustomer).toHaveBeenCalledWith("cust_1", []);
+        expect(orderModel.getOrdersByCustomer).toHaveBeenCalledWith(
+            "cust_1",
+            [],
+        );
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(mockOrders);
     });
@@ -353,7 +381,9 @@ describe("getOrdersByCustomer Controller Tests", () => {
     test("should return orders correct when only 1 status is provided", async () => {
         req.query.status = "Pending";
 
-        const mockOrders = [{ order_id: "order_1", status: "Pending", items: [] }];
+        const mockOrders = [
+            { order_id: "order_1", status: "Pending", items: [] },
+        ];
         orderModel.getOrdersByCustomer.mockResolvedValueOnce(mockOrders);
 
         await getOrdersByCustomer(req, res);
@@ -393,7 +423,9 @@ describe("getOrdersByCustomer Controller Tests", () => {
         await getOrdersByCustomer(req, res);
 
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Internal server error",
+        });
     });
 });
 
@@ -420,13 +452,21 @@ describe("getOrderByStallId Controller Tests", () => {
 
     test("should fetch orders with timeframe set to null when no query param is passed", async () => {
         const mockOrders = [
-            { order_id: "order_1", stall_id: "stall_A", queue_number: 1, items: [] },
+            {
+                order_id: "order_1",
+                stall_id: "stall_A",
+                queue_number: 1,
+                items: [],
+            },
         ];
         orderModel.getOrderByStallId.mockResolvedValueOnce(mockOrders);
 
         await getOrderByStallId(req, res);
 
-        expect(orderModel.getOrderByStallId).toHaveBeenCalledWith("stall_A", null);
+        expect(orderModel.getOrderByStallId).toHaveBeenCalledWith(
+            "stall_A",
+            null,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(mockOrders);
     });
@@ -435,7 +475,12 @@ describe("getOrderByStallId Controller Tests", () => {
         req.query.timeframe = "today";
 
         const mockOrders = [
-            { order_id: "order_1", stall_id: "stall_A", queue_number: 1, items: [] },
+            {
+                order_id: "order_1",
+                stall_id: "stall_A",
+                queue_number: 1,
+                items: [],
+            },
         ];
         orderModel.getOrderByStallId.mockResolvedValueOnce(mockOrders);
 
@@ -454,7 +499,10 @@ describe("getOrderByStallId Controller Tests", () => {
 
         await getOrderByStallId(req, res);
 
-        expect(orderModel.getOrderByStallId).toHaveBeenCalledWith("stall_A", null);
+        expect(orderModel.getOrderByStallId).toHaveBeenCalledWith(
+            "stall_A",
+            null,
+        );
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(null);
     });
@@ -467,7 +515,9 @@ describe("getOrderByStallId Controller Tests", () => {
         await getOrderByStallId(req, res);
 
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Internal server error",
+        });
     });
 });
 
@@ -509,7 +559,9 @@ describe("updateOrderStatus Controller Tests", () => {
             req.params.orderId,
             req.params.status,
         );
-        expect(orderModel.getOrderById).toHaveBeenCalledWith(req.params.orderId);
+        expect(orderModel.getOrderById).toHaveBeenCalledWith(
+            req.params.orderId,
+        );
 
         // verify ws broadcast
         expect(broadcast).toHaveBeenCalledWith({
@@ -549,6 +601,8 @@ describe("updateOrderStatus Controller Tests", () => {
         await updateOrderStatus(req, res);
 
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+        expect(res.json).toHaveBeenCalledWith({
+            message: "Internal server error",
+        });
     });
 });

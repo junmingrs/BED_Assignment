@@ -20,6 +20,16 @@ jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
 jest.mock("../model/accountModel");
 
+beforeAll(() => {
+    jest.spyOn(console, "log").mockImplementation(() => { });
+    jest.spyOn(console, "error").mockImplementation(() => { });
+});
+
+afterAll(() => {
+    console.log.mockRestore();
+    console.error.mockRestore();
+});
+
 describe("Account Controller Unit Tests", () => {
     let req, res;
 
@@ -347,9 +357,7 @@ describe("Account Controller Unit Tests", () => {
 
             await getAccountById(req, res);
 
-            expect(accountModel.getAccountById).toHaveBeenCalledWith(
-                "acc-123",
-            );
+            expect(accountModel.getAccountById).toHaveBeenCalledWith("acc-123");
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith(mockAccount);
         });
