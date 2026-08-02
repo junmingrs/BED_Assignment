@@ -40,6 +40,7 @@ const NAV_ITEMS = {
         { name: "Inspections", href: "/nea/inspections.html", align: "left" },
         { name: "Hawker Centres", href: "/nea/hawkers.html", align: "left" },
         { name: "Complaints", href: "/nea/complaints.html", align: "left" },
+        { name: "Profile", href: "/nea/profile.html", align: "right" },
     ],
 };
 
