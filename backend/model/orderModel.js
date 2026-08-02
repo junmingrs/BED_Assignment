@@ -2,7 +2,6 @@ const { poolPromise } = require("../db");
 const { getTimeFilter } = require("../helper");
 
 async function getTotalAmount(items) {
-    console.log(items);
     let total = 0;
     items.forEach((item) => {
         total += item.itemPrice;
@@ -102,7 +101,8 @@ async function getNextQueueNum(stallId) {
     const pool = await poolPromise;
     const result = await pool.request().input("stall_id", stallId).query(query);
 
-    if (result.recordset.length === 0) return 1;
+    if (result.recordset.length === 0 || !result.recordset[0].max_queue)
+        return 1;
     return parseInt(result.recordset[0].max_queue) + 1;
 }
 

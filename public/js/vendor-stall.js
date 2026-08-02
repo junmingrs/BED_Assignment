@@ -73,23 +73,37 @@ async function loadStallInfo() {
         document.getElementById('vendor-id').textContent = stallData.vendor_id || vendorId;
         document.getElementById('vendor-email').textContent = stallData.vendor_email || 'Not available';
 
-        // 租约信息
+        // ===== 租约信息（使用 /rentalagreement API） =====
         try {
-            const leaseRes = await fetch(`/stalls/${stallId}/lease`, {
+            const leaseRes = await fetch(`/rentalagreement?stallId=${stallId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (leaseRes.ok) {
-                const lease = await leaseRes.json();
-                const start = new Date(lease.start_date).toLocaleDateString('en-SG');
-                const end = new Date(lease.end_date).toLocaleDateString('en-SG');
-                document.getElementById('rental-agreement').textContent =
-                    `$${lease.monthly_rent}/month (${start} - ${end})`;
+                const leases = await leaseRes.json();
+                // 查找当前有效的租约（status 为 'Active'）
+                const activeLease = leases.find(l => l.status === 'Active');
+                if (activeLease) {
+                    const start = new Date(activeLease.start_date).toLocaleDateString('en-SG');
+                    const end = new Date(activeLease.end_date).toLocaleDateString('en-SG');
+                    document.getElementById('rental-agreement').textContent =
+                        `$${activeLease.rental_fee}/month (${start} - ${end})`;
+                } else if (leases.length > 0) {
+                    // 如果没有 active 的，显示最近一条（按 start_date 排序取第一个）
+                    const sorted = leases.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+                    const latest = sorted[0];
+                    const start = new Date(latest.start_date).toLocaleDateString('en-SG');
+                    const end = new Date(latest.end_date).toLocaleDateString('en-SG');
+                    document.getElementById('rental-agreement').textContent =
+                        `$${latest.rental_fee}/month (${start} - ${end}) - ${latest.status}`;
+                } else {
+                    document.getElementById('rental-agreement').textContent = 'No rental agreement';
+                }
             } else {
-                document.getElementById('rental-agreement').textContent = 'No active lease';
+                document.getElementById('rental-agreement').textContent = 'No rental agreement';
             }
         } catch (err) {
-            console.warn('Could not fetch lease:', err);
-            document.getElementById('rental-agreement').textContent = 'Lease info unavailable';
+            console.warn('Could not fetch rental agreement:', err);
+            document.getElementById('rental-agreement').textContent = 'Rental info unavailable';
         }
 
         window.currentStallId = stallId;

@@ -1,4 +1,8 @@
 import { getIdFromToken, getIsGuest } from "./helper.js";
+
+// 获取翻译函数
+const t = window.i18n ? window.i18n.t : (key) => key;
+
 const cartContainer = document.getElementById("container");
 const paymentContainer = document.getElementById("payment-container");
 const cartTotal = document.getElementById("cart-total");
@@ -99,9 +103,6 @@ async function loadCuisines(stallId, itemCode) {
 }
 
 async function renderCartItems() {
-    // TODO: store images?
-    // src = "${item.image}";
-
     cartMap = JSON.parse(localStorage.getItem(LS_KEYS.cart) ?? "{}");
     let totalAmount = 0;
     const cards = await Promise.all(
@@ -114,7 +115,10 @@ async function renderCartItems() {
             if (isEco) totalAmount += 0.3;
             const itemCards = await Promise.all(
                 stallItems.map(async (item) => {
-                    const menuItem = await getItemById(item.stallId, item.itemCode);
+                    const menuItem = await getItemById(
+                        item.stallId,
+                        item.itemCode,
+                    );
 
                     const cuisineContent = await loadCuisines(
                         item.stallId,
@@ -130,13 +134,14 @@ async function renderCartItems() {
                     let priceHtml;
                     if (matchedPromo) {
                         const discountedPrice =
-                            menuItem.item_price * (1 - matchedPromo.discount / 100);
+                            menuItem.item_price *
+                            (1 - matchedPromo.discount / 100);
                         priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">
                         $${discountedPrice.toFixed(2)}
                         <span class="ml-2 text-sm font-normal text-gray-500 line-through">$${menuItem.item_price.toFixed(2)}</span>
                         <span class="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">${matchedPromo.discount}% OFF</span>
                     </p>`;
-                        menuItem.item_price = discountedPrice; // Update price for total amount calculation
+                        menuItem.item_price = discountedPrice;
                     } else {
                         priceHtml = `<p class="mt-3 text-lg font-bold text-green-600">$${menuItem.item_price.toFixed(2)}</p>`;
                     }
@@ -146,10 +151,11 @@ async function renderCartItems() {
 
                     return `
                     <div class="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+
                       <img
-                        src="https://pupswithchopsticks.com/wp-content/uploads/kimchi-fried-rice-1-720x1080.jpg"
+                        src="${menuItem.item_image ?? "https://placehold.co/600x400?text=Not+Available"}"
                         alt="${menuItem.item_desc}"
-                        class="size-24 rounded-lg object-cover"
+                        class="w-40 h-30 rounded-lg object-cover"
                       />
 
                       <div class="flex-1">
@@ -175,7 +181,7 @@ async function renderCartItems() {
                       </div>
 
                       <button class="delete ml-4 rounded-md border border-red-200 px-3 py-2 text-red-600 transition-colors hover:bg-red-50" data-stall-id="${item.stallId}" data-item-code="${item.itemCode}">
-                        Delete
+                        ${t("delete")}
                       </button>
                     </div>
                 `;
@@ -196,15 +202,15 @@ async function renderCartItems() {
                     />
                     <div>
                         <p class="text-sm font-medium leading-none">
-                            Eco-friendly packaging
+                            ${t("eco_friendly")}
                         </p>
                         <p class="mt-1 text-xs text-gray-500">
-                            Use paper containers and reduce plastic where possible.
+                            ${t("eco_description")}
                         </p>
                     </div>
                 </label>
                 <p class="text-sm font-semibold text-gray-900">
-                    +$0.30
+                    ${t("plus_030")}
                 </p>
             </div>
         </section>
@@ -214,8 +220,7 @@ async function renderCartItems() {
 
     cartContainer.innerHTML = cards.join("");
     if (cartContainer.innerHTML === "") {
-        cartContainer.innerHTML =
-            '<p class="text-sm text-gray-500 text-center py-8">No items added in cart</p>';
+        cartContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-8">${t("cart_empty")}</p>`;
         paymentContainer.classList.add("hidden");
     } else {
         paymentContainer.classList.remove("hidden");
@@ -233,7 +238,7 @@ async function renderCartItems() {
 async function checkout() {
     const customerId = getIdFromToken(token);
     if (Object.keys(cartMap).length == 0) {
-        alert("Cannot checkout if there are no items in the cart.");
+        alert(t("checkout_empty_error"));
         return;
     }
 
@@ -252,7 +257,7 @@ async function checkout() {
         });
 
         const data = await response.json();
-        alert(data.message);
+        alert(t(data.message) || data.message);
         if (response.ok) {
             const itemPromises = [];
 
@@ -261,7 +266,10 @@ async function checkout() {
                 cartMap[stallId].items.forEach((item) => {
                     itemPromises.push(
                         (async () => {
-                            const menuItem = await getItemById(item.stallId, item.itemCode);
+                            const menuItem = await getItemById(
+                                item.stallId,
+                                item.itemCode,
+                            );
 
                             return {
                                 name: menuItem?.item_desc || "Item",
@@ -273,7 +281,7 @@ async function checkout() {
                 });
                 if (isEco) {
                     itemPromises.push({
-                        name: "Eco-friendly Packaging",
+                        name: t("eco_packaging_label"),
                         quantity: 1,
                         price: 0.3,
                     });
@@ -320,8 +328,9 @@ async function checkout() {
 }
 
 function changeQuality(stallId, itemCode, amount) {
-    const item = cartMap[stallId].items.find((item) => item.itemCode == itemCode);
-    // min is 1, because if it's 0 then they should delete it
+    const item = cartMap[stallId].items.find(
+        (item) => item.itemCode == itemCode,
+    );
     item.quantity = Math.max(item.quantity + amount, 1);
 }
 
@@ -390,13 +399,13 @@ promotionBtn.addEventListener("click", async () => {
     promotionMsg.classList.add("hidden");
 
     if (!code) {
-        showMsg("Please enter a promo code", "error");
+        showMsg(t("promo_enter_error"), "error");
         return;
     }
 
     const allPromos = await getAllPromotions();
     if (!Array.isArray(allPromos)) {
-        showMsg("Unable to verify promo code. Try again.", "error");
+        showMsg(t("promo_verify_error"), "error");
         return;
     }
 
@@ -406,29 +415,30 @@ promotionBtn.addEventListener("click", async () => {
     );
 
     if (!matchedPromo) {
-        showMsg(`${code} is not a valid promo code`, "error");
+        showMsg(`${code} ${t("promo_invalid")}`, "error");
         return;
     }
 
     if (appliedPromos.includes(matchedPromo)) {
-        showMsg(`${code} is already applied`, "error");
+        showMsg(`${code} ${t("promo_already_applied")}`, "error");
         return;
     }
 
-    // Check if currently active
     const today = new Date();
     const start = new Date(matchedPromo.start_date);
     const end = new Date(matchedPromo.end_date);
     end.setHours(23, 59, 59, 999);
 
     if (today < start || today > end) {
-        showMsg(`${code} is not currently active`, "error");
+        showMsg(`${code} ${t("promo_inactive")}`, "error");
         return;
     }
 
-    // Apply
     appliedPromos.push(matchedPromo);
-    showMsg(`${code} applied — ${matchedPromo.discount}% off`, "success");
+    showMsg(
+        `${code} ${t("promo_applied", { discount: matchedPromo.discount })}`,
+        "success",
+    );
     promotionInput.value = "";
     renderCartItems();
 });

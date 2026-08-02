@@ -26,7 +26,11 @@ const inspectionController = require("./controller/inspectionController");
 const hawkerCentreController = require("./controller/hawkerCentreController");
 const customerController = require("./controller/customerController.js");
 const chatbotController = require("./controller/chatbotController.js");
+const googleCalendarController = require("./controller/googleCalendarController");
+const inspectionSchedulingController = require("./controller/inspectionSchedulingController");
 const { authorise } = require("./middleware/auth");
+
+// validation
 const {
     validateRegister,
     validateLogin,
@@ -35,6 +39,20 @@ const {
     validateMenuItemCreate,
     validateMenuItemUpdate,
 } = require("./middleware/menuItemValidation");
+const {
+    validateGetOrderById,
+    validateGetOrdersByCustomer,
+    validateGetCustomerProfile,
+    validateUpdateOrderStatus,
+    validateGetOrderByStallId,
+    validateCheckoutCart,
+} = require("./middleware/orderValidation.js");
+const {
+    validateGetKPI,
+    validateGetHourlySales,
+    validateGetTopItems,
+    validateGetAISummary,
+} = require("./middleware/analyticsValidation.js");
 
 // Create Express app
 const app = express();
@@ -89,30 +107,45 @@ app.get(
     menuItemController.getMenuItemsByStallId,
 );
 
-app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
+app.post(
+    "/checkout",
+    authorise("Customer"),
+    validateCheckoutCart,
+    orderController.checkoutCart,
+);
+
 app.get(
     "/order/:orderId",
     authorise("Customer", "Vendor"),
+    validateGetOrderById,
     orderController.getOrderById,
 );
+
 app.get(
     "/customer/:customerId/orders",
     authorise("Customer"),
+    validateGetOrdersByCustomer,
     orderController.getOrdersByCustomer,
 );
+
 app.get(
     "/customer/:customerId/profile",
     authorise("Customer"),
+    validateGetCustomerProfile,
     customerController.getCustomerByAccountId,
 );
+
 app.patch(
     "/orders/:orderId/:status",
     authorise("Vendor", "Customer"),
+    validateUpdateOrderStatus,
     orderController.updateOrderStatus,
 );
+
 app.get(
     "/stalls/:stallId/orders",
     authorise("Customer", "Vendor"),
+    validateGetOrderByStallId,
     orderController.getOrderByStallId,
 );
 app.get(
@@ -154,7 +187,7 @@ app.delete(
 
 app.get(
     "/stalls",
-    authorise("Vendor", "Customer", "Operator","NEA"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     stallController.getAllStalls,
 );
 
@@ -208,7 +241,7 @@ app.delete(
 // get complaints for a stall
 app.get(
     "/stalls/:stallId/complaints",
-    authorise("Vendor", "Customer", "Operator","NEA"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     complaintController.getComplaints,
 );
 
@@ -259,14 +292,14 @@ app.post(
 app.get(
     "/inspections/:inspectionId",
     authorise("NEA"),
-    inspectionController.getInspectionById
+    inspectionController.getInspectionById,
 );
 
 // add an inspection (NEA only)
 app.put(
     "/inspections/:inspectionId",
     authorise("NEA"),
-    inspectionController.updateInspection
+    inspectionController.updateInspection,
 );
 
 // delete an inspection (NEA only)
@@ -275,32 +308,36 @@ app.delete(
     authorise("NEA"),
     inspectionController.deleteInspection,
 );
-// send email 
+// send email
 app.post(
     "/send-receipt",
     authorise("Customer"),
-    emailController.sendReceiptEmail
+    emailController.sendReceiptEmail,
 );
 
 // Stall Analytics
 app.get(
     "/vendor/analytics/kpi/:stallId",
     authorise("Vendor"),
+    validateGetKPI,
     analyticsController.getKPI,
 );
 app.get(
     "/vendor/analytics/hourly-sales/:stallId",
     authorise("Vendor"),
+    validateGetHourlySales,
     analyticsController.getHourlySales,
 );
 app.get(
     "/vendor/analytics/top-items/:stallId",
     authorise("Vendor"),
+    validateGetTopItems,
     analyticsController.getTopItems,
 );
 app.get(
     "/vendor/analytics/ai-summary/:stallId",
     authorise("Vendor"),
+    validateGetAISummary,
     analyticsController.getAISummary,
 );
 
@@ -321,16 +358,67 @@ app.get(
     hawkerCentreController.getHawkerCentreById,
 );
 
-app.post("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
-app.delete("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
-app.get("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.getMenuItemLikeByCustomer);
+app.post(
+    "/menuitem/likes/:customerId",
+    authorise("Customer"),
+    menuItemController.createMenuItemLike,
+);
+app.delete(
+    "/menuitem/likes/:customerId",
+    authorise("Customer"),
+    menuItemController.deleteMenuItemLike,
+);
+app.get(
+    "/menuitem/likes/:customerId",
+    authorise("Customer"),
+    menuItemController.getMenuItemLikeByCustomer,
+);
 app.get(
     "/menuitem",
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
 
-app.post("/customer/chatbot/:customerId", authorise("Customer"), chatbotController.chat);
+app.post(
+    "/customer/chatbot/:customerId",
+    authorise("Customer"),
+    chatbotController.chat,
+);
+
+// Google Calendar sync
+app.get("/auth/google", googleCalendarController.connectGoogle);
+app.get("/auth/google/callback", googleCalendarController.googleCallback);
+app.get(
+    "/vendor/calendar/status",
+    authorise("Vendor"),
+    googleCalendarController.getConnectionStatus,
+);
+app.get(
+    "/vendor/calendar/events",
+    authorise("Vendor"),
+    googleCalendarController.getGoogleEvents,
+);
+app.delete(
+    "/vendor/calendar/disconnect",
+    authorise("Vendor"),
+    googleCalendarController.disconnectGoogle,
+);
+
+app.post(
+    "/stalls/:stallId/inspections/schedule",
+    authorise("NEA"),
+    inspectionSchedulingController.scheduleInspection,
+);
+app.patch(
+    "/inspections/:inspectionId/complete",
+    authorise("NEA"),
+    inspectionSchedulingController.completeInspection,
+);
+app.get(
+    "/stalls/:stallId/inspections/scheduled",
+    authorise("Vendor", "NEA", "Operator"),
+    inspectionSchedulingController.getScheduledInspections,
+);
 
 // Start server
 app.listen(port, () => {

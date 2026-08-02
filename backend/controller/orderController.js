@@ -25,7 +25,10 @@ async function getOrdersByCustomer(req, res) {
             : [];
 
     try {
-        const orders = await orderModel.getOrdersByCustomer(customerId, statuses);
+        const orders = await orderModel.getOrdersByCustomer(
+            customerId,
+            statuses,
+        );
         return res.status(200).json(orders);
     } catch (err) {
         console.error(err);
@@ -73,7 +76,6 @@ async function updateOrderStatus(req, res) {
 async function checkoutCart(req, res) {
     const { cart, customerId } = req.body;
     const { isGuest } = req.user;
-    const cartMap = typeof cart == "string" ? JSON.parse(cart) : cart;
 
     try {
         const pool = await poolPromise;
@@ -85,16 +87,21 @@ async function checkoutCart(req, res) {
             );
 
         const customerEmail = customerResult.recordset[0]?.account_email;
-        const orderPromises = Object.keys(cartMap).map(async (stallId) => {
+        const orderPromises = Object.keys(cart).map(async (stallId) => {
             const orderId = crypto.randomUUID();
-            const items = cartMap[stallId].items;
-            const isEco = cartMap[stallId].isEco || false;
+            const items = cart[stallId].items;
+            const isEco = cart[stallId].isEco || false;
 
-            
             let total = await orderModel.getTotalAmount(items);
             if (isEco) total += 0.3;
 
-            await orderModel.createOrder(orderId, stallId, customerId, total, isEco);
+            await orderModel.createOrder(
+                orderId,
+                stallId,
+                customerId,
+                total,
+                isEco,
+            );
 
             const itemPromises = items.map(async (item) => {
                 await orderModel.createOrderItem(orderId, { ...item, stallId });
@@ -123,30 +130,52 @@ async function checkoutCart(req, res) {
             const allItems = [];
             let totalAmount = 0;
 
-            Object.keys(cartMap).forEach((stallId) => {
+            for (const stallId of Object.keys(cartMap)) {
                 const items = cartMap[stallId].items;
                 const isEco = cartMap[stallId].isEco || false;
                 let stallTotal = 0;
 
-                items.forEach((item) => {
-                    const price = item.itemPrice || item.item_price || item.price || 0;
+                for (const item of items) {
+                    const menuItemResult = await pool
+                        .request()
+                        .input("stallId", stallId)
+                        .input("itemCode", item.itemCode)
+                        .query(
+                            `SELECT item_desc, item_price FROM MenuItem WHERE stall_id = @stallId AND item_code = @itemCode`,
+                        );
+
+                    const menuItem = menuItemResult.recordset[0];
+                    const price =
+                        menuItem?.item_price ||
+                        item.item_price ||
+                        item.price ||
+                        0;
+
                     const qty = item.quantity || 1;
                     stallTotal += price * qty;
 
                     allItems.push({
-                        name: item.item_desc || item.name || "Item",
+                        name: menuItem?.item_desc || "Item",
                         quantity: qty,
                         price: price,
                     });
-                });
+                }
 
                 if (isEco) stallTotal += 0.3;
                 totalAmount += stallTotal;
-            });
+            }
 
-          
-            console.log(' Sending receipt items:', JSON.stringify(allItems, null, 2));
-            console.log(' Total amount:', totalAmount);
+            console.log(
+                " Sending receipt items:",
+                JSON.stringify(allItems, null, 2),
+            );
+            console.log(" Total amount:", totalAmount);
+
+            console.log(
+                " Sending receipt items:",
+                JSON.stringify(allItems, null, 2),
+            );
+            console.log(" Total amount:", totalAmount);
 
             sendReceipt(customerEmail, {
                 order_id: Object.values(ordersMap).join(", "),
