@@ -13,8 +13,9 @@ export function getIsGuest(token) {
     }
 }
 
-export function signOut() {
+export function signOut(isCustomer = false) {
     sessionStorage.removeItem(SS_KEYS.accessToken);
+    if (isCustomer) localStorage.removeItem(LS_KEYS.cart);
     window.location.href = "/";
 }
 
