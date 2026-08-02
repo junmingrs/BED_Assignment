@@ -32,9 +32,13 @@ async function loginUser(e) {
                 alert(data.message);
                 sessionStorage.setItem(SS_KEYS.accessToken, data.token);
                 window.location.href = "/nea/inspections.html";
+            } else if (data.role == "Vendor") {
+                alert(data.message);
+                sessionStorage.setItem(SS_KEYS.accessToken, data.token);
+                window.location.href = "/vendor/";
             } else {
                 alert(
-                    "You need to be an Operator or an NEA Officer to log in via this portal.",
+                    "You need to be a staff (NEA, Operator, Vendor) to login via this portal",
                 );
             }
         }

@@ -26,21 +26,14 @@ async function loginUser(e) {
             alert(data.message);
             return;
         } else {
-            switch (data.role) {
-                case "Vendor":
-                    alert(data.message);
-                    sessionStorage.setItem(SS_KEYS.accessToken, data.token);
-                    window.location.href = "/vendor/";
-                    break;
-                case "Customer":
-                    alert(data.message);
-                    sessionStorage.setItem(SS_KEYS.accessToken, data.token);
-                    window.location.href = "/customer/";
-                    break;
-                default:
-                    alert(
-                        "You need to be a Vendor or Customer to log in via this portal. For operators and NEA officers, please use the staff log in.",
-                    );
+            if (data.role == "Customer") {
+                alert(data.message);
+                sessionStorage.setItem(SS_KEYS.accessToken, data.token);
+                window.location.href = "/customer/";
+            } else {
+                alert(
+                    "You need to be a Customer to access this portal. Please use the staff login if you are a staff.",
+                );
             }
         }
     } catch (err) {
