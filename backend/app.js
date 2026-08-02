@@ -34,7 +34,8 @@ const { authorise } = require("./middleware/auth");
 const {
     validateRegister,
     validateLogin,
-} = require("./middleware/validate");
+    validateGetAccountById,
+} = require("./middleware/accountValidation.js");
 const {
     validateMenuItemCreate,
     validateMenuItemUpdate,
@@ -73,7 +74,12 @@ app.use(express.static(path.join("public")));
 // Routes
 app.post("/register", validateRegister, accountController.registerUser);
 app.post("/login", validateLogin, accountController.loginUser);
-app.post("/loginGuest", accountController.loginGuest);
+app.post("/loginGuest", accountController.loginGuest); // no need validation
+app.get(
+    "/account/:accountId/profile",
+    validateGetAccountById,
+    accountController.getAccountById,
+);
 
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);
@@ -96,11 +102,7 @@ app.get(
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get(
-    "/menuitems",
-    authorise("Vendor"),
-    menuItemController.getAllMenuItems,
-);
+app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
 app.get(
     "/menuitemsbystall/:stallId",
     authorise("Vendor", "Customer"),

@@ -48,6 +48,13 @@ const registerSchema = Joi.object({
         }),
 });
 
+const accountIdSchema = Joi.object({
+    accountId: Joi.string().required().messages({
+        "string.empty": "Account ID is required",
+        "any.required": "Account ID is required",
+    }),
+});
+
 function validateRegister(req, res, next) {
     const { error } = registerSchema.validate(req.body, { abortEarly: false });
 
@@ -72,4 +79,38 @@ function validateLogin(req, res, next) {
     next();
 }
 
-module.exports = { validateRegister, validateLogin };
+function validateGetAccountById(req, res, next) {
+    const { error } = accountIdSchema.validate(req.params, {
+        abortEarly: false,
+    });
+
+    if (error) {
+        const errorMessage = error.details
+            .map((detail) => detail.message)
+            .join(", ");
+        return res.status(400).json({ message: errorMessage });
+    }
+    next();
+}
+
+function authenticateToken(req, res, next) {
+    console.log("this happened");
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (token == null) return res.status(401).json({ error: "Invalid Token" });
+
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+        console.log(err);
+        if (err)
+            return res.status(403).json({ error: "Failed to verify token" });
+        req.user = user;
+        next();
+    });
+}
+
+module.exports = {
+    validateRegister,
+    validateLogin,
+    authenticateToken,
+    validateGetAccountById,
+};
