@@ -156,16 +156,21 @@ async function loadMenuItems(menuItems, menuItemLikes) {
     const cart = getCart();
 
     const itemPromises = menuItems.map(async (item) => {
-        console.log(item);
         const itemIndex = itemIndexInCart(cart, item.stall_id, item.item_code);
         const currentQty =
-            itemIndex !== -1 ? cart[item.stall_id].items[itemIndex].quantity : 0;
+            itemIndex !== -1
+                ? cart[item.stall_id].items[itemIndex].quantity
+                : 0;
         const like = menuItemLikes.find(
-            (l) => l.stall_id === item.stall_id && l.item_code === item.item_code,
+            (l) =>
+                l.stall_id === item.stall_id && l.item_code === item.item_code,
         )
             ? true
             : false;
-        const cuisineContent = await loadCuisines(item.stall_id, item.item_code);
+        const cuisineContent = await loadCuisines(
+            item.stall_id,
+            item.item_code,
+        );
 
         const actionControl =
             itemIndex === -1
