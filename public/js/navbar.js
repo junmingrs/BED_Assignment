@@ -5,10 +5,18 @@ const NAV_ITEMS = {
             name: "Browse",
             href: "/customer/hawkers.html",
             align: "left",
-            activePages: ["/customer/hawkers", "/customer/hawker", "/customer/stall"],
+            activePages: [
+                "/customer/hawkers",
+                "/customer/hawker",
+                "/customer/stall",
+            ],
         },
         { name: "Complaint", href: "/customer/complaint.html", align: "left" },
-        { name: "Order History", href: "/customer/order-history.html", align: "left" },
+        {
+            name: "Order History",
+            href: "/customer/order-history.html",
+            align: "left",
+        },
         { name: "Cart", href: "/customer/cart.html", align: "right" },
         {
             name: "Profile",
@@ -18,7 +26,7 @@ const NAV_ITEMS = {
     ],
     operator: [
         { name: "Home", href: "/operator/", align: "left" },
-        { name: "Hawker Centres", href: "/operator/hawkers.html", align: "left" },
+        { name: "Profile", href: "/operator/profile.html", align: "right" },
     ],
     vendor: [
         { name: "Home", href: "/vendor/", align: "left" },
@@ -96,7 +104,8 @@ function loadNavbar() {
                 <div class="flex items-center gap-7">
                     ${renderNavLinks(rightItems, currentPath)}
                 </div>
-                ${showLanguageToggle ? `
+                ${showLanguageToggle
+            ? `
                 <div class="flex gap-1 ml-4">
                     <button onclick="window.i18n.setLanguage('en')"
                         class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
@@ -106,7 +115,9 @@ function loadNavbar() {
                         class="px-3 py-1 text-sm font-medium rounded border border-gray-300 hover:bg-gray-100 transition">
                         中文
                     </button>
-                </div>` : ''}
+                </div>`
+            : ""
+        }
             </div>
         </nav>
     `;

@@ -1,4 +1,4 @@
-const { oauth2Client } = require("../config/googleAuth");
+const { oauth2Client } = require("../googleAuth");
 const { google } = require("googleapis");
 const googleTokenModel = require("../model/googleTokenModel");
 
@@ -60,7 +60,9 @@ const getGoogleEvents = async (req, res) => {
         const storedTokens = await googleTokenModel.getTokens(vendorId);
 
         if (!storedTokens) {
-            return res.status(404).json({ error: "Google Calendar not connected" });
+            return res
+                .status(404)
+                .json({ error: "Google Calendar not connected" });
         }
 
         // set up a per-request client with this vendor's tokens
@@ -81,8 +83,10 @@ const getGoogleEvents = async (req, res) => {
         // auto-persist refreshed tokens if Google issues new ones during this call
         client.on("tokens", async (newTokens) => {
             await googleTokenModel.saveTokens(vendorId, {
-                access_token: newTokens.access_token ?? storedTokens.access_token,
-                refresh_token: newTokens.refresh_token ?? storedTokens.refresh_token,
+                access_token:
+                    newTokens.access_token ?? storedTokens.access_token,
+                refresh_token:
+                    newTokens.refresh_token ?? storedTokens.refresh_token,
                 expiry_date: newTokens.expiry_date ?? storedTokens.token_expiry,
             });
         });
@@ -91,7 +95,9 @@ const getGoogleEvents = async (req, res) => {
 
         // get every calendar this account has access to (not just "primary")
         const calendarListResponse = await calendar.calendarList.list();
-        const calendarIds = (calendarListResponse.data.items || []).map((cal) => cal.id);
+        const calendarIds = (calendarListResponse.data.items || []).map(
+            (cal) => cal.id,
+        );
 
         // fetch events from each calendar in parallel, then merge
         const eventsPerCalendar = await Promise.all(
@@ -106,10 +112,13 @@ const getGoogleEvents = async (req, res) => {
                     })
                     .then((res) => res.data.items || [])
                     .catch((err) => {
-                        console.error(`Failed to fetch events for calendar ${calendarId}:`, err.message);
+                        console.error(
+                            `Failed to fetch events for calendar ${calendarId}:`,
+                            err.message,
+                        );
                         return []; // skip calendars that fail (e.g. no access) rather than failing the whole request
-                    })
-            )
+                    }),
+            ),
         );
 
         const events = eventsPerCalendar
@@ -127,7 +136,9 @@ const getGoogleEvents = async (req, res) => {
         res.status(200).json(events);
     } catch (err) {
         console.error("Error fetching Google Calendar events:", err);
-        res.status(500).json({ error: "Failed to fetch Google Calendar events" });
+        res.status(500).json({
+            error: "Failed to fetch Google Calendar events",
+        });
     }
 };
 
