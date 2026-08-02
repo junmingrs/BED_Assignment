@@ -35,6 +35,15 @@ const {
     authenticateToken,
 } = require("./middleware/validate");
 
+const {
+    validateGetOrderById,
+    validateGetOrdersByCustomer,
+    validateGetCustomerProfile,
+    validateUpdateOrderStatus,
+    validateGetOrderByStallId,
+    validateCheckoutCart,
+} = require("./middleware/orderValidation.js");
+
 // Create Express app
 const app = express();
 const port = process.env.PORT || process.argv[2];
@@ -79,30 +88,45 @@ app.get(
     menuItemController.getMenuItemsByStallId,
 );
 
-app.post("/checkout", authorise("Customer"), orderController.checkoutCart);
+app.post(
+    "/checkout",
+    authorise("Customer"),
+    validateCheckoutCart,
+    orderController.checkoutCart,
+);
+
 app.get(
     "/order/:orderId",
     authorise("Customer", "Vendor"),
+    validateGetOrderById,
     orderController.getOrderById,
 );
+
 app.get(
     "/customer/:customerId/orders",
     authorise("Customer"),
+    validateGetOrdersByCustomer,
     orderController.getOrdersByCustomer,
 );
+
 app.get(
     "/customer/:customerId/profile",
     authorise("Customer"),
+    validateGetCustomerProfile,
     customerController.getCustomerByAccountId,
 );
+
 app.patch(
     "/orders/:orderId/:status",
     authorise("Vendor", "Customer"),
+    validateUpdateOrderStatus,
     orderController.updateOrderStatus,
 );
+
 app.get(
     "/stalls/:stallId/orders",
     authorise("Customer", "Vendor"),
+    validateGetOrderByStallId,
     orderController.getOrderByStallId,
 );
 app.get(
@@ -144,7 +168,7 @@ app.delete(
 
 app.get(
     "/stalls",
-    authorise("Vendor", "Customer", "Operator","NEA"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     stallController.getAllStalls,
 );
 
@@ -198,7 +222,7 @@ app.delete(
 // get complaints for a stall
 app.get(
     "/stalls/:stallId/complaints",
-    authorise("Vendor", "Customer", "Operator","NEA"),
+    authorise("Vendor", "Customer", "Operator", "NEA"),
     complaintController.getComplaints,
 );
 
@@ -249,14 +273,14 @@ app.post(
 app.get(
     "/inspections/:inspectionId",
     authorise("NEA"),
-    inspectionController.getInspectionById
+    inspectionController.getInspectionById,
 );
 
 // add an inspection (NEA only)
 app.put(
     "/inspections/:inspectionId",
     authorise("NEA"),
-    inspectionController.updateInspection
+    inspectionController.updateInspection,
 );
 
 // delete an inspection (NEA only)
@@ -265,11 +289,11 @@ app.delete(
     authorise("NEA"),
     inspectionController.deleteInspection,
 );
-// send email 
+// send email
 app.post(
     "/send-receipt",
     authorise("Customer"),
-    emailController.sendReceiptEmail
+    emailController.sendReceiptEmail,
 );
 
 // Stall Analytics
@@ -311,16 +335,32 @@ app.get(
     hawkerCentreController.getHawkerCentreById,
 );
 
-app.post("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.createMenuItemLike);
-app.delete("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.deleteMenuItemLike);
-app.get("/menuitem/likes/:customerId", authorise("Customer"), menuItemController.getMenuItemLikeByCustomer);
+app.post(
+    "/menuitem/likes/:customerId",
+    authorise("Customer"),
+    menuItemController.createMenuItemLike,
+);
+app.delete(
+    "/menuitem/likes/:customerId",
+    authorise("Customer"),
+    menuItemController.deleteMenuItemLike,
+);
+app.get(
+    "/menuitem/likes/:customerId",
+    authorise("Customer"),
+    menuItemController.getMenuItemLikeByCustomer,
+);
 app.get(
     "/menuitem",
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
 
-app.post("/customer/chatbot/:customerId", authorise("Customer"), chatbotController.chat);
+app.post(
+    "/customer/chatbot/:customerId",
+    authorise("Customer"),
+    chatbotController.chat,
+);
 
 // Google Calendar sync
 app.get("/auth/google", googleCalendarController.connectGoogle);
