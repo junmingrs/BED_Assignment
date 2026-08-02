@@ -230,7 +230,7 @@ async function loadMenuItems(menuItems, menuItemLikes) {
                 </div>
                 <div class="shrink-0">
                     <img src="${item.item_image ?? "https://placehold.co/600x400?text=Not+Available"}"
-                        alt="${item.item_desc}" class="h-full w-40 rounded-lg object-cover" />
+                        alt="${item.item_desc}" class="h-30 w-40 rounded-lg object-cover" />
                 </div>
             </div>
         `;
