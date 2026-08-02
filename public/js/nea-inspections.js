@@ -25,6 +25,8 @@ const modalForm = document.getElementById('inspection-form');
 const modalMessage = document.getElementById('modal-message');
 const inspectionIdInput = document.getElementById('modal-inspection-id');
 const stallSelect = document.getElementById('modal-stall-id');
+const dateInput = document.getElementById('modal-date');
+const scoreModeNote = document.getElementById('modal-schedule-note');
 const scoreInput = document.getElementById('modal-score');
 const gradeSelect = document.getElementById('modal-grade');
 const remarksInput = document.getElementById('modal-remarks');
@@ -197,12 +199,13 @@ function renderInspections(inspections) {
             <table class="w-full text-sm table-fixed">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="w-[15%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stall</th>
-                        <th class="w-[10%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
-                        <th class="w-[12%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="w-[10%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-                        <th class="w-[8%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
-                        <th class="w-[35%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                        <th class="w-[14%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stall</th>
+                        <th class="w-[9%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                        <th class="w-[11%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="w-[9%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                        <th class="w-[7%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                        <th class="w-[9%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="w-[31%] px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
                         <th class="w-[10%] px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -218,15 +221,30 @@ function renderInspections(inspections) {
             'D': 'bg-red-100 text-red-700'
         } [insp.hygiene_grade] || 'bg-gray-100 text-gray-500';
 
+        // status may be undefined on rows fetched before the backend added this column;
+        // treat that as "Completed" so existing data doesn't visually break
+        const status = insp.status || 'Completed';
+        const statusLabel = status === 'Scheduled' ? 'Upcoming' : 'Complete';
+        const statusColor = status === 'Scheduled'
+            ? 'bg-amber-100 text-amber-700'
+            : 'bg-emerald-100 text-emerald-700';
+
+        // scheduled inspections have no score/grade yet
+        const scoreDisplay = insp.score !== null && insp.score !== undefined ? `${insp.score}/100` : '—';
+        const gradeDisplay = insp.hygiene_grade
+            ? `<span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold ${gradeColor}">${insp.hygiene_grade}</span>`
+            : `<span class="text-gray-400">—</span>`;
+
         html += `
             <tr class="border-b hover:bg-gray-50 transition-colors">
                 <td class="px-3 py-2 font-medium text-gray-800 truncate">${insp.stall_name}</td>
                 <td class="px-3 py-2 text-gray-600">${insp.stall_unit_no || '-'}</td>
                 <td class="px-3 py-2 text-gray-600">${date}</td>
-                <td class="px-3 py-2 font-medium">${insp.score}/100</td>
+                <td class="px-3 py-2 font-medium">${scoreDisplay}</td>
+                <td class="px-3 py-2">${gradeDisplay}</td>
                 <td class="px-3 py-2">
-                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold ${gradeColor}">
-                        ${insp.hygiene_grade}
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold ${statusColor}">
+                        ${statusLabel}
                     </span>
                 </td>
                 <td class="px-3 py-2 text-gray-600 break-words">${insp.remarks || '-'}</td>
@@ -309,6 +327,11 @@ async function openEditModal(inspectionId) {
         modalTitle.textContent = 'Edit Inspection';
         inspectionIdInput.value = insp.inspection_id;
         stallSelect.value = insp.stall_id;
+        if (insp.inspection_date) {
+            const d = new Date(insp.inspection_date);
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            dateInput.value = d.toISOString().slice(0, 16);
+        }
         scoreInput.value = insp.score;
         gradeSelect.value = insp.hygiene_grade;
         remarksInput.value = insp.remarks || '';
@@ -326,6 +349,10 @@ function openAddModal() {
     modalTitle.textContent = 'Add New Inspection';
     inspectionIdInput.value = '';
     modalForm.reset();
+    // default to right now, in the format datetime-local expects
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    dateInput.value = now.toISOString().slice(0, 16);
     showModal();
 }
 
@@ -337,6 +364,23 @@ function hideModal() {
     modalMessage.textContent = '';
 }
 
+// ===== Toggle score/grade requirement based on whether the date is in the future =====
+function updateScheduleModeUI() {
+    if (!dateInput.value) return;
+    const isFuture = new Date(dateInput.value) > new Date();
+
+    scoreInput.required = !isFuture;
+    gradeSelect.required = !isFuture;
+
+    if (scoreModeNote) {
+        scoreModeNote.textContent = isFuture
+            ? 'Future date selected — this will be scheduled. Score and grade can be filled in later.'
+            : '';
+        scoreModeNote.classList.toggle('hidden', !isFuture);
+    }
+}
+dateInput?.addEventListener('change', updateScheduleModeUI);
+
 addBtn.addEventListener('click', openAddModal);
 closeModalBtn.addEventListener('click', hideModal);
 cancelModalBtn.addEventListener('click', hideModal);
@@ -347,36 +391,97 @@ modalForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const stallId = stallSelect.value;
+    const dateValue = dateInput.value;
     const score = parseInt(scoreInput.value);
     const hygiene_grade = gradeSelect.value;
     const remarks = remarksInput.value.trim();
 
-    if (!stallId || isNaN(score) || score < 0 || score > 100 || !hygiene_grade) {
-        showModalMessage('Please fill all fields correctly.', 'red');
+    if (!stallId || !dateValue) {
+        showModalMessage('Please select a stall and date.', 'red');
         return;
     }
 
-    const inspectionId = inspectionIdInput.value;
-    const method = isEditing ? 'PUT' : 'POST';
-    const url = isEditing ? `/inspections/${inspectionId}` : `/stalls/${stallId}/inspections`;
-    const body = { score, remarks, hygiene_grade };
+    const selectedDate = new Date(dateValue);
+    const isFutureDate = selectedDate > new Date();
+
+    // Editing an existing inspection always goes through the original update flow
+    // (editing doesn't currently support re-scheduling a Completed inspection)
+    if (isEditing) {
+        if (isNaN(score) || score < 0 || score > 100 || !hygiene_grade) {
+            showModalMessage('Please fill all fields correctly.', 'red');
+            return;
+        }
+
+        const inspectionId = inspectionIdInput.value;
+        try {
+            const res = await fetch(`/inspections/${inspectionId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ score, remarks, hygiene_grade })
+            });
+
+            if (res.ok) {
+                showModalMessage('✅ Inspection updated successfully!', 'green');
+                setTimeout(() => { hideModal(); loadInspections(); }, 1000);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                showModalMessage(`❌ Failed: ${data.error || 'Unknown error'}`, 'red');
+            }
+        } catch (err) {
+            console.error(err);
+            showModalMessage('❌ Network error.', 'red');
+        }
+        return;
+    }
+
+    // New inspection: future date -> schedule it (no score/grade needed yet)
+    if (isFutureDate) {
+        try {
+            const res = await fetch(`/stalls/${stallId}/inspections/schedule`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ inspection_date: selectedDate.toISOString() })
+            });
+
+            if (res.ok) {
+                showModalMessage('✅ Inspection scheduled successfully!', 'green');
+                setTimeout(() => { hideModal(); loadInspections(); }, 1000);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                showModalMessage(`❌ Failed: ${data.error || 'Unknown error'}`, 'red');
+            }
+        } catch (err) {
+            console.error(err);
+            showModalMessage('❌ Network error.', 'red');
+        }
+        return;
+    }
+
+    // New inspection: today/past date -> log it as completed immediately (original flow)
+    if (isNaN(score) || score < 0 || score > 100 || !hygiene_grade) {
+        showModalMessage('Score and grade are required for a completed inspection.', 'red');
+        return;
+    }
 
     try {
-        const res = await fetch(url, {
-            method,
+        const res = await fetch(`/stalls/${stallId}/inspections`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ score, remarks, hygiene_grade })
         });
 
         if (res.ok) {
-            showModalMessage(`✅ Inspection ${isEditing ? 'updated' : 'added'} successfully!`, 'green');
-            setTimeout(() => {
-                hideModal();
-                loadInspections();
-            }, 1000);
+            showModalMessage('✅ Inspection added successfully!', 'green');
+            setTimeout(() => { hideModal(); loadInspections(); }, 1000);
         } else {
             const data = await res.json().catch(() => ({}));
             showModalMessage(`❌ Failed: ${data.error || 'Unknown error'}`, 'red');

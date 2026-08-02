@@ -136,6 +136,7 @@ const getAllStalls = async () => {
                 s.stall_id,
                 s.stall_name,
                 s.stall_unit_no,
+                s.hawker_centre_id,
                 v.vendor_id
             FROM Stall s
             JOIN Vendor v ON s.vendor_id = v.vendor_id
