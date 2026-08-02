@@ -25,7 +25,7 @@ const getStallInfo = async (stallId) => {
         throw new Error("Stall not found");
     }
 
-    const stall = stallResult.recordset[0];
+    return stallResult.recordset[0];
 
     // 4. Get ratings
     const ratingsResult = await pool.request()
