@@ -6,7 +6,6 @@
     "scripts": {
         "test": "jest",
         "dev": "nodemon backend/app.js 3000",
-        "d1": "nodemon backend/app.js 3001",
         "swagger": "node backend/swagger.js"
     },
     "repository": {
