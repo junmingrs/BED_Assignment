@@ -79,7 +79,6 @@ Create `backend/.env` in the `backend/` folder (this file is gitignored). The fo
 | `REFRESH_TOKEN_SECRET_KEY` | Secret used to sign and verify refresh token |
 | `OLLAMA_API_KEY` | API key for the Ollama chatbot |
 | `EMAIL_USER` | Gmail address used to send promotional emails and receipts |
-| `EMAIL_PASSWORD` | Gmail app password for the account above |
 
 ## Scripts
 
