@@ -21,7 +21,7 @@ jest.mock("mssql", () => ({
 
 // Mock console.error
 beforeAll(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => { });
 });
 
 afterAll(() => {
@@ -53,7 +53,9 @@ describe("hawkerCentreModel Unit Tests", () => {
         ];
 
         test("should return all hawker centres successfully", async () => {
-            mockRequest.query.mockResolvedValueOnce({ recordset: mockHawkerCentres });
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: mockHawkerCentres,
+            });
 
             const result = await getAllHawkerCentres();
 
@@ -90,11 +92,16 @@ describe("hawkerCentreModel Unit Tests", () => {
         };
 
         test("should return hawker centre by id successfully", async () => {
-            mockRequest.query.mockResolvedValueOnce({ recordset: [mockHawkerCentre] });
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: [mockHawkerCentre],
+            });
 
             const result = await getHawkerCentreById("hc_1");
 
-            expect(mockRequest.input).toHaveBeenCalledWith("hawker_centre_id", "hc_1");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "hawker_centre_id",
+                "hc_1",
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
             expect(result).toEqual(mockHawkerCentre);
         });
@@ -104,7 +111,10 @@ describe("hawkerCentreModel Unit Tests", () => {
 
             const result = await getHawkerCentreById("hc_1");
 
-            expect(mockRequest.input).toHaveBeenCalledWith("hawker_centre_id", "hc_1");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "hawker_centre_id",
+                "hc_1",
+            );
             expect(result).toBeNull();
         });
 
@@ -143,7 +153,10 @@ describe("hawkerCentreModel Unit Tests", () => {
 
             const result = await getStallsByHawkerCentreId("hc_1");
 
-            expect(mockRequest.input).toHaveBeenCalledWith("hawker_centre_id", "hc_1");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "hawker_centre_id",
+                "hc_1",
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
             expect(result).toEqual(mockStalls);
         });
@@ -179,11 +192,16 @@ describe("hawkerCentreModel Unit Tests", () => {
         ];
 
         test("should return hawker centres by operator id successfully", async () => {
-            mockRequest.query.mockResolvedValueOnce({ recordset: mockHawkerCentres });
+            mockRequest.query.mockResolvedValueOnce({
+                recordset: mockHawkerCentres,
+            });
 
             const result = await getHawkerCentresByOperatorId("op_1");
 
-            expect(mockRequest.input).toHaveBeenCalledWith("operator_id", "op_1");
+            expect(mockRequest.input).toHaveBeenCalledWith(
+                "operator_id",
+                "op_1",
+            );
             expect(mockRequest.query).toHaveBeenCalledTimes(1);
             expect(result).toEqual(mockHawkerCentres);
         });
