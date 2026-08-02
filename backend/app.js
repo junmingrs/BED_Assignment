@@ -35,8 +35,11 @@ const {
     validateRegister,
     validateLogin,
     validateGetAccountById,
-    authenticateToken,
 } = require("./middleware/accountValidation.js");
+const {
+    validateMenuItemCreate,
+    validateMenuItemUpdate,
+} = require("./middleware/menuItemValidation");
 const {
     validateGetOrderById,
     validateGetOrdersByCustomer,
@@ -81,20 +84,25 @@ app.get(
 // refresh token
 app.post("/refresh", accountController.refreshJWTToken);
 
-app.post("/menuitem", authorise("Vendor"), menuItemController.createMenuItem);
-app.put("/menuitem", authorise("Vendor"), menuItemController.updateMenuItem);
+app.post(
+    "/menuitem",
+    authorise("Vendor"),
+    validateMenuItemCreate,
+    menuItemController.createMenuItem,
+);
+app.put(
+    "/menuitem",
+    authorise("Vendor"),
+    validateMenuItemUpdate,
+    menuItemController.updateMenuItem,
+);
 app.delete("/menuitem", authorise("Vendor"), menuItemController.deleteMenuItem);
 app.get(
     "/menuitem",
     authorise("Vendor", "Customer"),
     menuItemController.getMenuItemsByStallIdAndItemCode,
 );
-app.get(
-    "/menuitems",
-    authorise("Vendor"),
-    authenticateToken,
-    menuItemController.getAllMenuItems,
-);
+app.get("/menuitems", authorise("Vendor"), menuItemController.getAllMenuItems);
 app.get(
     "/menuitemsbystall/:stallId",
     authorise("Vendor", "Customer"),
